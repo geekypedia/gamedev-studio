@@ -49,6 +49,24 @@ run_step() {
     fi
 }
 
+run_block() {
+    local NAME="$1"
+    shift
+
+    echo
+    echo "--------------------------------------------------"
+    echo "Installing: $NAME"
+    echo "--------------------------------------------------"
+
+    bash -c "$*"
+
+    if [ $? -eq 0 ]; then
+        success "$NAME"
+    else
+        failure "$NAME"
+    fi
+}
+
 echo "========================================="
 echo "🎮 Game Dev Studio Installer (Ubuntu)"
 echo "========================================="
@@ -64,12 +82,20 @@ sudo mkdir -p "$BIN"
 # ----------------------------------------
 echo "[1] Installing system dependencies..."
 
+run_block "System Update" '
 sudo apt update -y
+'
 
+#run_block "System Upgrade" '
+#sudo apt upgrade -y
+#'
+
+run_block "System Dependencies" '
 sudo apt install -y \
-  git curl wget unzip jq zenity inotify-tools \
-  build-essential software-properties-common \
-  libfuse2 flatpak python3 python3-pip
+git curl wget unzip jq zenity inotify-tools \
+build-essential software-properties-common \
+libfuse2 flatpak python3 python3-pip
+'
 
 # ----------------------------------------
 # GPU DRIVERS
@@ -83,25 +109,32 @@ sudo ubuntu-drivers autoinstall || true
 # ----------------------------------------
 echo "[3] Installing Flatpak support..."
 
-flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo || true
-flatpak install -y flathub com.usebottles.bottles || true
+run_block "Flatpak + Bottles" '
+flatpak remote-add --if-not-exists flathub \
+https://flathub.org/repo/flathub.flatpakrepo &&
+flatpak install -y flathub com.usebottles.bottles
+'
 
 # ----------------------------------------
 # NODE.JS ENVIRONMENT
 # ----------------------------------------
 echo "[4] Installing Node.js environment..."
 
+run_block "NodeJS Environment" '
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 
 export NVM_DIR="$HOME/.nvm"
-source "$NVM_DIR/nvm.sh" || true
 
-nvm install --lts || true
-nvm use --lts || true
+[ -s "$NVM_DIR/nvm.sh" ] &&
+source "$NVM_DIR/nvm.sh" &&
+
+nvm install --lts &&
+nvm use --lts &&
 
 npm install -g \
-  vite create-react-app react \
-  phaser excalibur
+vite create-react-app react \
+phaser excalibur
+'
 
 # ----------------------------------------
 # CODE EDITORS
@@ -137,10 +170,11 @@ curl -fsSL https://code-server.dev/install.sh | sudo bash
 # ----------------------------------------
 echo "[6] Installing web browser..."
 
+run_block "Google Chrome" '
 wget -O /tmp/chrome.deb \
-  https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-
+https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb &&
 sudo apt install -y /tmp/chrome.deb
+'
 
 # ----------------------------------------
 # GAME ENGINES
@@ -280,7 +314,7 @@ EOF
 chmod +x "$BIN/ldtk-sync"
 
 # ----------------------------------------
-# ITCH.IO UPLOADER
+# PRODUCTIVITY TOOLS
 # ----------------------------------------
 
 echo "[12] Installing productivity tools..."
