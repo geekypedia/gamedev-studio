@@ -928,11 +928,23 @@ unzip -o "$LDTK_ZIP" -d "$LDTK_DIR" || {
   return 0
 }
 
-# safer: prefer main executable patterns
-LDTK_BIN=$(find "$LDTK_DIR" -type f \( -name "ldtk*" -o -name "LDtk*" \) -executable | head -n 1)
+# First try obvious executable names
+LDTK_BIN=$(find "$LDTK_DIR" -type f \( -name "ldtk*" -o -name "LDtk*" \) -executable | head -n1)
+
+# If not found, look for any AppImage
+if [ -z "$LDTK_BIN" ]; then
+  LDTK_BIN=$(find "$LDTK_DIR" -type f -name "*.AppImage" | head -n1)
+
+  if [ -n "$LDTK_BIN" ]; then
+    echo "🔧 Found AppImage without executable bit: $LDTK_BIN"
+    chmod +x "$LDTK_BIN"
+  fi
+fi
 
 if [ -z "$LDTK_BIN" ]; then
   echo "⚠️ Could not locate LDtk executable"
+  echo "Contents of extracted folder:"
+  find "$LDTK_DIR" -type f | head -50
   return 0
 fi
 
