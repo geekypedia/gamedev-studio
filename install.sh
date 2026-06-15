@@ -186,14 +186,53 @@ create_desktop_entry() {
     local real_bin
     real_bin=$(readlink -f "$bin")
 
+    local base_dir
+    base_dir=$(dirname "$real_bin")
+
     local icon=""
 
-    icon=$(find "$(dirname "$real_bin")" \
-        -type f \
-        \( -iname "*.png" -o -iname "*.svg" -o -iname "*.xpm" \) \
-        | head -n1)
+    echo "🎯 Resolving icon for $app..."
 
-    [ -z "$icon" ] && icon="$app"
+    # -------------------------------------------------------
+    # 1. Try system theme icons first (BEST OPTION)
+    # -------------------------------------------------------
+    for i in "$app" "$(echo "$app" | tr '[:lower:]' '[:upper:]')" "$(echo "$app" | tr '[:upper:]' '[:lower:]')"; do
+        if gtk-update-icon-cache -q /usr/share/icons/hicolor 2>/dev/null; then
+            :
+        fi
+
+        if [ -n "$(find /usr/share/icons /usr/share/pixmaps -iname "$i.*" 2>/dev/null | head -n1)" ]; then
+            icon=$(find /usr/share/icons /usr/share/pixmaps -iname "$i.*" 2>/dev/null | head -n1)
+            break
+        fi
+    done
+
+    # -------------------------------------------------------
+    # 2. Try icon next to executable (same folder only)
+    # -------------------------------------------------------
+    if [ -z "$icon" ]; then
+        icon=$(find "$base_dir" -maxdepth 1 -type f \
+            \( -iname "*.png" -o -iname "*.svg" -o -iname "*.xpm" \) \
+            | grep -Ei "(icon|logo|app|$app)" \
+            | head -n1)
+    fi
+
+    # -------------------------------------------------------
+    # 3. Try ONE level deep ONLY (avoid random deep assets)
+    # -------------------------------------------------------
+    if [ -z "$icon" ]; then
+        icon=$(find "$base_dir" -mindepth 2 -maxdepth 2 -type f \
+            \( -iname "*.png" -o -iname "*.svg" \) \
+            | grep -Ei "(icon|logo|$app)" \
+            | head -n1)
+    fi
+
+    # -------------------------------------------------------
+    # 4. Fallback: system icon name
+    # -------------------------------------------------------
+    if [ -z "$icon" ]; then
+        icon="$app"
+    fi
 
     sudo tee "/usr/share/applications/${app}.desktop" >/dev/null <<EOF
 [Desktop Entry]
@@ -203,7 +242,7 @@ Name=$display_name
 Exec=$bin
 Icon=$icon
 Terminal=false
-Categories=Development;
+Categories=Development;GameDev;
 StartupNotify=true
 EOF
 
@@ -214,7 +253,6 @@ EOF
 
     echo "🖥️ Desktop launcher created: $display_name"
 }
-
 register_bin() {
     local name="$1"
     local target="$2"
@@ -618,10 +656,21 @@ mkdir -p "$TMP_DIR"
 
 API="https://api.github.com/repos/godotengine/godot/releases/latest"
 
+VERSION=$(curl -s "$API" | jq -r ".tag_name")
+
+TEMPLATE_DIR="$HOME/.local/share/godot/export_templates/$VERSION"
+
+# skip if already installed
+if [ -d "$TEMPLATE_DIR" ] && [ "$(ls -A "$TEMPLATE_DIR" 2>/dev/null)" ]; then
+    echo "✅ Already installed for $VERSION"
+    return 0
+fi
+
+echo "⬇️ Fetching templates for $VERSION"
+
 TEMPLATE_URL=$(
   curl -s "$API" |
-  jq -r "
-    .assets[]
+  jq -r ".assets[]
     | select(.name != null)
     | select(.name | test(\"export_templates\"))
     | .browser_download_url
@@ -634,28 +683,23 @@ if [ -z "$TEMPLATE_URL" ]; then
     return 0
 fi
 
-echo "⬇️ Downloading templates: $TEMPLATE_URL"
+echo "⬇️ Downloading: $TEMPLATE_URL"
 
 TEMPLATE_FILE="$TMP_DIR/godot_templates.tpz"
 
 safe_wget "$TEMPLATE_URL" "$TEMPLATE_FILE" || {
-    echo "⚠️ Template download failed"
+    echo "⚠️ Download failed"
     return 0
 }
 
-VERSION=$(curl -s "$API" | jq -r ".tag_name")
-
-TEMPLATE_DIR="$HOME/.local/share/godot/export_templates/$VERSION"
-
-mkdir -p "$TEMPLATE_DIR" || {
-    echo "⚠️ Failed to create template directory"
-    return 0
-}
+mkdir -p "$TEMPLATE_DIR"
 
 unzip -o "$TEMPLATE_FILE" -d "$TEMPLATE_DIR" || {
-    echo "⚠️ Template unzip failed"
+    echo "⚠️ Unzip failed"
     return 0
 }
+
+echo "✅ Installed Godot templates for $VERSION"
 '
 
 run_step "GDevelop" "is_installed gdevelop" '
