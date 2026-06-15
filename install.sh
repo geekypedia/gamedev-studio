@@ -64,7 +64,7 @@ sudo mkdir -p "$BIN"
 # ----------------------------------------
 echo "[1] Installing system dependencies..."
 
-sudo apt update && sudo apt upgrade -y
+sudo apt update -y
 
 sudo apt install -y \
   git curl wget unzip jq zenity inotify-tools \
