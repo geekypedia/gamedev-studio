@@ -335,12 +335,13 @@ export NVM_DIR="$HOME/.nvm"
 nvm install --lts
 nvm use --lts
 
-npm install -g vite --progress=true
-npm install -g create-react-app --progress=true
-npm install -g react --progress=true
-npm install -g phaser --progress=true
-npm install -g excalibur --progress=true
-npm install -g nw --progress=true
+npm install -g typescript --progress=true --verbose
+npm install -g vite --progress=true --verbose
+npm install -g react --progress=true --verbose
+npm install -g create-react-app --progress=true --verbose
+npm install -g phaser --progress=true --verbose
+npm install -g excalibur --progress=true --verbose
+npm install -g nw --progress=true --verbose
 '
 
 # -----------------------------
