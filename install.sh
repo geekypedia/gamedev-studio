@@ -171,6 +171,60 @@ is_ok() {
 # -----------------------------
 # BINARY REGISTRY (FIX)
 # -----------------------------
+
+extract_appimage_icon() {
+    local app="$1"
+
+    local bin
+    bin=$(command -v "$app" 2>/dev/null)
+
+    if [ -z "$bin" ]; then
+        echo "⚠️ $app not found"
+        return 1
+    fi
+
+    local appimage
+    appimage=$(readlink -f "$bin")
+
+    if [ -z "$appimage" ] || [[ "$appimage" != *.AppImage ]]; then
+        echo "⚠️ $app does not point to an AppImage"
+        return 1
+    fi
+
+    local dir
+    dir=$(dirname "$appimage")
+
+    local icon_path="$dir/icon.png"
+
+    # skip if already extracted
+    if [ -f "$icon_path" ]; then
+        echo "✅ Icon already exists for $app"
+        return 0
+    fi
+
+    echo "🎯 Extracting icon for $app from AppImage..."
+
+    # AppImage extract mode (no execution required)
+    if "$appimage" --appimage-extract >/dev/null 2>&1; then
+        if [ -f squashfs-root/.DirIcon ]; then
+            cp squashfs-root/.DirIcon "$icon_path"
+        elif [ -f squashfs-root/usr/share/icons/hicolor/256x256/apps/*.png ]; then
+            cp squashfs-root/usr/share/icons/hicolor/256x256/apps/*.png "$icon_path" 2>/dev/null || true
+        fi
+
+        rm -rf squashfs-root
+    else
+        echo "⚠️ Failed to extract AppImage for $app"
+        return 1
+    fi
+
+    if [ -f "$icon_path" ]; then
+        echo "🖼️ Icon saved: $icon_path"
+    else
+        echo "⚠️ Icon not found inside AppImage"
+    fi
+}
+
 create_desktop_entry() {
     local app="$1"
     local display_name="${2:-$1}"
@@ -646,9 +700,12 @@ if [ -z "$GODOT_BIN" ]; then
     return 0
 fi
 
-sudo install -Dm755 "$GODOT_BIN" /opt/gamedev/engines/godot
+mkdir -p /opt/gamedev/engines/godot
 
-register_bin godot /opt/gamedev/engines/godot "Godot"
+sudo install -Dm755 "$GODOT_BIN" /opt/gamedev/engines/godot/godot
+
+register_bin godot /opt/gamedev/engines/godot/godot "Godot"
+extract_appimage_icon godot
 '
 
 run_step "Godot Export Templates" "false" '
@@ -726,6 +783,7 @@ safe_wget "$GDEV_URL" /opt/gamedev/engines/gdevelop/gdevelop.AppImage || {
 }
 
 register_bin gdevelop /opt/gamedev/engines/gdevelop/gdevelop.AppImage "GDevelop"
+extract_appimage_icon gdevelop
 '
 
 run_step "ct.js" "is_installed ctjs" '
@@ -1032,6 +1090,7 @@ if [ -z "$LDTK_BIN" ]; then
 fi
 
 register_bin ldtk "$LDTK_BIN" "LDtk"
+extract_appimage_icon ldtk
 '
 
 
