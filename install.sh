@@ -115,9 +115,9 @@ BIN="/usr/local/bin"
 sudo mkdir -p "$BASE"/{engines,tools,art,web,audio,dev,pipelines}
 sudo mkdir -p "$BIN"
 
-# -----------------------------
-# SYSTEM FLOW (UPDATED DESIGN)
-# -----------------------------
+# -----------
+# SYSTEM FLOW
+# -----------
 
 run_step "APT Update" "true" '
 sudo apt update -y
@@ -219,6 +219,23 @@ sudo install -m 755 "$GODOT_BIN" /opt/gamedev/engines/godot
 sudo ln -sf /opt/gamedev/engines/godot /usr/local/bin/godot
 '
 
+run_step "Godot Export Templates" "false" '
+GODOT_VERSION=$(curl -s https://api.github.com/repos/godotengine/godot/releases/latest |
+jq -r ".tag_name")
+
+TEMPLATE_URL=$(curl -s https://api.github.com/repos/godotengine/godot/releases/latest |
+jq -r ".assets[] | select(.name|test(\"export_templates.*zip\")) | .browser_download_url" |
+head -n 1)
+
+safe_wget "$TEMPLATE_URL" /tmp/godot_templates.zip || exit 1
+
+mkdir -p ~/.local/share/godot/export_templates
+unzip -o /tmp/godot_templates.zip -d ~/.local/share/godot/export_templates
+
+echo "Godot templates installed for version: $GODOT_VERSION"
+'
+
+
 run_step "GDevelop" "is_installed gdevelop" '
 GDEV_URL=$(curl -s https://api.github.com/repos/4ian/GDevelop/releases/latest |
 jq -r ".assets[] | select(.name|test(\"linux.*AppImage\")) | .browser_download_url" | head -n 1)
@@ -255,6 +272,20 @@ run_step "GIMP/Krita/Inkscape" "is_installed gimp && is_installed krita && is_in
 sudo apt install -y gimp krita inkscape
 '
 
+run_step "Piskel" "false" '
+PISKEL_URL=$(curl -s https://api.github.com/repos/piskelapp/piskel/releases/latest |
+jq -r ".assets[] | select(.name|test(\"linux.*64\")) | .browser_download_url" |
+head -n 1)
+
+safe_wget "$PISKEL_URL" /tmp/piskel.zip || exit 1
+mkdir -p /opt/gamedev/art/piskel
+unzip -o /tmp/piskel.zip -d /opt/gamedev/art/piskel
+
+PISKEL_BIN=$(safe_find_exec /opt/gamedev/art/piskel)
+chmod +x "$PISKEL_BIN"
+sudo ln -sf "$PISKEL_BIN" /usr/local/bin/piskel
+'
+
 run_step "Pixelorama" "is_installed pixelorama" '
 safe_wget https://github.com/Orama-Interactive/Pixelorama/releases/latest/download/Pixelorama.x86_64.AppImage /opt/gamedev/art/pixelorama.AppImage &&
 chmod +x /opt/gamedev/art/pixelorama.AppImage &&
@@ -273,6 +304,73 @@ sudo ln -sf /opt/gamedev/art/libresprite.AppImage /usr/local/bin/libresprite || 
 
 run_step "Audio & Video Suite" "is_installed vlc && is_installed kdenlive" '
 sudo apt install -y vlc kdenlive obs-studio lmms audacity ardour hydrogen
+'
+
+# -----------------------------
+# Level Editors
+# -----------------------------
+
+run_step "Tiled Map Editor" "is_installed tiled" '
+sudo apt install -y tiled
+'
+
+run_step "LDtk" "false" '
+LDTK_URL=$(curl -s https://api.github.com/repos/deepnight/ldtk/releases/latest |
+jq -r ".assets[] | select(.name|test(\"Linux.*zip\")) | .browser_download_url" |
+head -n 1)
+
+safe_wget "$LDTK_URL" /tmp/ldtk.zip || exit 1
+mkdir -p /opt/gamedev/tools/ldtk
+unzip -o /tmp/ldtk.zip -d /opt/gamedev/tools/ldtk
+
+LDTK_BIN=$(safe_find_exec /opt/gamedev/tools/ldtk)
+chmod +x "$LDTK_BIN"
+sudo ln -sf "$LDTK_BIN" /usr/local/bin/ldtk
+'
+
+run_step "LDtk Sync Pipeline" "is_installed ldtk-sync" '
+cat > /usr/local/bin/ldtk-sync <<EOF
+#!/usr/bin/env bash
+
+WATCH_DIR=\${1:-\$PWD}
+
+echo "👀 Watching LDtk files in: \$WATCH_DIR"
+
+inotifywait -m "\$WATCH_DIR" -e close_write |
+while read path action file; do
+    if [[ "\$file" == *.ldtk ]]; then
+        echo "Exporting: \$file"
+        cp "\$path\$file" "\$WATCH_DIR/export_\$file.json"
+    fi
+done
+EOF
+
+chmod +x /usr/local/bin/ldtk-sync
+'
+
+# -----------------------------
+# PRODUCTIVITY TOOLS
+# -----------------------------
+run_step "Obsidian" "is_installed obsidian" '
+OBSIDIAN_URL=$(curl -s https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest |
+jq -r ".assets[] | select(.name|test(\"AppImage\")) | .browser_download_url" |
+head -n 1)
+
+safe_wget "$OBSIDIAN_URL" /opt/gamedev/tools/obsidian.AppImage || exit 1
+chmod +x /opt/gamedev/tools/obsidian.AppImage
+
+sudo ln -sf /opt/gamedev/tools/obsidian.AppImage /usr/local/bin/obsidian
+'
+
+# -----------------------------
+# DEPLOYMENT TOOLS
+# -----------------------------
+
+run_step "itch.io Butler" "is_installed butler" '
+safe_wget https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default /tmp/butler.zip
+unzip /tmp/butler.zip -d /tmp
+sudo mv /tmp/butler /usr/local/bin/
+sudo chmod +x /usr/local/bin/butler
 '
 
 # -----------------------------
