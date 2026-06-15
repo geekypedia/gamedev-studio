@@ -200,6 +200,33 @@ gh_asset() {
     ' | head -n1
 }
 
+gdrive_download() {
+    local file_id="$1"
+    local out="$2"
+
+    echo "⬇️ Google Drive download: $file_id"
+
+    # first request (may return confirm page)
+    curl -L -c /tmp/gcookie -s \
+      "https://drive.google.com/uc?export=download&id=$file_id" \
+      > /tmp/gpage.html
+
+    # extract confirm token if present
+    CONFIRM=$(grep -o 'confirm=[^&"]*' /tmp/gpage.html | head -n1 | cut -d= -f2)
+
+    if [ -n "$CONFIRM" ]; then
+        curl -L -b /tmp/gcookie \
+          "https://drive.google.com/uc?export=download&confirm=$CONFIRM&id=$file_id" \
+          -o "$out"
+    else
+        curl -L \
+          "https://drive.google.com/uc?export=download&id=$file_id" \
+          -o "$out"
+    fi
+
+    [ -s "$out" ]
+}
+
 install_engine() {
     local name="$1"
     shift
@@ -555,21 +582,29 @@ sudo apt install -y gimp krita inkscape
 '
 
 run_step "Piskel" "false" '
-PISKEL_URL=$(curl -s https://api.github.com/repos/piskelapp/piskel/releases/latest |
-jq -r ".assets[] | select(.name|test(\"linux.*64\")) | .browser_download_url" | head -n 1)
+FILE_ID="1EFo7Ye_rl7bGNr4iehXIgFg4gn2IcWDX"
 
-safe_wget "$PISKEL_URL" /tmp/piskel.zip || return 0
 mkdir -p /opt/gamedev/art/piskel
-unzip -o /tmp/piskel.zip -d /opt/gamedev/art/piskel
 
-PISKEL_BIN=$(find /opt/gamedev/art/piskel -type f -executable -name "*piskel*" | head -n 1)
+gdrive_download "$FILE_ID" /tmp/piskel.zip || {
+    echo "⚠️ Piskel download failed"
+    return 0
+}
 
-if [ -z "$PISKEL_BIN" ]; then
-    PISKEL_BIN=$(find /opt/gamedev/art/piskel -type f -executable | head -n 1)
+unzip -o /tmp/piskel.zip -d /opt/gamedev/art/piskel || {
+    echo "⚠️ Failed to extract Piskel"
+    return 0
+}
+
+BIN=$(find /opt/gamedev/art/piskel -type f -executable | head -n1)
+
+if [ -z "$BIN" ]; then
+    echo "⚠️ No executable found for Piskel"
+    return 0
 fi
 
-chmod +x "$PISKEL_BIN"
-sudo ln -sf "$PISKEL_BIN" /usr/local/bin/piskel
+chmod +x "$BIN"
+register_bin piskel "$BIN"
 '
 
 run_step "Pixelorama" "is_installed pixelorama" '
