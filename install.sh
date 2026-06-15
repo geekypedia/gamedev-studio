@@ -181,8 +181,15 @@ echo "========================================="
 BASE="/opt/gamedev"
 BIN="/usr/local/bin"
 
-sudo mkdir -p "$BASE"/{engines,tools,art,web,audio,dev,pipelines}
+# Create base directories as root
+sudo mkdir -p "$BASE"
 sudo mkdir -p "$BIN"
+
+# Take ownership of the whole gamedev tree
+sudo chown -R "$USER:$USER" "$BASE"
+
+# Now create subfolders as normal user (no sudo needed)
+mkdir -p "$BASE"/{engines,tools,art,web,audio,dev,pipelines}
 
 # -----------------------------
 # SYSTEM FLOW
