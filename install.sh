@@ -431,6 +431,7 @@ npm install -g create-react-app --progress=true --verbose
 npm install -g phaser --progress=true --verbose
 npm install -g excalibur --progress=true --verbose
 npm install -g nw --progress=true --verbose
+npm install -g electron --progress=true --verbose
 '
 
 # -----------------------------
@@ -754,36 +755,49 @@ sudo apt install -y love
 # CREATIVE TOOLS
 # -----------------------------
 
+run_step "Blender" "is_installed love" '
+sudo apt install -y blender
+'
+
 run_step "GIMP/Krita/Inkscape" "is_installed gimp && is_installed krita && is_installed inkscape" '
 sudo apt install -y gimp krita inkscape
 '
 
-run_step "Piskel" "false" '
-mkdir -p "$TMP_DIR"
+run_step "Piskel" "is_installed piskel" '
+INSTALL_DIR="/opt/gamedev/art/piskel"
 
-FILE_ID="1EFo7Ye_rl7bGNr4iehXIgFg4gn2IcWDX"
+rm -rf "$INSTALL_DIR"
 
-mkdir -p /opt/gamedev/art/piskel
-
-gdrive_download "$FILE_ID" "$TMP_DIR/piskel.zip" || {
-    echo "⚠️ Piskel download failed"
+git clone https://github.com/piskelapp/piskel.git "$INSTALL_DIR" || {
+    echo "⚠️ Failed to clone Piskel"
     return 0
 }
 
-unzip -o "$TMP_DIR/piskel.zip" -d /opt/gamedev/art/piskel || {
-    echo "⚠️ Failed to extract Piskel"
+cd "$INSTALL_DIR" || return 0
+
+npm install || {
+    echo "⚠️ npm install failed"
     return 0
 }
 
-BIN=$(find /opt/gamedev/art/piskel -type f -executable | head -n1)
+npm run build || {
+    echo "⚠️ build failed"
+    return 0
+}
 
-if [ -z "$BIN" ]; then
-    echo "⚠️ No executable found for Piskel"
+npm run electron || {
+    echo "⚠️ electron build failed"
+    return 0
+}
+
+PISKEL_BIN=$(find "$INSTALL_DIR" -type f \( -name "Piskel" -o -name "piskel" \) -executable | head -n1)
+
+if [ -z "$PISKEL_BIN" ]; then
+    echo "⚠️ Could not locate Piskel executable"
     return 0
 fi
 
-chmod +x "$BIN"
-register_bin piskel "$BIN"
+register_bin piskel "$PISKEL_BIN"
 '
 
 run_step "Pixelorama" "is_installed pixelorama" '
