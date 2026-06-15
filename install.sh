@@ -176,6 +176,27 @@ copy_ctjs_icon() {
     local CT_INSTALL="$1"
 
     if [ -z "$CT_INSTALL" ] || [ ! -d "$CT_INSTALL" ]; then
+        echo "⚠️ Invalid ct.js install path"
+        return 1
+    fi
+
+    local SRC="$CT_INSTALL/linux64/package.nw/ct_ide.png"
+    local DEST="$CT_INSTALL/linux64/icon.png"
+
+    if [ ! -f "$SRC" ]; then
+        echo "⚠️ ct.js icon not found at expected path: $SRC"
+        return 1
+    fi
+
+    cp "$SRC" "$DEST"
+
+    echo "🖼️ ct.js icon set: $DEST"
+}
+
+copy_ctjs_icon_rec() {
+    local CT_INSTALL="$1"
+
+    if [ -z "$CT_INSTALL" ] || [ ! -d "$CT_INSTALL" ]; then
         echo "⚠️ Invalid CTJS install path"
         return 1
     fi
