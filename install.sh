@@ -14,7 +14,40 @@
 # is preserved.
 ################################################################################
 
-set -e
+set +e
+
+INSTALLED=()
+FAILED=()
+MANUAL=()
+
+success() {
+    INSTALLED+=("$1")
+    echo "✓ $1"
+}
+
+failure() {
+    FAILED+=("$1")
+    MANUAL+=("$1")
+    echo "✗ $1"
+}
+
+run_step() {
+    local NAME="$1"
+    shift
+
+    echo
+    echo "--------------------------------------------------"
+    echo "Installing: $NAME"
+    echo "--------------------------------------------------"
+
+    "$@"
+
+    if [ $? -eq 0 ]; then
+        success "$NAME"
+    else
+        failure "$NAME"
+    fi
+}
 
 echo "========================================="
 echo "🎮 Game Dev Studio Installer (Ubuntu)"
@@ -75,16 +108,29 @@ npm install -g \
 # ----------------------------------------
 echo "[5] Installing code editors..."
 
-wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > /tmp/ms.gpg
-sudo install -o root -g root -m 644 /tmp/ms.gpg /usr/share/keyrings/
+echo "[5] Installing code editors..."
+
+sudo rm -f /etc/apt/sources.list.d/vscode.list
+sudo rm -f /usr/share/keyrings/ms.gpg
+sudo rm -f /usr/share/keyrings/packages.microsoft.gpg
+
+run_step "VS Code Repository" bash -c '
+curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
+| gpg --dearmor \
+| sudo tee /usr/share/keyrings/ms.gpg >/dev/null
 
 echo "deb [arch=amd64 signed-by=/usr/share/keyrings/ms.gpg] https://packages.microsoft.com/repos/code stable main" \
-| sudo tee /etc/apt/sources.list.d/vscode.list
+| sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
+'
 
-sudo apt update
+run_step "VS Code" bash -c '
+sudo apt update &&
 sudo apt install -y code
+'
 
+run_step "Code Server" bash -c '
 curl -fsSL https://code-server.dev/install.sh | sudo bash
+'
 
 # ----------------------------------------
 # WEB BROWSER
