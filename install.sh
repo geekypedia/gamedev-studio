@@ -1069,7 +1069,7 @@ echo "🌐 Fetching microStudio latest release..."
 DEB_URL=$(curl -s "$API" | jq -r "
   .assets[]
   | select(.name != null)
-  | select(.name | test(\"linux.*\\.deb$\"; \"i\"))
+  | select(.name | contains(\"linux\") and endswith(\".deb\"))
   | .browser_download_url
 " | head -n 1)
 
