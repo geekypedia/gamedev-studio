@@ -8,9 +8,10 @@ It installs and configures:
 
 - 🎮 Game engines (Godot, GDevelop, ct.js, Ren’Py, Love2D, microStudio)
 - 🌐 Web game stack (Node.js, React, Phaser, ExcaliburJS)
-- 🎨 Art tools (GIMP, Krita, Inkscape, Pixelorama, LibreSprite)
+- 🎨 Art tools (GIMP, Krita, Inkscape, Piskel, Pixelorama, LibreSprite)
 - 🎧 Audio/Video production suite (LMMS, Audacity, Ardour, Hydrogen, synth tools, Kdenlive, OBS Studio, VLC)
 - 💻 Development tools (VS Code, code-server, Chrome, git)
+- 💻 Productivity tools (Obsidian)
 - 📦 Deployment tools (itch.io Butler)
 - 🧠 Pipeline utilities (LDtk sync system)
 
