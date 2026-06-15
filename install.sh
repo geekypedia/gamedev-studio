@@ -271,11 +271,12 @@ register_bin godot /opt/gamedev/engines/godot
 run_step "Godot Export Templates" "false" '
 API="https://api.github.com/repos/godotengine/godot/releases/latest"
 
-TEMPLATE_URL=$(curl -s "$API" | jq -r "
+TEMPLATE_URL=$(curl -s "$API" | jq -r '
   .assets[]
-  | select(.name | test(\"export_templates.*\\.tpz\"))
+  | select(.name != null)
+  | select(.name | index("export_templates"))
   | .browser_download_url
-" | head -n 1)
+' | head -n 1)
 
 if [ -z "$TEMPLATE_URL" ]; then
   echo "⚠️ Could not find export templates URL"
@@ -307,7 +308,10 @@ run_step "GDevelop" "is_installed gdevelop" '
 GDEV_URL=$(curl -s https://api.github.com/repos/4ian/GDevelop/releases/latest |
 jq -r ".assets[] | select(.name|test(\"linux.*AppImage\")) | .browser_download_url" | head -n 1)
 
-safe_wget "$GDEV_URL" /opt/gamedev/engines/gdevelop.AppImage || exit 1
+safe_wget "$GDEV_URL" /opt/gamedev/engines/gdevelop.AppImage || {
+  echo "⚠️ GDevelop download failed, skipping"
+  return 0
+}
 chmod +x /opt/gamedev/engines/gdevelop.AppImage
 sudo ln -sf /opt/gamedev/engines/gdevelop.AppImage /usr/local/bin/gdevelop
 '
@@ -316,13 +320,13 @@ run_step "ct.js" "is_installed ctjs" '
 CT_URL=$(curl -s https://api.github.com/repos/ct-js/ct-js/releases/latest |
 jq -r ".assets[] | select(.name|test(\"AppImage\")) | .browser_download_url" | head -n 1)
 
-safe_wget "$CT_URL" /opt/gamedev/engines/ctjs.AppImage || exit 1
+safe_wget "$CT_URL" /opt/gamedev/engines/ctjs.AppImage || return 0
 chmod +x /opt/gamedev/engines/ctjs.AppImage
 sudo ln -sf /opt/gamedev/engines/ctjs.AppImage /usr/local/bin/ctjs
 '
 
 run_step "RenPy" "is_installed renpy" '
-safe_wget https://www.renpy.org/dl/latest/renpy.zip /tmp/renpy.zip || exit 1
+safe_wget https://www.renpy.org/dl/latest/renpy.zip /tmp/renpy.zip || return 0
 
 rm -rf /opt/gamedev/engines/renpy
 mkdir -p /opt/gamedev/engines/renpy
@@ -333,7 +337,7 @@ RENPY_LAUNCHER=$(find /opt/gamedev/engines/renpy -type f -name "renpy.sh" | head
 
 if [ -z "$RENPY_LAUNCHER" ]; then
     echo "RenPy launcher not found"
-    exit 1
+    return 0
 fi
 
 register_bin renpy "$RENPY_LAUNCHER"
@@ -355,7 +359,7 @@ run_step "Piskel" "false" '
 PISKEL_URL=$(curl -s https://api.github.com/repos/piskelapp/piskel/releases/latest |
 jq -r ".assets[] | select(.name|test(\"linux.*64\")) | .browser_download_url" | head -n 1)
 
-safe_wget "$PISKEL_URL" /tmp/piskel.zip || exit 1
+safe_wget "$PISKEL_URL" /tmp/piskel.zip || return 0
 mkdir -p /opt/gamedev/art/piskel
 unzip -o /tmp/piskel.zip -d /opt/gamedev/art/piskel
 
@@ -401,7 +405,7 @@ run_step "LDtk" "false" '
 LDTK_URL=$(curl -s https://api.github.com/repos/deepnight/ldtk/releases/latest |
 jq -r ".assets[] | select(.name|test(\"Linux.*zip\")) | .browser_download_url" | head -n 1)
 
-safe_wget "$LDTK_URL" /tmp/ldtk.zip || exit 1
+safe_wget "$LDTK_URL" /tmp/ldtk.zip || return 0
 mkdir -p /opt/gamedev/tools/ldtk
 unzip -o /tmp/ldtk.zip -d /opt/gamedev/tools/ldtk
 
@@ -437,7 +441,7 @@ run_step "Obsidian" "is_installed obsidian" '
 OBSIDIAN_URL=$(curl -s https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest |
 jq -r ".assets[] | select(.name|test(\"AppImage\")) | .browser_download_url" | head -n 1)
 
-safe_wget "$OBSIDIAN_URL" /opt/gamedev/tools/obsidian.AppImage || exit 1
+safe_wget "$OBSIDIAN_URL" /opt/gamedev/tools/obsidian.AppImage || return 0
 chmod +x /opt/gamedev/tools/obsidian.AppImage
 sudo ln -sf /opt/gamedev/tools/obsidian.AppImage /usr/local/bin/obsidian
 '
