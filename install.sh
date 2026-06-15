@@ -761,6 +761,22 @@ curl -fsSL https://code-server.dev/install.sh | sudo bash || {
 }
 '
 
+run_step "SQLite Browser" "is_installed sqlitebrowser" '
+echo "📦 Installing DB Browser for SQLite..."
+
+sudo apt install -y sqlitebrowser || {
+    echo "⚠️ Failed to install sqlitebrowser"
+    return 0
+}
+
+echo "🧭 Verifying installation..."
+if command -v sqlitebrowser >/dev/null 2>&1; then
+    echo "✅ SQLite Browser installed successfully"
+else
+    echo "⚠️ Installation completed but binary not found"
+fi
+'
+
 # -----------------------------
 # WEB BROWSER
 # -----------------------------
