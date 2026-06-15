@@ -40,26 +40,7 @@ run_step() {
     echo "Installing: $NAME"
     echo "--------------------------------------------------"
 
-    "$@"
-
-    if [ $? -eq 0 ]; then
-        success "$NAME"
-    else
-        failure "$NAME"
-    fi
-}
-
-run_block() {
-    local NAME="$1"
-    shift
-
-    echo
-    echo "--------------------------------------------------"
-    echo "Installing: $NAME"
-    echo "--------------------------------------------------"
-
     bash -c "$*"
-
     if [ $? -eq 0 ]; then
         success "$NAME"
     else
@@ -80,17 +61,8 @@ sudo mkdir -p "$BIN"
 # ----------------------------------------
 # SYSTEM SETUP
 # ----------------------------------------
-echo "[1] Installing system dependencies..."
-
-run_block "System Update" '
-sudo apt update -y
-'
-
-#run_block "System Upgrade" '
-#sudo apt upgrade -y
-#'
-
-run_block "System Dependencies" '
+run_step "System Dependencies" '
+sudo apt update -y &&
 sudo apt install -y \
 git curl wget unzip jq zenity inotify-tools \
 build-essential software-properties-common \
@@ -100,251 +72,239 @@ libfuse2 flatpak python3 python3-pip
 # ----------------------------------------
 # GPU DRIVERS
 # ----------------------------------------
-echo "[2] Configuring graphics drivers..."
-
-sudo ubuntu-drivers autoinstall || true
+run_step "GPU Drivers" sudo ubuntu-drivers autoinstall
 
 # ----------------------------------------
-# FLATPAK SUPPORT
+# FLATPAK
 # ----------------------------------------
-echo "[3] Installing Flatpak support..."
-
-run_block "Flatpak + Bottles" '
-flatpak remote-add --if-not-exists flathub \
-https://flathub.org/repo/flathub.flatpakrepo &&
-flatpak install -y flathub com.usebottles.bottles
+run_step "Flatpak + Bottles" '
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo &&
+flatpak install -y flathub com.usebottles.bottles || true
 '
 
 # ----------------------------------------
-# NODE.JS ENVIRONMENT
+# NODE / NVM
 # ----------------------------------------
-echo "[4] Installing Node.js environment..."
-
-run_block "NodeJS Environment" '
+run_step "Node.js (NVM + LTS)" '
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 
 export NVM_DIR="$HOME/.nvm"
-
-[ -s "$NVM_DIR/nvm.sh" ] &&
-source "$NVM_DIR/nvm.sh" &&
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 
 nvm install --lts &&
 nvm use --lts &&
 
-npm install -g \
-vite create-react-app react \
-phaser excalibur
+npm install -g vite create-react-app react phaser excalibur
 '
 
 # ----------------------------------------
-# CODE EDITORS
+# CODE EDITORS (VS CODE FIXED)
 # ----------------------------------------
-echo "[5] Installing code editors..."
-
 echo "[5] Installing code editors..."
 
 sudo rm -f /etc/apt/sources.list.d/vscode.list
 sudo rm -f /usr/share/keyrings/ms.gpg
 sudo rm -f /usr/share/keyrings/packages.microsoft.gpg
 
-run_step "VS Code Repository" bash -c '
-curl -fsSL https://packages.microsoft.com/keys/microsoft.asc \
-| gpg --dearmor \
-| sudo tee /usr/share/keyrings/ms.gpg >/dev/null
+run_step "VS Code Repo Setup" '
+curl -fsSL https://packages.microsoft.com/keys/microsoft.asc |
+gpg --dearmor |
+sudo tee /usr/share/keyrings/ms.gpg >/dev/null
 
-echo "deb [arch=amd64 signed-by=/usr/share/keyrings/ms.gpg] https://packages.microsoft.com/repos/code stable main" \
-| sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/ms.gpg] https://packages.microsoft.com/repos/code stable main" |
+sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
 '
 
-run_step "VS Code" bash -c '
+run_step "VS Code" '
 sudo apt update &&
 sudo apt install -y code
 '
 
-run_step "Code Server" bash -c '
+run_step "Code Server" '
 curl -fsSL https://code-server.dev/install.sh | sudo bash
 '
 
 # ----------------------------------------
 # WEB BROWSER
 # ----------------------------------------
-echo "[6] Installing web browser..."
-
-run_block "Google Chrome" '
-wget -O /tmp/chrome.deb \
-https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb &&
+run_step "Google Chrome" '
+wget -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb &&
 sudo apt install -y /tmp/chrome.deb
 '
 
 # ----------------------------------------
 # GAME ENGINES
 # ----------------------------------------
-echo "[7] Installing game engines..."
 
-GODOT_URL=$(curl -s https://api.github.com/repos/godotengine/godot/releases/latest \
-| jq -r '.assets[] | select(.name|test("linux.*x86_64.*zip")) | .browser_download_url' | head -n 1)
+run_step "Godot" '
+GODOT_URL=$(curl -s https://api.github.com/repos/godotengine/godot/releases/latest |
+jq -r ".assets[] | select(.name|test(\"linux.*x86_64.*zip\")) | .browser_download_url" |
+head -n 1)
 
-wget -O /tmp/godot.zip "$GODOT_URL"
-unzip -o /tmp/godot.zip -d /tmp/godot
+wget -O /tmp/godot.zip "$GODOT_URL" &&
+unzip -o /tmp/godot.zip -d /tmp/godot || true
 
 GODOT_BIN=$(find /tmp/godot -type f -executable | head -n 1)
-sudo cp "$GODOT_BIN" "$BASE/engines/godot"
-sudo chmod +x "$BASE/engines/godot"
-sudo ln -sf "$BASE/engines/godot" "$BIN/godot"
 
-GDEV_URL=$(curl -s https://api.github.com/repos/4ian/GDevelop/releases/latest \
-| jq -r '.assets[] | select(.name|test("linux.*AppImage")) | .browser_download_url' | head -n 1)
+sudo cp "$GODOT_BIN" '"$BASE"'/engines/godot &&
+sudo chmod +x '"$BASE"'/engines/godot &&
+sudo ln -sf '"$BASE"'/engines/godot '"$BIN"'/godot
+'
 
-wget -O "$BASE/engines/gdevelop.AppImage" "$GDEV_URL"
-chmod +x "$BASE/engines/gdevelop.AppImage"
-sudo ln -sf "$BASE/engines/gdevelop.AppImage" "$BIN/gdevelop"
+run_step "GDevelop" '
+GDEV_URL=$(curl -s https://api.github.com/repos/4ian/GDevelop/releases/latest |
+jq -r ".assets[] | select(.name|test(\"linux.*AppImage\")) | .browser_download_url" |
+head -n 1)
 
-CT_URL=$(curl -s https://api.github.com/repos/ct-js/ct-js/releases/latest \
-| jq -r '.assets[] | select(.name|test("AppImage")) | .browser_download_url' | head -n 1)
+wget -O '"$BASE"'/engines/gdevelop.AppImage "$GDEV_URL" &&
+chmod +x '"$BASE"'/engines/gdevelop.AppImage &&
+sudo ln -sf '"$BASE"'/engines/gdevelop.AppImage '"$BIN"'/gdevelop
+'
 
-wget -O "$BASE/engines/ctjs.AppImage" "$CT_URL"
-chmod +x "$BASE/engines/ctjs.AppImage"
-sudo ln -sf "$BASE/engines/ctjs.AppImage" "$BIN/ctjs"
+run_step "ct.js" '
+CT_URL=$(curl -s https://api.github.com/repos/ct-js/ct-js/releases/latest |
+jq -r ".assets[] | select(.name|test(\"AppImage\")) | .browser_download_url" |
+head -n 1)
 
-wget -O /tmp/renpy.zip https://www.renpy.org/dl/latest/renpy.zip
-mkdir -p "$BASE/engines/renpy"
-unzip -o /tmp/renpy.zip -d "$BASE/engines/renpy"
+wget -O '"$BASE"'/engines/ctjs.AppImage "$CT_URL" &&
+chmod +x '"$BASE"'/engines/ctjs.AppImage &&
+sudo ln -sf '"$BASE"'/engines/ctjs.AppImage '"$BIN"'/ctjs
+'
 
-sudo apt install -y love
+run_step "RenPy" '
+wget -O /tmp/renpy.zip https://www.renpy.org/dl/latest/renpy.zip &&
+mkdir -p '"$BASE"'/engines/renpy &&
+unzip -o /tmp/renpy.zip -d '"$BASE"'/engines/renpy
+'
 
-MICRO_URL=$(curl -s https://api.github.com/repos/pmgl/microstudio/releases/latest \
-| jq -r '.assets[] | select(.name|test("linux")) | .browser_download_url' | head -n 1)
+run_step "LOVE2D" sudo apt install -y love
 
-wget -O /tmp/microstudio.zip "$MICRO_URL"
-mkdir -p "$BASE/web/microstudio"
-unzip -o /tmp/microstudio.zip -d "$BASE/web/microstudio"
+run_step "MicroStudio" '
+MICRO_URL=$(curl -s https://api.github.com/repos/pmgl/microstudio/releases/latest |
+jq -r ".assets[] | select(.name|test(\"linux\")) | .browser_download_url" |
+head -n 1)
 
-MICRO_BIN=$(find "$BASE/web/microstudio" -type f -executable | head -n 1)
-sudo ln -sf "$MICRO_BIN" "$BIN/microstudio"
+wget -O /tmp/microstudio.zip "$MICRO_URL" &&
+mkdir -p '"$BASE"'/web/microstudio &&
+unzip -o /tmp/microstudio.zip -d '"$BASE"'/web/microstudio
+
+MICRO_BIN=$(find '"$BASE"'/web/microstudio -type f -executable | head -n 1)
+sudo ln -sf "$MICRO_BIN" '"$BIN"'/microstudio
+'
 
 # ----------------------------------------
 # CREATIVE TOOLS
 # ----------------------------------------
-echo "[8] Installing creative tools..."
 
-sudo apt install -y \
-  gimp krita inkscape
+run_step "GIMP/Krita/Inkscape" \
+sudo apt install -y gimp krita inkscape
 
-wget -O "$BASE/art/pixelorama.AppImage" \
-https://github.com/Orama-Interactive/Pixelorama/releases/latest/download/Pixelorama.x86_64.AppImage || true
+run_step "Pixelorama" '
+wget -O '"$BASE"'/art/pixelorama.AppImage \
+https://github.com/Orama-Interactive/Pixelorama/releases/latest/download/Pixelorama.x86_64.AppImage &&
+chmod +x '"$BASE"'/art/pixelorama.AppImage &&
+sudo ln -sf '"$BASE"'/art/pixelorama.AppImage '"$BIN"'/pixelorama
+'
 
-chmod +x "$BASE/art/pixelorama.AppImage"
-sudo ln -sf "$BASE/art/pixelorama.AppImage" "$BIN/pixelorama"
-
-wget -O "$BASE/art/libresprite.AppImage" \
+run_step "LibreSprite" '
+wget -O '"$BASE"'/art/libresprite.AppImage \
 https://github.com/LibreSprite/LibreSprite/releases/latest/download/LibreSprite-x86_64.AppImage || true
 
-chmod +x "$BASE/art/libresprite.AppImage"
-sudo ln -sf "$BASE/art/libresprite.AppImage" "$BIN/libresprite"
+chmod +x '"$BASE"'/art/libresprite.AppImage || true
+sudo ln -sf '"$BASE"'/art/libresprite.AppImage '"$BIN"'/libresprite || true
+'
 
-# ----------------------------------------
-# Piskel
-# ----------------------------------------
+run_step "Piskel" '
+PISKEL_URL=$(curl -s https://api.github.com/repos/piskelapp/piskel/releases/latest |
+jq -r ".assets[] | select(.name|test(\"linux.*64\")) | .browser_download_url" |
+head -n 1)
 
-PISKEL_URL=$(curl -s https://api.github.com/repos/piskelapp/piskel/releases/latest \
-| jq -r '.assets[] | select(.name|test("linux.*64")) | .browser_download_url' | head -n 1)
+wget -O /tmp/piskel.zip "$PISKEL_URL" &&
+mkdir -p '"$BASE"'/art/piskel &&
+unzip -o /tmp/piskel.zip -d '"$BASE"'/art/piskel
 
-wget -O /tmp/piskel.zip "$PISKEL_URL"
-
-mkdir -p "$BASE/art/piskel"
-
-unzip -o /tmp/piskel.zip -d "$BASE/art/piskel"
-
-PISKEL_BIN=$(find "$BASE/art/piskel" -type f -executable | head -n 1)
-
+PISKEL_BIN=$(find '"$BASE"'/art/piskel -type f -executable | head -n 1)
 chmod +x "$PISKEL_BIN"
-
-sudo ln -sf "$PISKEL_BIN" "$BIN/piskel"
-
+sudo ln -sf "$PISKEL_BIN" '"$BIN"'/piskel
+'
 
 # ----------------------------------------
-# AUDIO-VIDEO STACK
+# AUDIO / VIDEO
 # ----------------------------------------
-echo "[9] Installing audio and video tools..."
 
-sudo apt install -y \
-  vlc kdenlive obs-studio \
-  lmms audacity ardour hydrogen \
-  drumkv1 synthv1 samplv1 geonkick
+run_step "Audio & Video Suite" \
+sudo apt install -y vlc kdenlive obs-studio lmms audacity ardour hydrogen drumkv1 synthv1 samplv1 geonkick
 
 # ----------------------------------------
 # LDtk
 # ----------------------------------------
-echo "[10] Setting up Level Editors..."
 
-sudo apt install -y \
-  tiled
+run_step "Tiled" sudo apt install -y tiled
 
-LDTK_URL=$(curl -s https://api.github.com/repos/deepnight/ldtk/releases/latest \
-| jq -r '.assets[] | select(.name|test("Linux.*zip")) | .browser_download_url' | head -n 1)
+run_step "LDtk" '
+LDTK_URL=$(curl -s https://api.github.com/repos/deepnight/ldtk/releases/latest |
+jq -r ".assets[] | select(.name|test(\"Linux.*zip\")) | .browser_download_url" |
+head -n 1)
 
-wget -O /tmp/ldtk.zip "$LDTK_URL"
-mkdir -p "$BASE/tools/ldtk"
+wget -O /tmp/ldtk.zip "$LDTK_URL" &&
+mkdir -p '"$BASE"'/tools/ldtk &&
+unzip -o /tmp/ldtk.zip -d '"$BASE"'/tools/ldtk
 
-unzip -o /tmp/ldtk.zip -d "$BASE/tools/ldtk"
-
-LDTK_BIN=$(find "$BASE/tools/ldtk" -type f -executable | head -n 1)
-
+LDTK_BIN=$(find '"$BASE"'/tools/ldtk -type f -executable | head -n 1)
 chmod +x "$LDTK_BIN"
-sudo ln -sf "$LDTK_BIN" "$BIN/ldtk"
+sudo ln -sf "$LDTK_BIN" '"$BIN"'/ldtk
+'
 
 # ----------------------------------------
-# LDtk SYNC TOOL
+# LDtk Sync Tool
 # ----------------------------------------
-echo "[11] Setting up LDtk sync..."
 
-cat > "$BIN/ldtk-sync" <<'EOF'
+run_step "LDtk Sync Tool" '
+cat > '"$BIN"'/ldtk-sync <<'"'"'EOF'"'"'
 #!/usr/bin/env bash
-
 WATCH=${1:-$PWD}
-
 echo "Watching LDtk files in: $WATCH"
-
 inotifywait -m "$WATCH" -e close_write |
 while read path action file; do
   [[ "$file" == *.ldtk ]] && cp "$path$file" "$WATCH/export_$file.json"
 done
 EOF
 
-chmod +x "$BIN/ldtk-sync"
+chmod +x '"$BIN"'/ldtk-sync
+'
 
 # ----------------------------------------
-# PRODUCTIVITY TOOLS
+# OBSIDIAN
 # ----------------------------------------
 
-echo "[12] Installing productivity tools..."
-OBSIDIAN_URL=$(curl -s https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest \
-| jq -r '.assets[] | select(.name|test("AppImage")) | .browser_download_url' | head -n 1)
+run_step "Obsidian" '
+OBSIDIAN_URL=$(curl -s https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest |
+jq -r ".assets[] | select(.name|test(\"AppImage\")) | .browser_download_url" |
+head -n 1)
 
-wget -O "$BASE/tools/obsidian.AppImage" "$OBSIDIAN_URL"
-
-chmod +x "$BASE/tools/obsidian.AppImage"
-
-sudo ln -sf "$BASE/tools/obsidian.AppImage" "$BIN/obsidian"
+wget -O '"$BASE"'/tools/obsidian.AppImage "$OBSIDIAN_URL" &&
+chmod +x '"$BASE"'/tools/obsidian.AppImage &&
+sudo ln -sf '"$BASE"'/tools/obsidian.AppImage '"$BIN"'/obsidian
+'
 
 # ----------------------------------------
-# ITCH.IO UPLOADER
+# BUTLER
 # ----------------------------------------
-echo "[13] Installing deployment tools..."
 
-curl -L -o /tmp/butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
-unzip /tmp/butler.zip -d /tmp
-sudo mv /tmp/butler /usr/local/bin/
+run_step "itch.io Butler" '
+curl -L -o /tmp/butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default &&
+unzip /tmp/butler.zip -d /tmp &&
+sudo mv /tmp/butler /usr/local/bin/ &&
 sudo chmod +x /usr/local/bin/butler
+'
 
 # ----------------------------------------
 # GAMDEV COMMAND
 # ----------------------------------------
-echo "[14] Creating gamedev command..."
 
-cat > "$BIN/gamedev" <<'EOF'
+run_step "Gamedev Command" '
+cat > '"$BIN"'/gamedev <<'"'"'EOF'"'"'
 #!/usr/bin/env bash
-
 case "$1" in
   list)
     ls /usr/local/bin | grep -E "godot|gdevelop|ctjs|ldtk|microstudio|pixelorama|libresprite|obs"
@@ -374,13 +334,31 @@ case "$1" in
 esac
 EOF
 
-chmod +x "$BIN/gamedev"
+chmod +x '"$BIN"'/gamedev
+'
 
 # ----------------------------------------
-# COMPLETION
+# SUMMARY
 # ----------------------------------------
+
+echo
 echo "========================================="
-echo "Installation complete."
-echo "Use: gamedev list"
-echo "Use: gamedev audio"
+echo "INSTALLATION SUMMARY"
+echo "========================================="
+
+echo
+echo "INSTALLED:"
+printf '  ✓ %s\n' "${INSTALLED[@]}"
+
+echo
+echo "FAILED:"
+printf '  ✗ %s\n' "${FAILED[@]}"
+
+echo
+echo "MANUAL INSTALL REQUIRED:"
+printf '  • %s\n' "${MANUAL[@]}"
+
+echo
+echo "========================================="
+echo "Done."
 echo "========================================="
