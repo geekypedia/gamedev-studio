@@ -148,8 +148,7 @@ sudo ln -sf "$MICRO_BIN" "$BIN/microstudio"
 echo "[8] Installing creative tools..."
 
 sudo apt install -y \
-  gimp krita inkscape \
-  audacity vlc kdenlive lmms
+  gimp krita inkscape
 
 wget -O "$BASE/art/pixelorama.AppImage" \
 https://github.com/Orama-Interactive/Pixelorama/releases/latest/download/Pixelorama.x86_64.AppImage || true
@@ -164,24 +163,55 @@ chmod +x "$BASE/art/libresprite.AppImage"
 sudo ln -sf "$BASE/art/libresprite.AppImage" "$BIN/libresprite"
 
 # ----------------------------------------
-# AUDIO STACK
+# Piskel
 # ----------------------------------------
-echo "[9] Installing audio tools..."
+
+PISKEL_URL=$(curl -s https://api.github.com/repos/piskelapp/piskel/releases/latest \
+| jq -r '.assets[] | select(.name|test("linux.*64")) | .browser_download_url' | head -n 1)
+
+wget -O /tmp/piskel.zip "$PISKEL_URL"
+
+mkdir -p "$BASE/art/piskel"
+
+unzip -o /tmp/piskel.zip -d "$BASE/art/piskel"
+
+PISKEL_BIN=$(find "$BASE/art/piskel" -type f -executable | head -n 1)
+
+chmod +x "$PISKEL_BIN"
+
+sudo ln -sf "$PISKEL_BIN" "$BIN/piskel"
+
+
+# ----------------------------------------
+# AUDIO-VIDEO STACK
+# ----------------------------------------
+echo "[9] Installing audio and video tools..."
 
 sudo apt install -y \
-  obs-studio \
-  ardour hydrogen \
+  vlc kdenlive obs-studio \
+  lmms audacity ardour hydrogen \
   drumkv1 synthv1 samplv1 geonkick
 
 # ----------------------------------------
-# ITCH.IO UPLOADER
+# LDtk
 # ----------------------------------------
-echo "[10] Installing deployment tools..."
+echo "[10] Setting up Level Editors..."
 
-curl -L -o /tmp/butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
-unzip /tmp/butler.zip -d /tmp
-sudo mv /tmp/butler /usr/local/bin/
-sudo chmod +x /usr/local/bin/butler
+sudo apt install -y \
+  tiled
+
+LDTK_URL=$(curl -s https://api.github.com/repos/deepnight/ldtk/releases/latest \
+| jq -r '.assets[] | select(.name|test("Linux.*zip")) | .browser_download_url' | head -n 1)
+
+wget -O /tmp/ldtk.zip "$LDTK_URL"
+mkdir -p "$BASE/tools/ldtk"
+
+unzip -o /tmp/ldtk.zip -d "$BASE/tools/ldtk"
+
+LDTK_BIN=$(find "$BASE/tools/ldtk" -type f -executable | head -n 1)
+
+chmod +x "$LDTK_BIN"
+sudo ln -sf "$LDTK_BIN" "$BIN/ldtk"
 
 # ----------------------------------------
 # LDtk SYNC TOOL
@@ -204,9 +234,33 @@ EOF
 chmod +x "$BIN/ldtk-sync"
 
 # ----------------------------------------
+# ITCH.IO UPLOADER
+# ----------------------------------------
+
+echo "[12] Installing productivity tools..."
+OBSIDIAN_URL=$(curl -s https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest \
+| jq -r '.assets[] | select(.name|test("AppImage")) | .browser_download_url' | head -n 1)
+
+wget -O "$BASE/tools/obsidian.AppImage" "$OBSIDIAN_URL"
+
+chmod +x "$BASE/tools/obsidian.AppImage"
+
+sudo ln -sf "$BASE/tools/obsidian.AppImage" "$BIN/obsidian"
+
+# ----------------------------------------
+# ITCH.IO UPLOADER
+# ----------------------------------------
+echo "[13] Installing deployment tools..."
+
+curl -L -o /tmp/butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
+unzip /tmp/butler.zip -d /tmp
+sudo mv /tmp/butler /usr/local/bin/
+sudo chmod +x /usr/local/bin/butler
+
+# ----------------------------------------
 # GAMDEV COMMAND
 # ----------------------------------------
-echo "[12] Creating gamedev command..."
+echo "[14] Creating gamedev command..."
 
 cat > "$BIN/gamedev" <<'EOF'
 #!/usr/bin/env bash
