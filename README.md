@@ -69,14 +69,16 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 - Node.js (via NVM LTS)
 - Vite
 - React
+- create-react-app
 - Phaser
 - ExcaliburJS
-- create-react-app
 - NW
+- Electron
 
 ---
 
 ### 🎨 Art & Design Tools
+- Blender
 - GIMP
 - Krita
 - Inkscape
