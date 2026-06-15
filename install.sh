@@ -172,7 +172,109 @@ is_ok() {
 # BINARY REGISTRY (FIX)
 # -----------------------------
 
+copy_ctjs_icon() {
+    local CT_INSTALL="$1"
+
+    if [ -z "$CT_INSTALL" ] || [ ! -d "$CT_INSTALL" ]; then
+        echo "⚠️ Invalid CTJS install path"
+        return 1
+    fi
+
+    echo "🎯 Searching ct.js icon in $CT_INSTALL..."
+
+    # Prefer common Electron / ct.js icon locations
+    local ICON
+    ICON=$(find "$CT_INSTALL" \
+        -type f \( \
+            -iname "icon.png" \
+            -o -iname "ctjs.png" \
+            -o -iname "icon.ico" \
+            -o -iname "*.png" \
+        \) \
+        | grep -Ei "(icon|ctjs)" \
+        | head -n 1)
+
+    # fallback: any reasonably sized png (avoid random assets if possible)
+    if [ -z "$ICON" ]; then
+        ICON=$(find "$CT_INSTALL" -type f -iname "*.png" | head -n 1)
+    fi
+
+    if [ -z "$ICON" ]; then
+        echo "⚠️ No icon found for ct.js"
+        return 1
+    fi
+
+    local DEST="$CT_INSTALL/icon.png"
+
+    cp "$ICON" "$DEST"
+
+    echo "🖼️ ct.js icon copied to: $DEST"
+}
+
 extract_appimage_icon() {
+    local appimage="$1"
+
+    if [ -z "$appimage" ] || [ ! -f "$appimage" ]; then
+        echo "⚠️ Invalid AppImage path"
+        return 1
+    fi
+
+    if [[ "$appimage" != *.AppImage ]]; then
+        echo "⚠️ Not an AppImage: $appimage"
+        return 1
+    fi
+
+    local dir icon_path tmpdir
+
+    dir=$(dirname "$appimage")
+    icon_path="$dir/icon.png"
+    tmpdir="/tmp/appimage_extract_$$"
+
+    # skip if already exists
+    if [ -f "$icon_path" ]; then
+        echo "✅ Icon already exists: $icon_path"
+        return 0
+    fi
+
+    echo "🎯 Extracting icon from AppImage: $appimage"
+
+    mkdir -p "$tmpdir"
+
+    # extract AppImage filesystem
+    if "$appimage" --appimage-extract >/dev/null 2>&1; then
+
+        # 1. Best case: .DirIcon (most AppImages)
+        if [ -f squashfs-root/.DirIcon ]; then
+            cp squashfs-root/.DirIcon "$icon_path"
+
+        # 2. Common Linux icon locations
+        else
+            ICON=$(find squashfs-root \
+                -type f \
+                \( -iname "*.png" -o -iname "*.svg" -o -iname "*.xpm" \) \
+                | grep -Ei "(icon|logo|app)" \
+                | head -n 1)
+
+            if [ -n "$ICON" ]; then
+                cp "$ICON" "$icon_path"
+            fi
+        fi
+
+        rm -rf squashfs-root
+    else
+        echo "⚠️ AppImage extraction failed"
+        return 1
+    fi
+
+    if [ -f "$icon_path" ]; then
+        echo "🖼️ Icon saved: $icon_path"
+    else
+        echo "⚠️ No icon found inside AppImage"
+        return 1
+    fi
+}
+
+extract_appimage_icon_from_symlnk() {
     local app="$1"
 
     local bin
@@ -307,6 +409,7 @@ EOF
 
     echo "🖥️ Desktop launcher created: $display_name"
 }
+
 register_bin() {
     local name="$1"
     local target="$2"
@@ -705,7 +808,6 @@ mkdir -p /opt/gamedev/engines/godot
 sudo install -Dm755 "$GODOT_BIN" /opt/gamedev/engines/godot/godot
 
 register_bin godot /opt/gamedev/engines/godot/godot "Godot"
-extract_appimage_icon godot
 '
 
 run_step "Godot Export Templates" "false" '
@@ -782,8 +884,8 @@ safe_wget "$GDEV_URL" /opt/gamedev/engines/gdevelop/gdevelop.AppImage || {
     return 0
 }
 
+extract_appimage_icon /opt/gamedev/engines/gdevelop/gdevelop.AppImage
 register_bin gdevelop /opt/gamedev/engines/gdevelop/gdevelop.AppImage "GDevelop"
-extract_appimage_icon gdevelop
 '
 
 run_step "ct.js" "is_installed ctjs" '
@@ -841,6 +943,7 @@ if [ -z "$CT_BIN_FINAL" ]; then
   return 0
 fi
 
+copy_ctjs_icon "$CT_INSTALL"
 register_bin ctjs "$CT_BIN_FINAL" "Ct.js"
 '
 
@@ -1089,8 +1192,8 @@ if [ -z "$LDTK_BIN" ]; then
   return 0
 fi
 
+extract_appimage_icon "$LDTK_BIN" 
 register_bin ldtk "$LDTK_BIN" "LDtk"
-extract_appimage_icon ldtk
 '
 
 
