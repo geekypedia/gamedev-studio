@@ -286,6 +286,10 @@ sudo chown -R "$USER:$USER" "$BASE"
 # Now create subfolders as normal user (no sudo needed)
 mkdir -p "$BASE"/{engines,tools,art,web,audio,dev,pipelines}
 
+# Create and Take ownership of the tmp too
+sudo mkdir -p "$TMP_DIR"
+sudo chown -R "$USER:$USER" "$TMP_DIR"
+
 # -----------------------------
 # SYSTEM FLOW
 # -----------------------------
