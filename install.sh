@@ -105,6 +105,23 @@ run_step() {
     fi
 }
 
+# -----------------------------
+# BINARY REGISTRY (FIX)
+# -----------------------------
+
+register_bin() {
+    local name="$1"
+    local target="$2"
+
+    if [ -z "$target" ] || [ ! -f "$target" ]; then
+        echo "⚠ Cannot register $name (missing binary: $target)"
+        return 1
+    fi
+
+    chmod +x "$target"
+    sudo ln -sf "$target" /usr/local/bin/"$name"
+}
+
 echo "========================================="
 echo "🎮 Game Dev Studio Installer (Ubuntu)"
 echo "========================================="
@@ -210,16 +227,25 @@ sudo apt install -y /tmp/chrome.deb
 # GAME ENGINES
 # -----------------------------
 
-run_step "Godot" "is_installed godot" '
+rrun_step "Godot" "is_installed godot" '
 GODOT_URL=$(curl -s https://api.github.com/repos/godotengine/godot/releases/latest |
 jq -r ".assets[] | select(.name|test(\"linux.*x86_64.*zip\")) | .browser_download_url" | head -n 1)
 
 safe_wget "$GODOT_URL" /tmp/godot.zip || exit 1
-rm -rf /tmp/godot && unzip -o /tmp/godot.zip -d /tmp/godot
 
-GODOT_BIN=$(safe_find_exec /tmp/godot)
+rm -rf /tmp/godot
+unzip -o /tmp/godot.zip -d /tmp/godot
+
+GODOT_BIN=$(find /tmp/godot -type f -executable -name "*x86_64*" | head -n 1)
+
+if [ -z "$GODOT_BIN" ]; then
+    echo "Godot binary not found"
+    exit 1
+fi
+
 sudo install -Dm755 "$GODOT_BIN" /opt/gamedev/engines/godot
-sudo ln -sf /opt/gamedev/engines/godot /usr/local/bin/godot
+
+register_bin godot /opt/gamedev/engines/godot
 '
 
 run_step "Godot Export Templates" "false" '
@@ -250,10 +276,22 @@ chmod +x /opt/gamedev/engines/ctjs.AppImage
 sudo ln -sf /opt/gamedev/engines/ctjs.AppImage /usr/local/bin/ctjs
 '
 
-run_step "RenPy" "false" '
-safe_wget https://www.renpy.org/dl/latest/renpy.zip /tmp/renpy.zip &&
-mkdir -p /opt/gamedev/engines/renpy &&
+run_step "RenPy" "is_installed renpy" '
+safe_wget https://www.renpy.org/dl/latest/renpy.zip /tmp/renpy.zip || exit 1
+
+rm -rf /opt/gamedev/engines/renpy
+mkdir -p /opt/gamedev/engines/renpy
+
 unzip -o /tmp/renpy.zip -d /opt/gamedev/engines/renpy
+
+RENPY_LAUNCHER=$(find /opt/gamedev/engines/renpy -type f -name "renpy.sh" | head -n 1)
+
+if [ -z "$RENPY_LAUNCHER" ]; then
+    echo "RenPy launcher not found"
+    exit 1
+fi
+
+register_bin renpy "$RENPY_LAUNCHER"
 '
 
 run_step "LOVE2D" "is_installed love" '
