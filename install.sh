@@ -335,23 +335,47 @@ export NVM_DIR="$HOME/.nvm"
 nvm install --lts
 nvm use --lts
 
-npm install -g vite create-react-app react phaser excalibur nw
+npm install -g vite --progress=true
+npm install -g create-react-app --progress=true
+npm install -g react --progress=true
+npm install -g phaser --progress=true
+npm install -g excalibur --progress=true
+npm install -g nw --progress=true
 '
 
 # -----------------------------
 # CODE EDITORS
 # -----------------------------
 
-sudo rm -f /etc/apt/sources.list.d/vscode.list
-sudo rm -f /usr/share/keyrings/ms.gpg
-
 run_step "VS Code Repo Setup" "false" '
+echo "🧹 Detecting existing VS Code / Microsoft APT entries..."
+
+# Remove VS Code repo files (old + renamed variants)
+sudo rm -f /etc/apt/sources.list.d/vscode.list
+sudo rm -f /etc/apt/sources.list.d/*vscode*.list
+
+# Remove old Microsoft keyrings used by VS Code installs
+sudo rm -f /usr/share/keyrings/ms.gpg
+sudo rm -f /usr/share/keyrings/microsoft.gpg
+
+# New recommended keyring location
+sudo mkdir -p /etc/apt/keyrings
+
+echo "🔑 Installing Microsoft signing key..."
+
 curl -fsSL https://packages.microsoft.com/keys/microsoft.asc |
 gpg --dearmor |
-sudo tee /usr/share/keyrings/ms.gpg >/dev/null
+sudo tee /etc/apt/keyrings/microsoft.gpg >/dev/null
 
-echo "deb [arch=amd64 signed-by=/usr/share/keyrings/ms.gpg] https://packages.microsoft.com/repos/code stable main" |
+echo "📦 Adding VS Code repository..."
+
+echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" |
 sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
+
+echo "🔄 Updating package list..."
+sudo apt-get update -y || true
+
+echo "✅ VS Code repo setup complete"
 '
 
 run_step "VS Code Install" "is_installed code" '
