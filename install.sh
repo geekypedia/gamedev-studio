@@ -451,6 +451,13 @@ sudo apt-get update -y || true
 echo "✅ VS Code repo normalized"
 '
 
+run_step "Code Server" "is_installed code-server" '
+curl -fsSL https://code-server.dev/install.sh | sudo bash || {
+  echo "⚠️ code-server install failed"
+  return 0
+}
+'
+
 # -----------------------------
 # WEB BROWSER
 # -----------------------------
