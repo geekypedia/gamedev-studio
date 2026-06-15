@@ -527,6 +527,9 @@ check_apt_conflicts() {
   awk '$1 > 1 {print "⚠️ Duplicate entry:", $0}'
 }
 
+is_npm_installed() {
+    npm list -g --depth=0 "$1" >/dev/null 2>&1
+}
 
 # -----------------------------
 # INSTALLER ENGINE
@@ -686,15 +689,42 @@ export NVM_DIR="$HOME/.nvm"
 
 nvm install --lts
 nvm use --lts
+'
 
-npm install -g typescript --progress=true --verbose
-npm install -g vite --progress=true --verbose
-npm install -g react --progress=true --verbose
-npm install -g create-react-app --progress=true --verbose
-npm install -g phaser --progress=true --verbose
-npm install -g excalibur --progress=true --verbose
-npm install -g nw --progress=true --verbose
-npm install -g electron --progress=true --verbose
+run_step "TSC" "is_installed tsc" '
+sudo apt install node-typescript -y || echo "⚠️ TypeScript install failed"
+'
+
+run_step "TypeScript" "is_npm_installed typescript" '
+npm install -g typescript --progress=true --verbose || echo "⚠️ TypeScript install failed"
+'
+
+run_step "Vite" "is_installed vite" '
+npm install -g vite --progress=true --verbose || echo "⚠️ Vite install failed"
+'
+
+run_step "Create Vite" "is_installed create-vite" '
+npm install -g create-vite --progress=true --verbose || echo "⚠️ create-vite install failed"
+'
+
+run_step "React CLI" "is_installed create-react-app" '
+npm install -g create-react-app --progress=true --verbose || echo "⚠️ create-react-app install failed"
+'
+
+run_step "Phaser CLI" "is_npm_installed phaser" '
+npm install -g phaser --progress=true --verbose || echo "⚠️ Phaser install failed"
+'
+
+run_step "Excalibur CLI" "is_npm_installed excalibur" '
+npm install -g excalibur --progress=true --verbose || echo "⚠️ Excalibur install failed"
+'
+
+run_step "NW.js CLI" "is_npm_installed nw" '
+npm install -g nw --progress=true --verbose || echo "⚠️ NW.js install failed"
+'
+
+run_step "Electron CLI" "is_npm_installed electron" '
+npm install -g electron --progress=true --verbose || echo "⚠️ Electron install failed"
 '
 
 # -----------------------------
