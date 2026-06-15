@@ -771,49 +771,12 @@ sudo apt install -y love
 # CREATIVE TOOLS
 # -----------------------------
 
-run_step "Blender" "is_installed love" '
+run_step "Blender" "is_installed blender" '
 sudo apt install -y blender
 '
 
 run_step "GIMP/Krita/Inkscape" "is_installed gimp && is_installed krita && is_installed inkscape" '
 sudo apt install -y gimp krita inkscape
-'
-
-run_step "Piskel" "is_installed piskel" '
-INSTALL_DIR="/opt/gamedev/art/piskel"
-
-rm -rf "$INSTALL_DIR"
-
-git clone https://github.com/piskelapp/piskel.git "$INSTALL_DIR" || {
-    echo "⚠️ Failed to clone Piskel"
-    return 0
-}
-
-cd "$INSTALL_DIR" || return 0
-
-npm install || {
-    echo "⚠️ npm install failed"
-    return 0
-}
-
-npm run build || {
-    echo "⚠️ build failed"
-    return 0
-}
-
-npm run electron || {
-    echo "⚠️ electron build failed"
-    return 0
-}
-
-PISKEL_BIN=$(find "$INSTALL_DIR" -type f \( -name "Piskel" -o -name "piskel" \) -executable | head -n1)
-
-if [ -z "$PISKEL_BIN" ]; then
-    echo "⚠️ Could not locate Piskel executable"
-    return 0
-fi
-
-register_bin piskel "$PISKEL_BIN"
 '
 
 run_step "Pixelorama" "is_installed pixelorama" '
