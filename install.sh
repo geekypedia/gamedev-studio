@@ -115,18 +115,18 @@ BIN="/usr/local/bin"
 sudo mkdir -p "$BASE"/{engines,tools,art,web,audio,dev,pipelines}
 sudo mkdir -p "$BIN"
 
-# -----------
+# -----------------------------
 # SYSTEM FLOW
-# -----------
+# -----------------------------
 
 run_step "APT Update" "true" '
 sudo apt update -y
 '
 
 if [[ "$RUN_UPGRADE_STEP" -eq 1 ]]; then
-    run_step "APT Upgrade" "true" '
-    sudo apt upgrade -y
-    '
+run_step "APT Upgrade" "true" '
+sudo apt upgrade -y
+'
 fi
 
 run_step "System Dependencies Install" \
@@ -159,13 +159,15 @@ flatpak install -y flathub com.usebottles.bottles || true
 # -----------------------------
 
 run_step "Node.js (NVM + LTS)" "is_installed node" '
+if [ ! -d "$HOME/.nvm" ]; then
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+fi
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 
-nvm install --lts &&
-nvm use --lts &&
+nvm install --lts
+nvm use --lts
 
 npm install -g vite create-react-app react phaser excalibur
 '
@@ -199,10 +201,11 @@ curl -fsSL https://code-server.dev/install.sh | sudo bash
 # WEB BROWSER
 # -----------------------------
 
-run_step "Google Chrome" "is_installed google-chrome" '
+run_step "Google Chrome" "is_installed google-chrome || is_installed google-chrome-stable" '
 safe_wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb /tmp/chrome.deb &&
 sudo apt install -y /tmp/chrome.deb
 '
+
 # -----------------------------
 # GAME ENGINES
 # -----------------------------
@@ -212,29 +215,22 @@ GODOT_URL=$(curl -s https://api.github.com/repos/godotengine/godot/releases/late
 jq -r ".assets[] | select(.name|test(\"linux.*x86_64.*zip\")) | .browser_download_url" | head -n 1)
 
 safe_wget "$GODOT_URL" /tmp/godot.zip || exit 1
-unzip -o /tmp/godot.zip -d /tmp/godot
+rm -rf /tmp/godot && unzip -o /tmp/godot.zip -d /tmp/godot
 
 GODOT_BIN=$(safe_find_exec /tmp/godot)
-sudo install -m 755 "$GODOT_BIN" /opt/gamedev/engines/godot
+sudo install -Dm755 "$GODOT_BIN" /opt/gamedev/engines/godot
 sudo ln -sf /opt/gamedev/engines/godot /usr/local/bin/godot
 '
 
 run_step "Godot Export Templates" "false" '
-GODOT_VERSION=$(curl -s https://api.github.com/repos/godotengine/godot/releases/latest |
-jq -r ".tag_name")
-
 TEMPLATE_URL=$(curl -s https://api.github.com/repos/godotengine/godot/releases/latest |
-jq -r ".assets[] | select(.name|test(\"export_templates.*zip\")) | .browser_download_url" |
-head -n 1)
+jq -r ".assets[] | select(.name|test(\"export_templates.*zip\")) | .browser_download_url" | head -n 1)
 
 safe_wget "$TEMPLATE_URL" /tmp/godot_templates.zip || exit 1
 
 mkdir -p ~/.local/share/godot/export_templates
 unzip -o /tmp/godot_templates.zip -d ~/.local/share/godot/export_templates
-
-echo "Godot templates installed for version: $GODOT_VERSION"
 '
-
 
 run_step "GDevelop" "is_installed gdevelop" '
 GDEV_URL=$(curl -s https://api.github.com/repos/4ian/GDevelop/releases/latest |
@@ -274,8 +270,7 @@ sudo apt install -y gimp krita inkscape
 
 run_step "Piskel" "false" '
 PISKEL_URL=$(curl -s https://api.github.com/repos/piskelapp/piskel/releases/latest |
-jq -r ".assets[] | select(.name|test(\"linux.*64\")) | .browser_download_url" |
-head -n 1)
+jq -r ".assets[] | select(.name|test(\"linux.*64\")) | .browser_download_url" | head -n 1)
 
 safe_wget "$PISKEL_URL" /tmp/piskel.zip || exit 1
 mkdir -p /opt/gamedev/art/piskel
@@ -307,7 +302,7 @@ sudo apt install -y vlc kdenlive obs-studio lmms audacity ardour hydrogen
 '
 
 # -----------------------------
-# Level Editors
+# LEVEL EDITORS
 # -----------------------------
 
 run_step "Tiled Map Editor" "is_installed tiled" '
@@ -316,8 +311,7 @@ sudo apt install -y tiled
 
 run_step "LDtk" "false" '
 LDTK_URL=$(curl -s https://api.github.com/repos/deepnight/ldtk/releases/latest |
-jq -r ".assets[] | select(.name|test(\"Linux.*zip\")) | .browser_download_url" |
-head -n 1)
+jq -r ".assets[] | select(.name|test(\"Linux.*zip\")) | .browser_download_url" | head -n 1)
 
 safe_wget "$LDTK_URL" /tmp/ldtk.zip || exit 1
 mkdir -p /opt/gamedev/tools/ldtk
@@ -331,7 +325,6 @@ sudo ln -sf "$LDTK_BIN" /usr/local/bin/ldtk
 run_step "LDtk Sync Pipeline" "is_installed ldtk-sync" '
 cat > /usr/local/bin/ldtk-sync <<EOF
 #!/usr/bin/env bash
-
 WATCH_DIR=\${1:-\$PWD}
 
 echo "👀 Watching LDtk files in: \$WATCH_DIR"
@@ -349,21 +342,20 @@ chmod +x /usr/local/bin/ldtk-sync
 '
 
 # -----------------------------
-# PRODUCTIVITY TOOLS
+# PRODUCTIVITY
 # -----------------------------
+
 run_step "Obsidian" "is_installed obsidian" '
 OBSIDIAN_URL=$(curl -s https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest |
-jq -r ".assets[] | select(.name|test(\"AppImage\")) | .browser_download_url" |
-head -n 1)
+jq -r ".assets[] | select(.name|test(\"AppImage\")) | .browser_download_url" | head -n 1)
 
 safe_wget "$OBSIDIAN_URL" /opt/gamedev/tools/obsidian.AppImage || exit 1
 chmod +x /opt/gamedev/tools/obsidian.AppImage
-
 sudo ln -sf /opt/gamedev/tools/obsidian.AppImage /usr/local/bin/obsidian
 '
 
 # -----------------------------
-# DEPLOYMENT TOOLS
+# DEPLOYMENT
 # -----------------------------
 
 run_step "itch.io Butler" "is_installed butler" '
