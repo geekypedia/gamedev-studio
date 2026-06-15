@@ -229,7 +229,7 @@ curl -fsSL https://code-server.dev/install.sh | sudo bash
 
 run_step "Google Chrome" "is_ok google-chrome google-chrome-stable chromium" '
 safe_wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb /tmp/chrome.deb &&
-sudo apt install -y /tmp/chrome.deb
+sudo apt install -f -y /tmp/chrome.deb
 '
 
 # -----------------------------
@@ -325,7 +325,12 @@ safe_wget "$PISKEL_URL" /tmp/piskel.zip || exit 1
 mkdir -p /opt/gamedev/art/piskel
 unzip -o /tmp/piskel.zip -d /opt/gamedev/art/piskel
 
-PISKEL_BIN=$(safe_find_exec /opt/gamedev/art/piskel)
+PISKEL_BIN=$(find /opt/gamedev/art/piskel -type f -executable -name "*piskel*" | head -n 1)
+
+if [ -z "$PISKEL_BIN" ]; then
+    PISKEL_BIN=$(find /opt/gamedev/art/piskel -type f -executable | head -n 1)
+fi
+
 chmod +x "$PISKEL_BIN"
 sudo ln -sf "$PISKEL_BIN" /usr/local/bin/piskel
 '
@@ -372,7 +377,7 @@ sudo ln -sf "$LDTK_BIN" /usr/local/bin/ldtk
 '
 
 run_step "LDtk Sync Pipeline" "is_installed ldtk-sync" '
-cat > /usr/local/bin/ldtk-sync <<EOF
+sudo tee /usr/local/bin/ldtk-sync >/dev/null <<'EOF'
 #!/usr/bin/env bash
 WATCH_DIR=\${1:-\$PWD}
 
