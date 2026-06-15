@@ -1224,7 +1224,7 @@ run_step "Kdenlive" "is_installed kdenlive" '
 sudo apt install -y kdenlive || echo "⚠️ Kdenlive install failed"
 '
 
-run_step "OBS Studio" "is_installed obs-studio" '
+run_step "OBS Studio" "is_installed obs" '
 sudo apt install -y obs-studio || echo "⚠️ OBS Studio install failed"
 '
 
@@ -1268,7 +1268,7 @@ else
 fi
 '
 
-run_step "LDtk" "false" '
+run_step "LDtk" "is_installed ldtk" '
 API="https://api.github.com/repos/deepnight/ldtk/releases/latest"
 
 LDTK_URL=$(
