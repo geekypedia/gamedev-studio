@@ -731,7 +731,7 @@ npm install -g electron --progress=true --verbose || echo "⚠️ Electron insta
 # CODE EDITORS
 # -----------------------------
 
-run_step "VS Code Repo Setup" "false" '
+run_step "VS Code Repo Setup" "is_installed code" '
 echo "🧹 Cleaning old VS Code / Microsoft repository definitions..."
 
 # Remove all known VS Code / Microsoft repo definitions
