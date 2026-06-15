@@ -412,27 +412,73 @@ unzip -o /tmp/ctjs.zip -d /opt/gamedev/engines/ctjs || {
   return 0
 }
 
-chmod +x /opt/gamedev/engines/ctjs/ctjs 2>/dev/null || true
+chmod +x /opt/gamedev/engines/ctjs/linux64/ctjs 2>/dev/null || true
 
-if [ -f /opt/gamedev/engines/ctjs/ctjs ]; then
-  sudo ln -sf /opt/gamedev/engines/ctjs/ctjs /usr/local/bin/ctjs
+if [ -f /opt/gamedev/engines/ctjs/linux64/ctjs ]; then
+  sudo ln -sf /opt/gamedev/engines/ctjs/linux64/ctjs /usr/local/bin/ctjs
 else
   echo "⚠️ ct.js executable not found"
 fi
 '
 
 run_step "RenPy" "is_installed renpy" '
-safe_wget https://www.renpy.org/dl/latest/renpy.zip /tmp/renpy.zip || return 0
+API="https://api.github.com/repos/renpy/renpy/releases/latest"
+
+DATA=$(curl -s "$API")
+
+# Prefer SDK tar.bz2
+RENPY_URL=$(echo "$DATA" | jq -r '
+  .assets[]
+  | select(.name | endswith("sdk.tar.bz2"))
+  | .browser_download_url
+' | head -n1)
+
+EXT="tar.bz2"
+
+# Fallback to zip if tar.bz2 not found
+if [ -z "$RENPY_URL" ]; then
+    RENPY_URL=$(echo "$DATA" | jq -r '
+      .assets[]
+      | select(.name | endswith("sdk.zip"))
+      | .browser_download_url
+    ' | head -n1)
+
+    EXT="zip"
+fi
+
+if [ -z "$RENPY_URL" ]; then
+    echo "⚠️ Could not find RenPy SDK (tar.bz2 or zip)"
+    return 0
+fi
+
+echo "⬇️ RenPy URL: $RENPY_URL"
+
+OUT="/tmp/renpy.$EXT"
+
+safe_wget "$RENPY_URL" "$OUT" || {
+    echo "⚠️ RenPy download failed"
+    return 0
+}
 
 rm -rf /opt/gamedev/engines/renpy
 mkdir -p /opt/gamedev/engines/renpy
 
-unzip -o /tmp/renpy.zip -d /opt/gamedev/engines/renpy
+if [ "$EXT" = "tar.bz2" ]; then
+    tar -xjf "$OUT" -C /opt/gamedev/engines/renpy || {
+        echo "⚠️ Extraction failed (tar.bz2)"
+        return 0
+    }
+else
+    unzip -o "$OUT" -d /opt/gamedev/engines/renpy || {
+        echo "⚠️ Extraction failed (zip)"
+        return 0
+    }
+fi
 
 RENPY_LAUNCHER=$(find /opt/gamedev/engines/renpy -type f -name "renpy.sh" | head -n 1)
 
 if [ -z "$RENPY_LAUNCHER" ]; then
-    echo "RenPy launcher not found"
+    echo "⚠️ renpy.sh not found"
     return 0
 fi
 
