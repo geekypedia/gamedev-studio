@@ -31,6 +31,27 @@ failure() {
     echo "✗ $1"
 }
 
+# -----------------------------
+# SAFE HELPERS (IMPORTANT FIX)
+# -----------------------------
+
+safe_wget() {
+    local url="$1"
+    local out="$2"
+
+    if [ -z "$url" ] || [ "$url" = "null" ]; then
+        return 1
+    fi
+
+    wget -q -O "$out" "$url"
+    [ -s "$out" ]
+}
+
+safe_find_exec() {
+    local path="$1"
+    find "$path" -type f -executable 2>/dev/null | head -n 1
+}
+
 run_step() {
     local NAME="$1"
     shift
@@ -98,7 +119,7 @@ npm install -g vite create-react-app react phaser excalibur
 '
 
 # ----------------------------------------
-# CODE EDITORS (VS CODE FIXED)
+# CODE EDITORS (FIXED VS CODE)
 # ----------------------------------------
 echo "[5] Installing code editors..."
 
@@ -115,7 +136,7 @@ echo "deb [arch=amd64 signed-by=/usr/share/keyrings/ms.gpg] https://packages.mic
 sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
 '
 
-run_step "VS Code" '
+run_step "VS Code Install" '
 sudo apt update &&
 sudo apt install -y code
 '
@@ -128,12 +149,12 @@ curl -fsSL https://code-server.dev/install.sh | sudo bash
 # WEB BROWSER
 # ----------------------------------------
 run_step "Google Chrome" '
-wget -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb &&
+safe_wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb /tmp/chrome.deb &&
 sudo apt install -y /tmp/chrome.deb
 '
 
 # ----------------------------------------
-# GAME ENGINES
+# GAME ENGINES (PART 1)
 # ----------------------------------------
 
 run_step "Godot" '
@@ -141,14 +162,15 @@ GODOT_URL=$(curl -s https://api.github.com/repos/godotengine/godot/releases/late
 jq -r ".assets[] | select(.name|test(\"linux.*x86_64.*zip\")) | .browser_download_url" |
 head -n 1)
 
-wget -O /tmp/godot.zip "$GODOT_URL" &&
-unzip -o /tmp/godot.zip -d /tmp/godot || true
+safe_wget "$GODOT_URL" /tmp/godot.zip &&
+unzip -o /tmp/godot.zip -d /tmp/godot
 
-GODOT_BIN=$(find /tmp/godot -type f -executable | head -n 1)
+GODOT_BIN=$(safe_find_exec /tmp/godot)
+[ -n "$GODOT_BIN" ] || exit 1
 
-sudo cp "$GODOT_BIN" '"$BASE"'/engines/godot &&
-sudo chmod +x '"$BASE"'/engines/godot &&
-sudo ln -sf '"$BASE"'/engines/godot '"$BIN"'/godot
+sudo cp "$GODOT_BIN" "'"$BASE"'/engines/godot" &&
+sudo chmod +x "'"$BASE"'/engines/godot" &&
+sudo ln -sf "'"$BASE"'/engines/godot" "'"$BIN"'/godot
 '
 
 run_step "GDevelop" '
@@ -156,9 +178,9 @@ GDEV_URL=$(curl -s https://api.github.com/repos/4ian/GDevelop/releases/latest |
 jq -r ".assets[] | select(.name|test(\"linux.*AppImage\")) | .browser_download_url" |
 head -n 1)
 
-wget -O '"$BASE"'/engines/gdevelop.AppImage "$GDEV_URL" &&
-chmod +x '"$BASE"'/engines/gdevelop.AppImage &&
-sudo ln -sf '"$BASE"'/engines/gdevelop.AppImage '"$BIN"'/gdevelop
+safe_wget "$GDEV_URL" "'"$BASE"'/engines/gdevelop.AppImage" &&
+chmod +x "'"$BASE"'/engines/gdevelop.AppImage" &&
+sudo ln -sf "'"$BASE"'/engines/gdevelop.AppImage" "'"$BIN"'/gdevelop
 '
 
 run_step "ct.js" '
@@ -166,15 +188,15 @@ CT_URL=$(curl -s https://api.github.com/repos/ct-js/ct-js/releases/latest |
 jq -r ".assets[] | select(.name|test(\"AppImage\")) | .browser_download_url" |
 head -n 1)
 
-wget -O '"$BASE"'/engines/ctjs.AppImage "$CT_URL" &&
-chmod +x '"$BASE"'/engines/ctjs.AppImage &&
-sudo ln -sf '"$BASE"'/engines/ctjs.AppImage '"$BIN"'/ctjs
+safe_wget "$CT_URL" "'"$BASE"'/engines/ctjs.AppImage" &&
+chmod +x "'"$BASE"'/engines/ctjs.AppImage" &&
+sudo ln -sf "'"$BASE"'/engines/ctjs.AppImage" "'"$BIN"'/ctjs
 '
 
 run_step "RenPy" '
-wget -O /tmp/renpy.zip https://www.renpy.org/dl/latest/renpy.zip &&
-mkdir -p '"$BASE"'/engines/renpy &&
-unzip -o /tmp/renpy.zip -d '"$BASE"'/engines/renpy
+safe_wget https://www.renpy.org/dl/latest/renpy.zip /tmp/renpy.zip &&
+mkdir -p "'"$BASE"'/engines/renpy" &&
+unzip -o /tmp/renpy.zip -d "'"$BASE"'/engines/renpy
 '
 
 run_step "LOVE2D" sudo apt install -y love
@@ -184,12 +206,14 @@ MICRO_URL=$(curl -s https://api.github.com/repos/pmgl/microstudio/releases/lates
 jq -r ".assets[] | select(.name|test(\"linux\")) | .browser_download_url" |
 head -n 1)
 
-wget -O /tmp/microstudio.zip "$MICRO_URL" &&
-mkdir -p '"$BASE"'/web/microstudio &&
-unzip -o /tmp/microstudio.zip -d '"$BASE"'/web/microstudio
+safe_wget "$MICRO_URL" /tmp/microstudio.zip &&
+mkdir -p "'"$BASE"'/web/microstudio" &&
+unzip -o /tmp/microstudio.zip -d "'"$BASE"'/web/microstudio
 
-MICRO_BIN=$(find '"$BASE"'/web/microstudio -type f -executable | head -n 1)
-sudo ln -sf "$MICRO_BIN" '"$BIN"'/microstudio
+MICRO_BIN=$(safe_find_exec "'"$BASE"'/web/microstudio")
+[ -n "$MICRO_BIN" ] || exit 1
+
+sudo ln -sf "$MICRO_BIN" "'"$BIN"'/microstudio
 '
 
 # ----------------------------------------
@@ -200,18 +224,15 @@ run_step "GIMP/Krita/Inkscape" \
 sudo apt install -y gimp krita inkscape
 
 run_step "Pixelorama" '
-wget -O '"$BASE"'/art/pixelorama.AppImage \
-https://github.com/Orama-Interactive/Pixelorama/releases/latest/download/Pixelorama.x86_64.AppImage &&
-chmod +x '"$BASE"'/art/pixelorama.AppImage &&
-sudo ln -sf '"$BASE"'/art/pixelorama.AppImage '"$BIN"'/pixelorama
+safe_wget https://github.com/Orama-Interactive/Pixelorama/releases/latest/download/Pixelorama.x86_64.AppImage "'"$BASE"'/art/pixelorama.AppImage" &&
+chmod +x "'"$BASE"'/art/pixelorama.AppImage" &&
+sudo ln -sf "'"$BASE"'/art/pixelorama.AppImage" "'"$BIN"'/pixelorama
 '
 
 run_step "LibreSprite" '
-wget -O '"$BASE"'/art/libresprite.AppImage \
-https://github.com/LibreSprite/LibreSprite/releases/latest/download/LibreSprite-x86_64.AppImage || true
-
-chmod +x '"$BASE"'/art/libresprite.AppImage || true
-sudo ln -sf '"$BASE"'/art/libresprite.AppImage '"$BIN"'/libresprite || true
+safe_wget https://github.com/LibreSprite/LibreSprite/releases/latest/download/LibreSprite-x86_64.AppImage "'"$BASE"'/art/libresprite.AppImage" || true
+chmod +x "'"$BASE"'/art/libresprite.AppImage" || true
+sudo ln -sf "'"$BASE"'/art/libresprite.AppImage" "'"$BIN"'/libresprite || true
 '
 
 run_step "Piskel" '
@@ -219,13 +240,15 @@ PISKEL_URL=$(curl -s https://api.github.com/repos/piskelapp/piskel/releases/late
 jq -r ".assets[] | select(.name|test(\"linux.*64\")) | .browser_download_url" |
 head -n 1)
 
-wget -O /tmp/piskel.zip "$PISKEL_URL" &&
-mkdir -p '"$BASE"'/art/piskel &&
-unzip -o /tmp/piskel.zip -d '"$BASE"'/art/piskel
+safe_wget "$PISKEL_URL" /tmp/piskel.zip &&
+mkdir -p "'"$BASE"'/art/piskel" &&
+unzip -o /tmp/piskel.zip -d "'"$BASE"'/art/piskel
 
-PISKEL_BIN=$(find '"$BASE"'/art/piskel -type f -executable | head -n 1)
+PISKEL_BIN=$(safe_find_exec "'"$BASE"'/art/piskel")
+[ -n "$PISKEL_BIN" ] || exit 1
+
 chmod +x "$PISKEL_BIN"
-sudo ln -sf "$PISKEL_BIN" '"$BIN"'/piskel
+sudo ln -sf "$PISKEL_BIN" "'"$BIN"'/piskel
 '
 
 # ----------------------------------------
@@ -246,13 +269,15 @@ LDTK_URL=$(curl -s https://api.github.com/repos/deepnight/ldtk/releases/latest |
 jq -r ".assets[] | select(.name|test(\"Linux.*zip\")) | .browser_download_url" |
 head -n 1)
 
-wget -O /tmp/ldtk.zip "$LDTK_URL" &&
-mkdir -p '"$BASE"'/tools/ldtk &&
-unzip -o /tmp/ldtk.zip -d '"$BASE"'/tools/ldtk
+safe_wget "$LDTK_URL" /tmp/ldtk.zip &&
+mkdir -p "'"$BASE"'/tools/ldtk" &&
+unzip -o /tmp/ldtk.zip -d "'"$BASE"'/tools/ldtk
 
-LDTK_BIN=$(find '"$BASE"'/tools/ldtk -type f -executable | head -n 1)
+LDTK_BIN=$(safe_find_exec "'"$BASE"'/tools/ldtk")
+[ -n "$LDTK_BIN" ] || exit 1
+
 chmod +x "$LDTK_BIN"
-sudo ln -sf "$LDTK_BIN" '"$BIN"'/ldtk
+sudo ln -sf "$LDTK_BIN" "'"$BIN"'/ldtk
 '
 
 # ----------------------------------------
@@ -260,7 +285,7 @@ sudo ln -sf "$LDTK_BIN" '"$BIN"'/ldtk
 # ----------------------------------------
 
 run_step "LDtk Sync Tool" '
-cat > '"$BIN"'/ldtk-sync <<'"'"'EOF'"'"'
+cat > "'"$BIN"'/ldtk-sync" <<'"'"'EOF'"'"'
 #!/usr/bin/env bash
 WATCH=${1:-$PWD}
 echo "Watching LDtk files in: $WATCH"
@@ -270,7 +295,7 @@ while read path action file; do
 done
 EOF
 
-chmod +x '"$BIN"'/ldtk-sync
+chmod +x "'"$BIN"'/ldtk-sync
 '
 
 # ----------------------------------------
@@ -282,9 +307,9 @@ OBSIDIAN_URL=$(curl -s https://api.github.com/repos/obsidianmd/obsidian-releases
 jq -r ".assets[] | select(.name|test(\"AppImage\")) | .browser_download_url" |
 head -n 1)
 
-wget -O '"$BASE"'/tools/obsidian.AppImage "$OBSIDIAN_URL" &&
-chmod +x '"$BASE"'/tools/obsidian.AppImage &&
-sudo ln -sf '"$BASE"'/tools/obsidian.AppImage '"$BIN"'/obsidian
+safe_wget "$OBSIDIAN_URL" "'"$BASE"'/tools/obsidian.AppImage" &&
+chmod +x "'"$BASE"'/tools/obsidian.AppImage" &&
+sudo ln -sf "'"$BASE"'/tools/obsidian.AppImage" "'"$BIN"'/obsidian
 '
 
 # ----------------------------------------
@@ -292,8 +317,9 @@ sudo ln -sf '"$BASE"'/tools/obsidian.AppImage '"$BIN"'/obsidian
 # ----------------------------------------
 
 run_step "itch.io Butler" '
-curl -L -o /tmp/butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default &&
+safe_wget https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default /tmp/butler.zip &&
 unzip /tmp/butler.zip -d /tmp &&
+[ -f /tmp/butler ] &&
 sudo mv /tmp/butler /usr/local/bin/ &&
 sudo chmod +x /usr/local/bin/butler
 '
@@ -303,7 +329,7 @@ sudo chmod +x /usr/local/bin/butler
 # ----------------------------------------
 
 run_step "Gamedev Command" '
-cat > '"$BIN"'/gamedev <<'"'"'EOF'"'"'
+cat > "'"$BIN"'/gamedev" <<'"'"'EOF'"'"'
 #!/usr/bin/env bash
 case "$1" in
   list)
@@ -334,7 +360,7 @@ case "$1" in
 esac
 EOF
 
-chmod +x '"$BIN"'/gamedev
+chmod +x "'"$BIN"'/gamedev
 '
 
 # ----------------------------------------
