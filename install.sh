@@ -55,6 +55,13 @@ for arg in "$@"; do
 done
 
 # -----------------------------
+# GLOBAL VARIABLES
+# -----------------------------
+
+APPLICATION_ID="5ddd20fa-76f4-40a2-8fc1-9599cac0924e"
+TMP_DIR="/tmp/$APPLICATION_ID"
+
+# -----------------------------
 # SAFE HELPERS
 # -----------------------------
 
@@ -70,7 +77,7 @@ safe_wget() {
     echo "⬇️ Downloading: $url"
 
     # Create isolated temp directory per run
-    local TMP_DIR="/tmp/5ddd20fa-76f4-40a2-8fc1-9599cac0924e"
+    #local TMP_DIR="/tmp/5ddd20fa-76f4-40a2-8fc1-9599cac0924e"
     mkdir -p "$TMP_DIR"
 
     download() {
@@ -246,18 +253,18 @@ install_engine() {
         ;;
 
         zip)
-            safe_wget "$url" "/tmp/$name.zip" || return 0
-            unzip -o "/tmp/$name.zip" -d "$dest" || return 0
+            safe_wget "$url" "$TMP_DIR/$name.zip" || return 0
+            unzip -o "$TMP_DIR/$name.zip" -d "$dest" || return 0
         ;;
 
         tar.gz)
-            safe_wget "$url" "/tmp/$name.tar.gz" || return 0
-            tar -xzf "/tmp/$name.tar.gz" -C "$dest" || return 0
+            safe_wget "$url" "$TMP_DIR/$name.tar.gz" || return 0
+            tar -xzf "$TMP_DIR/$name.tar.gz" -C "$dest" || return 0
         ;;
 
         tar.bz2)
-            safe_wget "$url" "/tmp/$name.tar.bz2" || return 0
-            tar -xjf "/tmp/$name.tar.bz2" -C "$dest" || return 0
+            safe_wget "$url" "$TMP_DIR/$name.tar.bz2" || return 0
+            tar -xjf "$TMP_DIR/$name.tar.bz2" -C "$dest" || return 0
         ;;
     esac
 }
@@ -393,12 +400,16 @@ curl -fsSL https://code-server.dev/install.sh | sudo bash
 # -----------------------------
 
 run_step "Google Chrome" "is_ok google-chrome google-chrome-stable chromium" '
-safe_wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb /tmp/chrome.deb || {
+mkdir -p "$TMP_DIR"
+
+CHROME_DEB="$TMP_DIR/chrome.deb"
+
+safe_wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb "$CHROME_DEB" || {
   echo "⚠️ Download failed"
   return 0
 }
 
-sudo dpkg -i /tmp/chrome.deb || {
+sudo dpkg -i "$CHROME_DEB" || {
   echo "⚠️ dpkg install had dependency issues, fixing..."
 }
 
@@ -413,19 +424,39 @@ sudo apt-get install -f -y || {
 # -----------------------------
 
 run_step "Godot" "is_installed godot" '
-GODOT_URL=$(curl -s https://api.github.com/repos/godotengine/godot/releases/latest |
-jq -r ".assets[] | select(.name|test(\"linux.*x86_64.*zip\")) | .browser_download_url" | head -n 1)
+mkdir -p "$TMP_DIR"
 
-safe_wget "$GODOT_URL" /tmp/godot.zip || exit 1
+GODOT_URL=$(
+  curl -s https://api.github.com/repos/godotengine/godot/releases/latest |
+  jq -r ".assets[] | select(.name|test(\"linux.*x86_64.*zip\")) | .browser_download_url" |
+  head -n 1
+)
 
-rm -rf /tmp/godot
-unzip -o /tmp/godot.zip -d /tmp/godot
+if [ -z "$GODOT_URL" ]; then
+    echo "⚠️ Godot download URL not found"
+    return 0
+fi
 
-GODOT_BIN=$(find /tmp/godot -type f -executable -name "*x86_64*" | head -n 1)
+GODOT_ZIP="$TMP_DIR/godot.zip"
+
+safe_wget "$GODOT_URL" "$GODOT_ZIP" || {
+    echo "⚠️ Godot download failed"
+    return 0
+}
+
+rm -rf "$TMP_DIR/godot"
+mkdir -p "$TMP_DIR/godot"
+
+unzip -o "$GODOT_ZIP" -d "$TMP_DIR/godot" || {
+    echo "⚠️ Godot unzip failed"
+    return 0
+}
+
+GODOT_BIN=$(find "$TMP_DIR/godot" -type f -executable -name "*x86_64*" | head -n 1)
 
 if [ -z "$GODOT_BIN" ]; then
-    echo "Godot binary not found"
-    exit 1
+    echo "⚠️ Godot binary not found"
+    return 0
 fi
 
 sudo install -Dm755 "$GODOT_BIN" /opt/gamedev/engines/godot
@@ -434,38 +465,47 @@ register_bin godot /opt/gamedev/engines/godot
 '
 
 run_step "Godot Export Templates" "false" '
+mkdir -p "$TMP_DIR"
+
 API="https://api.github.com/repos/godotengine/godot/releases/latest"
 
-TEMPLATE_URL=$(curl -s "$API" | jq -r "
-  .assets[]
-  | select(.name != null)
-  | select(.name | index(\"export_templates\"))
-  | .browser_download_url
-" | head -n 1)
+TEMPLATE_URL=$(
+  curl -s "$API" |
+  jq -r "
+    .assets[]
+    | select(.name != null)
+    | select(.name | test(\"export_templates\"))
+    | .browser_download_url
+  " | head -n 1
+)
 
 if [ -z "$TEMPLATE_URL" ]; then
-  echo "⚠️ Could not find export templates URL"
-  curl -s "$API" | jq -r ".assets[].name"
-  return 0
+    echo "⚠️ Could not find export templates URL"
+    curl -s "$API" | jq -r ".assets[].name"
+    return 0
 fi
 
-echo "Downloading: $TEMPLATE_URL"
+echo "⬇️ Downloading templates: $TEMPLATE_URL"
 
-safe_wget "$TEMPLATE_URL" /tmp/godot_templates.tpz || {
-  echo "⚠️ Download failed, skipping templates"
-  return 0
+TEMPLATE_FILE="$TMP_DIR/godot_templates.tpz"
+
+safe_wget "$TEMPLATE_URL" "$TEMPLATE_FILE" || {
+    echo "⚠️ Template download failed"
+    return 0
 }
 
 VERSION=$(curl -s "$API" | jq -r ".tag_name")
 
-mkdir -p "$HOME/.local/share/godot/export_templates/$VERSION" || {
-  echo "⚠️ Failed to create directory"
-  return 0
+TEMPLATE_DIR="$HOME/.local/share/godot/export_templates/$VERSION"
+
+mkdir -p "$TEMPLATE_DIR" || {
+    echo "⚠️ Failed to create template directory"
+    return 0
 }
 
-unzip -o /tmp/godot_templates.tpz -d "$HOME/.local/share/godot/export_templates/$VERSION" || {
-  echo "⚠️ Unzip failed"
-  return 0
+unzip -o "$TEMPLATE_FILE" -d "$TEMPLATE_DIR" || {
+    echo "⚠️ Template unzip failed"
+    return 0
 }
 '
 
@@ -495,6 +535,9 @@ sudo ln -sf /opt/gamedev/engines/gdevelop.AppImage /usr/local/bin/gdevelop
 '
 
 run_step "ct.js" "is_installed ctjs" '
+mkdir -p "$TMP_DIR"
+mkdir -p /opt/gamedev/engines/ctjs
+
 CT_URL=$(
   curl -s https://api.github.com/repos/ct-js/ct-js/releases/latest |
   jq -r "
@@ -509,28 +552,51 @@ if [ -z "$CT_URL" ]; then
   return 0
 fi
 
-mkdir -p /opt/gamedev/engines/ctjs
+CT_ZIP="$TMP_DIR/ctjs.zip"
+CT_TMP="$TMP_DIR/ctjs"
+CT_INSTALL="/opt/gamedev/engines/ctjs"
 
-safe_wget "$CT_URL" /tmp/ctjs.zip || {
+safe_wget "$CT_URL" "$CT_ZIP" || {
   echo "⚠️ ct.js download failed"
   return 0
 }
 
-unzip -o /tmp/ctjs.zip -d /opt/gamedev/engines/ctjs || {
+rm -rf "$CT_TMP"
+mkdir -p "$CT_TMP"
+
+unzip -o "$CT_ZIP" -d "$CT_TMP" || {
   echo "⚠️ Failed to extract ct.js"
   return 0
 }
 
-chmod +x /opt/gamedev/engines/ctjs/linux64/ctjs 2>/dev/null || true
+# Find binary in temp
+CT_BIN=$(find "$CT_TMP" -type f -name "ctjs" -executable | head -n 1)
 
-if [ -f /opt/gamedev/engines/ctjs/linux64/ctjs ]; then
-  sudo ln -sf /opt/gamedev/engines/ctjs/linux64/ctjs /usr/local/bin/ctjs
-else
+if [ -z "$CT_BIN" ]; then
   echo "⚠️ ct.js executable not found"
+  return 0
 fi
+
+# Move full extracted folder into /opt
+rm -rf "$CT_INSTALL"
+mv "$CT_TMP" "$CT_INSTALL"
+
+# Update binary path after move
+CT_BIN_FINAL=$(find "$CT_INSTALL" -type f -name "ctjs" -executable | head -n 1)
+
+if [ -z "$CT_BIN_FINAL" ]; then
+  echo "⚠️ ct.js binary missing after install move"
+  return 0
+fi
+
+chmod +x "$CT_BIN_FINAL"
+sudo ln -sf "$CT_BIN_FINAL" /usr/local/bin/ctjs
 '
 
 run_step "RenPy" "is_installed renpy" '
+
+mkdir -p "$TMP_DIR"
+
 API="https://api.github.com/repos/renpy/renpy/releases/latest"
 
 DATA=$(curl -s "$API")
@@ -562,7 +628,7 @@ fi
 
 echo "⬇️ RenPy URL: $RENPY_URL"
 
-OUT="/tmp/renpy.$EXT"
+OUT="$TMP_DIR/renpy.$EXT"
 
 safe_wget "$RENPY_URL" "$OUT" || {
     echo "⚠️ RenPy download failed"
@@ -607,16 +673,18 @@ sudo apt install -y gimp krita inkscape
 '
 
 run_step "Piskel" "false" '
+mkdir -p "$TMP_DIR"
+
 FILE_ID="1EFo7Ye_rl7bGNr4iehXIgFg4gn2IcWDX"
 
 mkdir -p /opt/gamedev/art/piskel
 
-gdrive_download "$FILE_ID" /tmp/piskel.zip || {
+gdrive_download "$FILE_ID" "$TMP_DIR/piskel.zip" || {
     echo "⚠️ Piskel download failed"
     return 0
 }
 
-unzip -o /tmp/piskel.zip -d /opt/gamedev/art/piskel || {
+unzip -o "$TMP_DIR/piskel.zip" -d /opt/gamedev/art/piskel || {
     echo "⚠️ Failed to extract Piskel"
     return 0
 }
@@ -653,20 +721,23 @@ fi
 
 echo "⬇️ Pixelorama URL: $PIXEL_URL"
 
-safe_wget "$PIXEL_URL" /tmp/pixelorama.tar.gz || {
+PIXEL_ARCHIVE="$TMP_DIR/pixelorama.tar.gz"
+PIXEL_DIR="/opt/gamedev/art/pixelorama"
+
+safe_wget "$PIXEL_URL" "$PIXEL_ARCHIVE" || {
     echo "⚠️ Pixelorama download failed"
     return 0
 }
 
-rm -rf /opt/gamedev/art/pixelorama
-mkdir -p /opt/gamedev/art/pixelorama
+rm -rf "$PIXEL_DIR"
+mkdir -p "$PIXEL_DIR"
 
-tar -xzf /tmp/pixelorama.tar.gz -C /opt/gamedev/art/pixelorama || {
+tar -xzf "$PIXEL_ARCHIVE" -C "$PIXEL_DIR" || {
     echo "⚠️ Extraction failed"
     return 0
 }
 
-PIXEL_BIN=$(find /opt/gamedev/art/pixelorama -type f -name "Pixelorama*" -executable | head -n1)
+PIXEL_BIN=$(find "$PIXEL_DIR" -type f -name "Pixelorama*" -executable | head -n1)
 
 if [ -z "$PIXEL_BIN" ]; then
     echo "⚠️ Pixelorama binary not found"
@@ -696,21 +767,24 @@ fi
 
 echo "⬇️ LibreSprite URL: $ZIP_URL"
 
-safe_wget "$ZIP_URL" /tmp/libresprite.zip || {
+LIBRE_ZIP="$TMP_DIR/libresprite.zip"
+LIBRE_DIR="/opt/gamedev/art/libresprite"
+
+safe_wget "$ZIP_URL" "$LIBRE_ZIP" || {
     echo "⚠️ LibreSprite download failed"
     return 0
 }
 
-rm -rf /opt/gamedev/art/libresprite
-mkdir -p /opt/gamedev/art/libresprite
+rm -rf "$LIBRE_DIR"
+mkdir -p "$LIBRE_DIR"
 
-unzip -o /tmp/libresprite.zip -d /opt/gamedev/art/libresprite || {
+unzip -o "$LIBRE_ZIP" -d "$LIBRE_DIR" || {
     echo "⚠️ Extraction failed"
     return 0
 }
 
 # Find actual AppImage inside extracted folder
-LS_BIN=$(find /opt/gamedev/art/libresprite -type f -name "*.AppImage" | head -n 1)
+LS_BIN=$(find "$LIBRE_DIR" -type f -name "*.AppImage" | head -n 1)
 
 if [ -z "$LS_BIN" ]; then
     echo "⚠️ LibreSprite AppImage not found after extraction"
@@ -733,16 +807,14 @@ sudo apt install -y vlc kdenlive obs-studio lmms audacity ardour hydrogen
 # LEVEL EDITORS
 # -----------------------------
 
-run_step "Tiled Map Editor" "is_installed tiled" '
-sudo apt install -y tiled
-'
-
 run_step "LDtk" "false" '
+API="https://api.github.com/repos/deepnight/ldtk/releases/latest"
+
 LDTK_URL=$(
-  curl -s https://api.github.com/repos/deepnight/ldtk/releases/latest |
+  curl -s "$API" |
   jq -r "
     .assets[]
-    | select(.name==\"ubuntu-distribution.zip\")
+    | select(.name == \"ubuntu-distribution.zip\")
     | .browser_download_url
   " | head -n1
 )
@@ -752,28 +824,42 @@ if [ -z "$LDTK_URL" ]; then
   return 0
 fi
 
-safe_wget "$LDTK_URL" /tmp/ldtk.zip || {
+echo "⬇️ LDtk URL: $LDTK_URL"
+
+LDTK_ZIP="$TMP_DIR/ldtk.zip"
+LDTK_DIR="/opt/gamedev/tools/ldtk"
+
+safe_wget "$LDTK_URL" "$LDTK_ZIP" || {
   echo "⚠️ LDtk download failed"
   return 0
 }
 
-mkdir -p /opt/gamedev/tools/ldtk
-unzip -o /tmp/ldtk.zip -d /opt/gamedev/tools/ldtk || return 0
+rm -rf "$LDTK_DIR"
+mkdir -p "$LDTK_DIR"
 
-LDTK_BIN=$(safe_find_exec /opt/gamedev/tools/ldtk)
+unzip -o "$LDTK_ZIP" -d "$LDTK_DIR" || {
+  echo "⚠️ LDtk unzip failed"
+  return 0
+}
 
-if [ -n "$LDTK_BIN" ]; then
-  chmod +x "$LDTK_BIN"
-  sudo ln -sf "$LDTK_BIN" /usr/local/bin/ldtk
-else
+# safer: prefer main executable patterns
+LDTK_BIN=$(find "$LDTK_DIR" -type f \( -name "ldtk*" -o -name "LDtk*" \) -executable | head -n 1)
+
+if [ -z "$LDTK_BIN" ]; then
   echo "⚠️ Could not locate LDtk executable"
+  return 0
 fi
+
+chmod +x "$LDTK_BIN"
+sudo ln -sf "$LDTK_BIN" /usr/local/bin/ldtk
 '
 
+
 run_step "LDtk Sync Pipeline" "is_installed ldtk-sync" '
-sudo tee /usr/local/bin/ldtk-sync >/dev/null <<'EOF'
+sudo tee /usr/local/bin/ldtk-sync >/dev/null <<EOF
 #!/usr/bin/env bash
-WATCH_DIR=\${1:-\$PWD}
+
+WATCH_DIR="\${1:-\$PWD}"
 
 echo "👀 Watching LDtk files in: \$WATCH_DIR"
 
@@ -786,7 +872,7 @@ while read path action file; do
 done
 EOF
 
-chmod +x /usr/local/bin/ldtk-sync
+sudo chmod +x /usr/local/bin/ldtk-sync
 '
 
 # -----------------------------
@@ -825,26 +911,52 @@ sudo ln -sf /opt/gamedev/tools/obsidian.AppImage /usr/local/bin/obsidian
 # -----------------------------
 
 run_step "itch.io Butler" "is_installed butler" '
-safe_wget https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default /tmp/butler.zip || {
-    echo "⚠️ Failed to download Butler"
-    return 0
-}
+mkdir -p "$TMP_DIR"
 
-rm -rf /tmp/butler_unpack
-mkdir -p /tmp/butler_unpack
+BUTLER_URLS=(
+  "https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default"
+  "https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default"
+)
 
-unzip -o /tmp/butler.zip -d /tmp/butler_unpack || {
-    echo "⚠️ Failed to extract Butler"
-    return 0
-}
+BUTLER_ZIP="$TMP_DIR/butler.zip"
+BUTLER_TMP="$TMP_DIR/butler_unpack"
+INSTALL_DIR="/opt/gamedev/tools/butler"
 
-BUTLER_BIN=$(find /tmp/butler_unpack -type f -name butler | head -n1)
+BUTLER_SOURCE=""
 
-if [ -n "$BUTLER_BIN" ]; then
-    register_bin butler "$BUTLER_BIN"
-else
-    echo "⚠️ Could not locate Butler executable"
+for url in "${BUTLER_URLS[@]}"; do
+  echo "⬇️ Trying: $url"
+  if safe_wget "$url" "$BUTLER_ZIP"; then
+    BUTLER_SOURCE="$url"
+    break
+  fi
+done
+
+if [ -z "$BUTLER_SOURCE" ]; then
+  echo "⚠️ Failed to download Butler from all mirrors"
+  return 0
 fi
+
+rm -rf "$BUTLER_TMP"
+mkdir -p "$BUTLER_TMP"
+
+unzip -o "$BUTLER_ZIP" -d "$BUTLER_TMP" || {
+  echo "⚠️ Failed to extract Butler"
+  return 0
+}
+
+BUTLER_BIN=$(find "$BUTLER_TMP" -type f -name "butler" -executable | head -n1)
+
+if [ -z "$BUTLER_BIN" ]; then
+  echo "⚠️ Could not locate Butler executable"
+  return 0
+fi
+
+mkdir -p "$INSTALL_DIR"
+cp "$BUTLER_BIN" "$INSTALL_DIR/butler"
+chmod +x "$INSTALL_DIR/butler"
+
+register_bin butler "$INSTALL_DIR/butler"
 '
 
 # -----------------------------
