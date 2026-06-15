@@ -57,15 +57,15 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 ## 🧱 What Gets Installed
 
 ### 🎮 Game Engines
-- Godot Engine
-- GDevelop
-- ct.js
-- Ren’Py
-- LÖVE2D
+- Godot Engine (Python like GDScript)
+- GDevelop (No-code, JavaScript supported)
+- Ct.js (Block-based, JavaScript, CoffeeScript)
+- Ren’Py (Python)
+- LÖVE2D (Lua)
 
 ---
 
-### 🌐 Web Game Stack
+### 🌐 Web Game + App Stack 
 - Node.js (via NVM LTS)
 - Vite
 - React
@@ -74,6 +74,7 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 - ExcaliburJS
 - NW
 - Electron
+- SQLite Browser
 
 ---
 
@@ -108,6 +109,18 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 
 ---
 
+### 🧩 Level Design Tools
+- Tiled Map Editor
+- LDtk
+
+---
+
+### 🧩 Pipeline Tools
+- LDtk Sync Tool
+- Godot Export Templates for iOS, Android and Desktop
+
+---
+
 ### 🧠 Productivity Tools
 - Obsidian
 
@@ -115,12 +128,6 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 
 ### 📦 Publishing Tools
 - itch.io Butler
-
----
-
-### 🧩 Pipeline Tools
-- LDtk
-- LDtk Sync Tool
 
 ---
 
