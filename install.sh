@@ -388,36 +388,36 @@ sudo ln -sf /opt/gamedev/engines/gdevelop.AppImage /usr/local/bin/gdevelop
 run_step "ct.js" "is_installed ctjs" '
 CT_URL=$(
   curl -s https://api.github.com/repos/ct-js/ct-js/releases/latest |
-  jq -r '
+  jq -r "
     .assets[]
-    | select(.name | test("linux64.*zip$"))
+    | select(.name | test(\"linux.*64.*zip$\"; \"i\"))
     | .browser_download_url
-  ' | head -n1
+  " | head -n1
 )
 
 if [ -z "$CT_URL" ]; then
-    echo "⚠️ Could not find ct.js Linux x64 ZIP"
-    return 0
+  echo "⚠️ Could not find ct.js Linux x64 ZIP"
+  return 0
 fi
 
 mkdir -p /opt/gamedev/engines/ctjs
 
 safe_wget "$CT_URL" /tmp/ctjs.zip || {
-    echo "⚠️ ct.js download failed"
-    return 0
+  echo "⚠️ ct.js download failed"
+  return 0
 }
 
 unzip -o /tmp/ctjs.zip -d /opt/gamedev/engines/ctjs || {
-    echo "⚠️ Failed to extract ct.js"
-    return 0
+  echo "⚠️ Failed to extract ct.js"
+  return 0
 }
 
 chmod +x /opt/gamedev/engines/ctjs/ctjs 2>/dev/null || true
 
 if [ -f /opt/gamedev/engines/ctjs/ctjs ]; then
-    sudo ln -sf /opt/gamedev/engines/ctjs/ctjs /usr/local/bin/ctjs
+  sudo ln -sf /opt/gamedev/engines/ctjs/ctjs /usr/local/bin/ctjs
 else
-    echo "⚠️ ct.js executable not found after extraction"
+  echo "⚠️ ct.js executable not found"
 fi
 '
 
