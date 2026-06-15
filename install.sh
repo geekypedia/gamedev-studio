@@ -900,7 +900,9 @@ sudo ln -sf "$LS_BIN" /usr/local/bin/libresprite
 # -----------------------------
 
 run_step "Audio & Video Suite" "is_installed vlc && is_installed kdenlive" '
-sudo apt install -y vlc kdenlive obs-studio lmms audacity ardour hydrogen
+sudo apt install -y vlc kdenlive obs-studio lmms audacity ardour
+sudo apt install -y hydrogen hydrogen-drumkits geonkick
+
 '
 
 # -----------------------------
