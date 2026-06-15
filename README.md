@@ -62,6 +62,7 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 - Ct.js (Block-based, JavaScript, CoffeeScript)
 - Ren’Py (Python)
 - LÖVE2D (Lua)
+- microStudio (Lua, JavaScript, Python)
 
 ---
 
