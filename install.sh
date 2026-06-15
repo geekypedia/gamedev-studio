@@ -186,7 +186,8 @@ copy_ctjs_icon() {
     local ICON
     ICON=$(find "$CT_INSTALL" \
         -type f \( \
-            -iname "icon.png" \
+            -iname "ct_ide.png" \
+            -o -iname "icon.png" \
             -o -iname "ctjs.png" \
             -o -iname "icon.ico" \
             -o -iname "*.png" \
