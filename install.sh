@@ -761,6 +761,14 @@ curl -fsSL https://code-server.dev/install.sh | sudo bash || {
 }
 '
 
+run_step "HTTP Server" "is_installed http-server" '
+npm install -g http-server || echo "⚠️ http-server install failed"
+'
+
+run_step "Serve" "is_installed serve" '
+npm install -g serve || echo "⚠️ serve install failed"
+'
+
 run_step "SQLite (CLI)" "is_installed sqlite3" '
 sudo apt install -y sqlite3 sqlite3-tools || echo "⚠️ SQLite install failed"
 '
