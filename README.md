@@ -28,24 +28,28 @@ Built for speed, reproducibility, and zero manual setup.
 
 ### 🟢 Standard Install (Recommended)
 
+```bash
 curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh && sudo ~/gamedev-studio.sh
 
 ---
 
 ### 🔁 Install + System Upgrade
 
+```bash
 curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh && sudo ~/gamedev-studio.sh --upgrade
 
 ---
 
 ### 💥 Force Reinstall (Overwrite Everything)
 
+```bash
 curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh && sudo ~/gamedev-studio.sh --force
 
 ---
 
 ### ⚡ Force + Upgrade (Full System Refresh)
 
+```bash
 curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh && sudo ~/gamedev-studio.sh --force --upgrade
 
 ---
