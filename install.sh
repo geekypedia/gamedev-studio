@@ -439,40 +439,56 @@ npm install -g electron --progress=true --verbose
 # -----------------------------
 
 run_step "VS Code Repo Setup" "false" '
-echo "🧹 Normalizing VS Code / Microsoft APT repository..."
+echo "🧹 Cleaning old VS Code / Microsoft repository definitions..."
 
-# Ensure key directory exists
-sudo mkdir -p /etc/apt/keyrings
-
-# Remove ALL known conflicting definitions (safe pattern-based cleanup)
+# Remove all known VS Code / Microsoft repo definitions
 sudo rm -f /etc/apt/sources.list.d/vscode.list
-sudo rm -f /etc/apt/sources.list.d/*vscode*.list
-sudo rm -f /etc/apt/sources.list.d/*microsoft*.list
-fix_microsoft_repo
+sudo rm -f /etc/apt/sources.list.d/vscode.sources
 
-# Remove old keyrings (both legacy + modern drift)
+sudo rm -f /etc/apt/sources.list.d/*vscode*.list
+sudo rm -f /etc/apt/sources.list.d/*vscode*.sources
+
+sudo rm -f /etc/apt/sources.list.d/*microsoft*.list
+sudo rm -f /etc/apt/sources.list.d/*microsoft*.sources
+
+# Remove any inline VS Code entries from main sources.list
+sudo sed -i "\|packages.microsoft.com/repos/code|d" /etc/apt/sources.list 2>/dev/null || true
+
+# Remove old keyrings
 sudo rm -f /usr/share/keyrings/ms.gpg
 sudo rm -f /usr/share/keyrings/microsoft.gpg
 sudo rm -f /etc/apt/keyrings/microsoft.gpg
 
-# Remove any inline duplicates inside sources.list
-sudo sed -i "\|packages.microsoft.com/repos/code|d" /etc/apt/sources.list 2>/dev/null || true
+# Create keyring directory
+sudo mkdir -p /etc/apt/keyrings
 
 echo "🔑 Installing Microsoft signing key..."
 
 curl -fsSL https://packages.microsoft.com/keys/microsoft.asc |
-gpg --dearmor |
-sudo tee /etc/apt/keyrings/microsoft.gpg >/dev/null
+sudo gpg --dearmor -o /etc/apt/keyrings/microsoft.gpg
 
-echo "📦 Writing single canonical VS Code repo..."
+echo "📦 Adding VS Code repository..."
 
 echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" |
 sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
 
-echo "🔄 Updating package cache..."
-sudo apt-get update -y || true
+echo "🔍 Active VS Code repo definitions:"
+grep -R "packages.microsoft.com/repos/code" /etc/apt 2>/dev/null || true
 
-echo "✅ VS Code repo normalized"
+echo "🔄 Updating package cache..."
+sudo apt-get update -y || {
+    echo "⚠️ apt update failed"
+    return 0
+}
+
+echo "✅ VS Code repository configured"
+'
+
+run_step "VS Code Install" "is_installed code" '
+sudo apt-get install -y code || {
+    echo "⚠️ VS Code installation failed"
+    return 0
+}
 '
 
 run_step "Code Server" "is_installed code-server" '
