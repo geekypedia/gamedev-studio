@@ -105,6 +105,13 @@ run_step() {
     fi
 }
 
+is_ok() {
+    for cmd in "$@"; do
+        command -v "$cmd" >/dev/null 2>&1 || return 1
+    done
+    return 0
+}
+
 # -----------------------------
 # BINARY REGISTRY (FIX)
 # -----------------------------
@@ -147,7 +154,7 @@ sudo apt upgrade -y
 fi
 
 run_step "System Dependencies Install" \
-"is_installed git && is_installed curl && is_installed wget && is_installed unzip && is_installed jq" '
+"is_ok git curl wget unzip jq" '
 sudo apt install -y \
 git curl wget unzip jq zenity inotify-tools \
 build-essential software-properties-common \
@@ -158,9 +165,11 @@ libfuse2 flatpak python3 python3-pip
 # GPU DRIVERS
 # -----------------------------
 
-run_step "GPU Drivers" "false" '
+if [[ "$RUN_UPGRADE_STEP" -eq 1 ]]; then
+run_step "GPU Drivers" "nvidia-smi >/dev/null 2>&1 || lspci | grep -i nvidia" '
 sudo ubuntu-drivers autoinstall
 '
+fi
 
 # -----------------------------
 # FLATPAK
@@ -218,7 +227,7 @@ curl -fsSL https://code-server.dev/install.sh | sudo bash
 # WEB BROWSER
 # -----------------------------
 
-run_step "Google Chrome" "is_installed google-chrome || is_installed google-chrome-stable" '
+run_step "Google Chrome" "is_ok google-chrome google-chrome-stable chromium" '
 safe_wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb /tmp/chrome.deb &&
 sudo apt install -y /tmp/chrome.deb
 '
@@ -227,7 +236,7 @@ sudo apt install -y /tmp/chrome.deb
 # GAME ENGINES
 # -----------------------------
 
-rrun_step "Godot" "is_installed godot" '
+run_step "Godot" "is_installed godot" '
 GODOT_URL=$(curl -s https://api.github.com/repos/godotengine/godot/releases/latest |
 jq -r ".assets[] | select(.name|test(\"linux.*x86_64.*zip\")) | .browser_download_url" | head -n 1)
 
@@ -254,8 +263,10 @@ jq -r ".assets[] | select(.name|test(\"export_templates.*zip\")) | .browser_down
 
 safe_wget "$TEMPLATE_URL" /tmp/godot_templates.zip || exit 1
 
-mkdir -p ~/.local/share/godot/export_templates
-unzip -o /tmp/godot_templates.zip -d ~/.local/share/godot/export_templates
+VERSION=$(curl -s https://api.github.com/repos/godotengine/godot/releases/latest | jq -r ".tag_name")
+
+mkdir -p ~/.local/share/godot/export_templates/$VERSION
+unzip -o /tmp/godot_templates.zip -d ~/.local/share/godot/export_templates/$VERSION
 '
 
 run_step "GDevelop" "is_installed gdevelop" '
@@ -397,10 +408,15 @@ sudo ln -sf /opt/gamedev/tools/obsidian.AppImage /usr/local/bin/obsidian
 # -----------------------------
 
 run_step "itch.io Butler" "is_installed butler" '
-safe_wget https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default /tmp/butler.zip
-unzip /tmp/butler.zip -d /tmp
-sudo mv /tmp/butler /usr/local/bin/
-sudo chmod +x /usr/local/bin/butler
+safe_wget https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default /tmp/butler.zip || exit 1
+
+rm -rf /tmp/butler_unpack
+mkdir -p /tmp/butler_unpack
+unzip /tmp/butler.zip -d /tmp/butler_unpack
+
+BUTLER_BIN=$(find /tmp/butler_unpack -type f -name "butler" | head -n 1)
+
+register_bin butler "$BUTLER_BIN"
 '
 
 # -----------------------------
