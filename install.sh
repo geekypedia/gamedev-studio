@@ -535,27 +535,27 @@ API="https://api.github.com/repos/renpy/renpy/releases/latest"
 DATA=$(curl -s "$API")
 
 # Prefer SDK tar.bz2
-RENPY_URL=$(echo "$DATA" | jq -r '
+RENPY_URL=$(echo "$DATA" | jq -r "
   .assets[]
-  | select(.name | endswith("sdk.tar.bz2"))
+  | select(.name | endswith(\"sdk.tar.bz2\"))
   | .browser_download_url
-' | head -n1)
+" | head -n1)
 
 EXT="tar.bz2"
 
 # Fallback to zip if tar.bz2 not found
 if [ -z "$RENPY_URL" ]; then
-    RENPY_URL=$(echo "$DATA" | jq -r '
+    RENPY_URL=$(echo "$DATA" | jq -r "
       .assets[]
-      | select(.name | endswith("sdk.zip"))
+      | select(.name | endswith(\"sdk.zip\"))
       | .browser_download_url
-    ' | head -n1)
+    " | head -n1)
 
     EXT="zip"
 fi
 
 if [ -z "$RENPY_URL" ]; then
-    echo "⚠️ Could not find RenPy SDK (tar.bz2 or zip)"
+    echo "⚠️ Could not find RenPy SDK"
     return 0
 fi
 
