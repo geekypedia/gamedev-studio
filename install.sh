@@ -718,12 +718,14 @@ if [ -z "$GDEV_URL" ]; then
     return 0
 fi
 
-safe_wget "$GDEV_URL" /opt/gamedev/engines/gdevelop.AppImage || {
+mkdir -p /opt/gamedev/engines/gdevelop
+
+safe_wget "$GDEV_URL" /opt/gamedev/engines/gdevelop/gdevelop.AppImage || {
     echo "⚠️ GDevelop download failed"
     return 0
 }
 
-register_bin gdevelop /opt/gamedev/engines/gdevelop.AppImage "GDevelop"
+register_bin gdevelop /opt/gamedev/engines/gdevelop/gdevelop.AppImage "GDevelop"
 '
 
 run_step "ct.js" "is_installed ctjs" '
@@ -1075,12 +1077,14 @@ if [ -z "$OBSIDIAN_URL" ]; then
   return 0
 fi
 
-safe_wget "$OBSIDIAN_URL" /opt/gamedev/tools/obsidian.AppImage || {
+mkdir -p /opt/gamedev/tools/obsidian
+
+safe_wget "$OBSIDIAN_URL" /opt/gamedev/tools/obsidian/obsidian.AppImage || {
   echo "⚠️ Obsidian download failed"
   return 0
 }
 
-register_bin obsidian /opt/gamedev/tools/obsidian.AppImage "Obsidian"
+register_bin obsidian /opt/gamedev/tools/obsidian/obsidian.AppImage "Obsidian"
 '
 
 # -----------------------------
