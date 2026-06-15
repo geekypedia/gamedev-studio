@@ -205,30 +205,53 @@ apt_cleanup_repo() {
 }
 
 fix_microsoft_repo() {
-  echo "🧼 Fixing Microsoft / VS Code repo conflicts..."
+  echo "🧹 Cleaning ONLY Microsoft VS Code repo entries..."
 
-  # Remove ALL known conflicting legacy files
-  sudo rm -f /etc/apt/sources.list.d/vscode.list
-  sudo rm -f /etc/apt/sources.list.d/microsoft.list
+  local TARGET="packages.microsoft.com/repos/code"
+
+  # Remove from all .list files in sources.list.d
+  for f in /etc/apt/sources.list.d/*.list; do
+    [ -e "$f" ] || continue
+
+    if grep -q "$TARGET" "$f"; then
+      echo "🗑 Cleaning file: $f"
+      sudo sed -i "\|$TARGET|d" "$f"
+
+      # If file becomes empty, remove it
+      if [ ! -s "$f" ]; then
+        sudo rm -f "$f"
+      fi
+    fi
+  done
+
+  # Remove from main sources.list only those lines
+  if grep -q "$TARGET" /etc/apt/sources.list 2>/dev/null; then
+    echo "🧹 Cleaning /etc/apt/sources.list"
+    sudo sed -i "\|$TARGET|d" /etc/apt/sources.list
+  fi
+
+  # Remove ONLY Microsoft keyrings (not everything APT-related)
   sudo rm -f /usr/share/keyrings/ms.gpg
   sudo rm -f /usr/share/keyrings/microsoft.gpg
+  sudo rm -f /etc/apt/keyrings/microsoft.gpg
 
-  # Remove duplicates inside sources.list safely
-  sudo sed -i '\|packages.microsoft.com/repos/code|d' /etc/apt/sources.list 2>/dev/null || true
-
-  # Ensure correct key directory exists
   sudo mkdir -p /etc/apt/keyrings
 
-  # Add SINGLE canonical key
+  echo "✅ Microsoft repo cleaned safely"
+}
+
+setup_microsoft_repo() {
+  echo "🔑 Adding clean Microsoft VS Code repo..."
+
   curl -fsSL https://packages.microsoft.com/keys/microsoft.asc |
     gpg --dearmor |
     sudo tee /etc/apt/keyrings/microsoft.gpg >/dev/null
 
-  # Add SINGLE repo definition
   echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" |
     sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
 
-  echo "✅ Microsoft repo normalized"
+  sudo apt-get update -y || true
+  echo "✅ VS Code repo ready"
 }
 
 check_apt_conflicts() {
