@@ -22,3 +22,4 @@ This project is designed to give developers a **single-command setup for a compl
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh && sudo ~/gamedev-studio.sh
+```
