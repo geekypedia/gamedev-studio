@@ -424,6 +424,7 @@ sudo mkdir -p /etc/apt/keyrings
 sudo rm -f /etc/apt/sources.list.d/vscode.list
 sudo rm -f /etc/apt/sources.list.d/*vscode*.list
 sudo rm -f /etc/apt/sources.list.d/*microsoft*.list
+fix_microsoft_repo
 
 # Remove old keyrings (both legacy + modern drift)
 sudo rm -f /usr/share/keyrings/ms.gpg
