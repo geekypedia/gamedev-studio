@@ -271,12 +271,12 @@ register_bin godot /opt/gamedev/engines/godot
 run_step "Godot Export Templates" "false" '
 API="https://api.github.com/repos/godotengine/godot/releases/latest"
 
-TEMPLATE_URL=$(curl -s "$API" | jq -r '
+TEMPLATE_URL=$(curl -s "$API" | jq -r "
   .assets[]
   | select(.name != null)
-  | select(.name | index("export_templates"))
+  | select(.name | index(\"export_templates\"))
   | .browser_download_url
-' | head -n 1)
+" | head -n 1)
 
 if [ -z "$TEMPLATE_URL" ]; then
   echo "⚠️ Could not find export templates URL"
