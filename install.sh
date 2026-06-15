@@ -513,7 +513,7 @@ setup_microsoft_repo() {
   echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" |
     sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
 
-  sudo apt-get update -y || true
+  sudo apt update -y || true
   echo "✅ VS Code repo ready"
 }
 
@@ -739,7 +739,7 @@ echo "🔍 Active VS Code repo definitions:"
 grep -R "packages.microsoft.com/repos/code" /etc/apt 2>/dev/null || true
 
 echo "🔄 Updating package cache..."
-sudo apt-get update -y || {
+sudo apt update -y || {
     echo "⚠️ apt update failed"
     return 0
 }
@@ -748,7 +748,7 @@ echo "✅ VS Code repository configured"
 '
 
 run_step "VS Code Install" "is_installed code" '
-sudo apt-get install -y code || {
+sudo apt install -y code || {
     echo "⚠️ VS Code installation failed"
     return 0
 }
@@ -759,6 +759,10 @@ curl -fsSL https://code-server.dev/install.sh | sudo bash || {
   echo "⚠️ code-server install failed"
   return 0
 }
+'
+
+run_step "SQLite (CLI)" "is_installed sqlite3" '
+sudo apt install -y sqlite3 sqlite3-tools || echo "⚠️ SQLite install failed"
 '
 
 run_step "SQLite Browser" "is_installed sqlitebrowser" '
@@ -795,7 +799,7 @@ sudo dpkg -i "$CHROME_DEB" || {
   echo "⚠️ dpkg install had dependency issues, fixing..."
 }
 
-sudo apt-get install -f -y || {
+sudo apt install -f -y || {
   echo "⚠️ apt fix failed"
   return 0
 }
@@ -1065,8 +1069,16 @@ run_step "Blender" "is_installed blender" '
 sudo apt install -y blender
 '
 
-run_step "GIMP/Krita/Inkscape" "is_installed gimp && is_installed krita && is_installed inkscape" '
-sudo apt install -y gimp krita inkscape
+run_step "GIMP" "is_installed gimp" '
+sudo apt install -y gimp
+'
+
+run_step "Krita" "is_installed krita" '
+sudo apt install -y krita
+'
+
+run_step "Inkscape" "is_installed inkscape" '
+sudo apt install -y inkscape
 '
 
 run_step "Pixelorama" "is_installed pixelorama" '
@@ -1166,10 +1178,36 @@ register_bin libresprite "$LS_BIN" "LibreSprite"
 # AUDIO / VIDEO
 # -----------------------------
 
-run_step "Audio & Video Suite" "is_installed vlc && is_installed kdenlive" '
-sudo apt install -y vlc kdenlive obs-studio lmms audacity ardour
-sudo apt install -y hydrogen hydrogen-drumkits geonkick
+run_step "VLC" "is_installed vlc" '
+sudo apt install -y vlc || echo "⚠️ VLC install failed"
+'
 
+run_step "Kdenlive" "is_installed kdenlive" '
+sudo apt install -y kdenlive || echo "⚠️ Kdenlive install failed"
+'
+
+run_step "OBS Studio" "is_installed obs-studio" '
+sudo apt install -y obs-studio || echo "⚠️ OBS Studio install failed"
+'
+
+run_step "LMMS" "is_installed lmms" '
+sudo apt install -y lmms || echo "⚠️ LMMS install failed"
+'
+
+run_step "Audacity" "is_installed audacity" '
+sudo apt install -y audacity || echo "⚠️ Audacity install failed"
+'
+
+run_step "Ardour" "is_installed ardour" '
+sudo apt install -y ardour || echo "⚠️ Ardour install failed"
+'
+
+run_step "Hydrogen Drum Machine" "is_installed hydrogen" '
+sudo apt install -y hydrogen hydrogen-drumkits || echo "⚠️ Hydrogen install failed"
+'
+
+run_step "Geonkick" "is_installed geonkick" '
+sudo apt install -y geonkick || echo "⚠️ Geonkick install failed"
 '
 
 # -----------------------------
