@@ -98,7 +98,7 @@ run_step() {
         echo "⚠ Force mode: reinstalling $NAME"
     fi
 
-    if bash -c "$*"; then
+    if eval "$*"; then
         success "$NAME"
     else
         failure "$NAME"
