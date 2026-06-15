@@ -187,9 +187,64 @@ register_bin() {
 
 
 # -----------------------------
-# INSTALLER ENGINE
+# APT REPO
 # -----------------------------
 
+apt_cleanup_repo() {
+  local pattern="$1"
+
+  echo "🧹 Searching APT configs for: $pattern"
+
+  # Find all repo files containing the pattern
+  grep -Rsl "$pattern" /etc/apt/sources.list /etc/apt/sources.list.d 2>/dev/null | while read -r file; do
+    echo "🔍 Found in: $file"
+
+    # Show current entries (debug-safe)
+    grep -n "$pattern" "$file" || true
+  done
+}
+
+fix_microsoft_repo() {
+  echo "🧼 Fixing Microsoft / VS Code repo conflicts..."
+
+  # Remove ALL known conflicting legacy files
+  sudo rm -f /etc/apt/sources.list.d/vscode.list
+  sudo rm -f /etc/apt/sources.list.d/microsoft.list
+  sudo rm -f /usr/share/keyrings/ms.gpg
+  sudo rm -f /usr/share/keyrings/microsoft.gpg
+
+  # Remove duplicates inside sources.list safely
+  sudo sed -i '\|packages.microsoft.com/repos/code|d' /etc/apt/sources.list 2>/dev/null || true
+
+  # Ensure correct key directory exists
+  sudo mkdir -p /etc/apt/keyrings
+
+  # Add SINGLE canonical key
+  curl -fsSL https://packages.microsoft.com/keys/microsoft.asc |
+    gpg --dearmor |
+    sudo tee /etc/apt/keyrings/microsoft.gpg >/dev/null
+
+  # Add SINGLE repo definition
+  echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" |
+    sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
+
+  echo "✅ Microsoft repo normalized"
+}
+
+check_apt_conflicts() {
+  echo "🔎 Checking for Signed-By conflicts..."
+
+  grep -R "signed-by" /etc/apt/sources.list /etc/apt/sources.list.d 2>/dev/null |
+  awk -F: '{print $2}' |
+  sort |
+  uniq -c |
+  awk '$1 > 1 {print "⚠️ Duplicate entry:", $0}'
+}
+
+
+# -----------------------------
+# INSTALLER ENGINE
+# -----------------------------
 
 gh_asset() {
     local repo="$1"
@@ -360,18 +415,23 @@ npm install -g nw --progress=true --verbose
 # -----------------------------
 
 run_step "VS Code Repo Setup" "false" '
-echo "🧹 Detecting existing VS Code / Microsoft APT entries..."
+echo "🧹 Normalizing VS Code / Microsoft APT repository..."
 
-# Remove VS Code repo files (old + renamed variants)
+# Ensure key directory exists
+sudo mkdir -p /etc/apt/keyrings
+
+# Remove ALL known conflicting definitions (safe pattern-based cleanup)
 sudo rm -f /etc/apt/sources.list.d/vscode.list
 sudo rm -f /etc/apt/sources.list.d/*vscode*.list
+sudo rm -f /etc/apt/sources.list.d/*microsoft*.list
 
-# Remove old Microsoft keyrings used by VS Code installs
+# Remove old keyrings (both legacy + modern drift)
 sudo rm -f /usr/share/keyrings/ms.gpg
 sudo rm -f /usr/share/keyrings/microsoft.gpg
+sudo rm -f /etc/apt/keyrings/microsoft.gpg
 
-# New recommended keyring location
-sudo mkdir -p /etc/apt/keyrings
+# Remove any inline duplicates inside sources.list
+sudo sed -i "\|packages.microsoft.com/repos/code|d" /etc/apt/sources.list 2>/dev/null || true
 
 echo "🔑 Installing Microsoft signing key..."
 
@@ -379,24 +439,15 @@ curl -fsSL https://packages.microsoft.com/keys/microsoft.asc |
 gpg --dearmor |
 sudo tee /etc/apt/keyrings/microsoft.gpg >/dev/null
 
-echo "📦 Adding VS Code repository..."
+echo "📦 Writing single canonical VS Code repo..."
 
 echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" |
 sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
 
-echo "🔄 Updating package list..."
+echo "🔄 Updating package cache..."
 sudo apt-get update -y || true
 
-echo "✅ VS Code repo setup complete"
-'
-
-run_step "VS Code Install" "is_installed code" '
-sudo apt update &&
-sudo apt install -y code
-'
-
-run_step "Code Server" "is_installed code-server" '
-curl -fsSL https://code-server.dev/install.sh | sudo bash
+echo "✅ VS Code repo normalized"
 '
 
 # -----------------------------
