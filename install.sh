@@ -178,6 +178,63 @@ register_bin() {
     sudo ln -sf "$target" /usr/local/bin/"$name"
 }
 
+
+# -----------------------------
+# INSTALLER ENGINE
+# -----------------------------
+
+
+gh_asset() {
+    local repo="$1"
+    local match1="$2"
+    local match2="$3"
+    local ext="$4"
+
+    curl -s "https://api.github.com/repos/$repo/releases/latest" |
+    jq -r --arg m1 "$match1" --arg m2 "$match2" --arg ext "$ext" '
+        .assets[]
+        | select(.name | test($m1; "i"))
+        | select(.name | test($m2; "i"))
+        | select(.name | endswith($ext))
+        | .browser_download_url
+    ' | head -n1
+}
+
+install_engine() {
+    local name="$1"
+    shift
+    local url="$1"
+    local type="$2"
+    local dest="$3"
+
+    echo "⬇️ Installing $name"
+
+    mkdir -p "$dest"
+
+    case "$type" in
+        appimage)
+            safe_wget "$url" "$dest/$name.AppImage" || return 0
+            chmod +x "$dest/$name.AppImage"
+            register_bin "$name" "$dest/$name.AppImage"
+        ;;
+
+        zip)
+            safe_wget "$url" "/tmp/$name.zip" || return 0
+            unzip -o "/tmp/$name.zip" -d "$dest" || return 0
+        ;;
+
+        tar.gz)
+            safe_wget "$url" "/tmp/$name.tar.gz" || return 0
+            tar -xzf "/tmp/$name.tar.gz" -C "$dest" || return 0
+        ;;
+
+        tar.bz2)
+            safe_wget "$url" "/tmp/$name.tar.bz2" || return 0
+            tar -xjf "/tmp/$name.tar.bz2" -C "$dest" || return 0
+        ;;
+    esac
+}
+
 echo "========================================="
 echo "🎮 Game Dev Studio Installer (Ubuntu)"
 echo "========================================="
@@ -516,15 +573,92 @@ sudo ln -sf "$PISKEL_BIN" /usr/local/bin/piskel
 '
 
 run_step "Pixelorama" "is_installed pixelorama" '
-safe_wget https://github.com/Orama-Interactive/Pixelorama/releases/latest/download/Pixelorama.x86_64.AppImage /opt/gamedev/art/pixelorama.AppImage &&
-chmod +x /opt/gamedev/art/pixelorama.AppImage &&
-sudo ln -sf /opt/gamedev/art/pixelorama.AppImage /usr/local/bin/pixelorama
+API="https://api.github.com/repos/Orama-Interactive/Pixelorama/releases/latest"
+
+PIXEL_URL=$(
+  curl -s "$API" |
+  jq -r "
+    .assets[]
+    | select(.name | test(\"Linux\"; \"i\"))
+    | select(.name | test(\"64bit\"; \"i\"))
+    | select(.name | endswith(\".tar.gz\"))
+    | .browser_download_url
+  " | head -n1
+)
+
+if [ -z "$PIXEL_URL" ]; then
+    echo "⚠️ Could not find Pixelorama Linux 64bit tar.gz"
+    return 0
+fi
+
+echo "⬇️ Pixelorama URL: $PIXEL_URL"
+
+safe_wget "$PIXEL_URL" /tmp/pixelorama.tar.gz || {
+    echo "⚠️ Pixelorama download failed"
+    return 0
+}
+
+rm -rf /opt/gamedev/art/pixelorama
+mkdir -p /opt/gamedev/art/pixelorama
+
+tar -xzf /tmp/pixelorama.tar.gz -C /opt/gamedev/art/pixelorama || {
+    echo "⚠️ Extraction failed"
+    return 0
+}
+
+PIXEL_BIN=$(find /opt/gamedev/art/pixelorama -type f -name "Pixelorama*" -executable | head -n1)
+
+if [ -z "$PIXEL_BIN" ]; then
+    echo "⚠️ Pixelorama binary not found"
+    return 0
+fi
+
+chmod +x "$PIXEL_BIN"
+sudo ln -sf "$PIXEL_BIN" /usr/local/bin/pixelorama
 '
 
-run_step "LibreSprite" "false" '
-safe_wget https://github.com/LibreSprite/LibreSprite/releases/latest/download/LibreSprite-x86_64.AppImage /opt/gamedev/art/libresprite.AppImage || true
-chmod +x /opt/gamedev/art/libresprite.AppImage || true
-sudo ln -sf /opt/gamedev/art/libresprite.AppImage /usr/local/bin/libresprite || true
+run_step "LibreSprite" "is_installed libresprite" '
+API="https://api.github.com/repos/LibreSprite/LibreSprite/releases/latest"
+
+ZIP_URL=$(
+  curl -s "$API" |
+  jq -r "
+    .assets[]
+    | select(.name | test(\"linux.*x86_64.*zip$\"; \"i\"))
+    | .browser_download_url
+  " | head -n1
+)
+
+if [ -z "$ZIP_URL" ]; then
+    echo "⚠️ Could not find LibreSprite Linux x86_64 zip"
+    return 0
+fi
+
+echo "⬇️ LibreSprite URL: $ZIP_URL"
+
+safe_wget "$ZIP_URL" /tmp/libresprite.zip || {
+    echo "⚠️ LibreSprite download failed"
+    return 0
+}
+
+rm -rf /opt/gamedev/art/libresprite
+mkdir -p /opt/gamedev/art/libresprite
+
+unzip -o /tmp/libresprite.zip -d /opt/gamedev/art/libresprite || {
+    echo "⚠️ Extraction failed"
+    return 0
+}
+
+# Find actual AppImage inside extracted folder
+LS_BIN=$(find /opt/gamedev/art/libresprite -type f -name "*.AppImage" | head -n 1)
+
+if [ -z "$LS_BIN" ]; then
+    echo "⚠️ LibreSprite AppImage not found after extraction"
+    return 0
+fi
+
+chmod +x "$LS_BIN"
+sudo ln -sf "$LS_BIN" /usr/local/bin/libresprite
 '
 
 # -----------------------------
