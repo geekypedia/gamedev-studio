@@ -69,33 +69,38 @@ safe_wget() {
 
     echo "⬇️ Downloading: $url"
 
-    # Try curl first
-    if command -v curl >/dev/null 2>&1; then
-        curl -L --fail --progress-bar "$url" -o "$out"
-        local status=$?
+    download() {
+        if command -v curl >/dev/null 2>&1; then
+            curl -L --fail --progress-bar "$url" -o "$1"
+        elif command -v wget >/dev/null 2>&1; then
+            wget --show-progress -O "$1" "$url"
+        else
+            echo "❌ Neither curl nor wget is installed"
+            return 1
+        fi
+    }
 
-    # Fallback to wget
-    elif command -v wget >/dev/null 2>&1; then
-        wget --show-progress -O "$out" "$url"
-        local status=$?
-
-    else
-        echo "❌ Neither curl nor wget is installed"
-        return 1
+    # Try requested location first
+    if download "$out"; then
+        [ -s "$out" ] && return 0
     fi
 
-    # Validate file only if download succeeded
-    if [ $status -ne 0 ]; then
-        echo "⚠️ Download failed"
-        return 1
+    echo "⚠️ Primary download path failed, retrying in /tmp..."
+
+    local tmpfile="/tmp/$(basename "$out")"
+
+    if download "$tmpfile"; then
+        if [ -s "$tmpfile" ]; then
+            mv "$tmpfile" "$out" 2>/dev/null || {
+                echo "⚠️ Cannot move to target, keeping in /tmp: $tmpfile"
+                return 0
+            }
+            return 0
+        fi
     fi
 
-    if [ ! -s "$out" ]; then
-        echo "⚠️ Downloaded file is empty"
-        return 1
-    fi
-
-    return 0
+    echo "⚠️ Download failed"
+    return 1
 }
 
 safe_wget_silent() {
@@ -347,12 +352,12 @@ unzip -o /tmp/godot_templates.tpz -d "$HOME/.local/share/godot/export_templates/
 run_step "GDevelop" "is_installed gdevelop" '
 GDEV_URL=$(
   curl -s https://api.github.com/repos/4ian/GDevelop/releases/latest |
-  jq -r '
+  jq -r "
     .assets[]
-    | select(.name | endswith(".AppImage"))
-    | select(.name | contains("arm64") | not)
+    | select(.name | endswith(\".AppImage\"))
+    | select(.name | contains(\"arm64\") | not)
     | .browser_download_url
-  ' | head -n1
+  " | head -n1
 )
 
 if [ -z "$GDEV_URL" ]; then
@@ -361,8 +366,8 @@ if [ -z "$GDEV_URL" ]; then
 fi
 
 safe_wget "$GDEV_URL" /opt/gamedev/engines/gdevelop.AppImage || {
-  echo "⚠️ GDevelop download failed, skipping"
-  return 0
+    echo "⚠️ GDevelop download failed"
+    return 0
 }
 
 chmod +x /opt/gamedev/engines/gdevelop.AppImage
