@@ -345,24 +345,64 @@ unzip -o /tmp/godot_templates.tpz -d "$HOME/.local/share/godot/export_templates/
 '
 
 run_step "GDevelop" "is_installed gdevelop" '
-GDEV_URL=$(curl -s https://api.github.com/repos/4ian/GDevelop/releases/latest |
-jq -r ".assets[] | select(.name|test(\"linux.*AppImage\")) | .browser_download_url" | head -n 1)
+GDEV_URL=$(
+  curl -s https://api.github.com/repos/4ian/GDevelop/releases/latest |
+  jq -r '
+    .assets[]
+    | select(.name | endswith(".AppImage"))
+    | select(.name | contains("arm64") | not)
+    | .browser_download_url
+  ' | head -n1
+)
+
+if [ -z "$GDEV_URL" ]; then
+    echo "⚠️ Could not find x86_64 AppImage"
+    return 0
+fi
 
 safe_wget "$GDEV_URL" /opt/gamedev/engines/gdevelop.AppImage || {
   echo "⚠️ GDevelop download failed, skipping"
   return 0
 }
+
 chmod +x /opt/gamedev/engines/gdevelop.AppImage
 sudo ln -sf /opt/gamedev/engines/gdevelop.AppImage /usr/local/bin/gdevelop
 '
 
 run_step "ct.js" "is_installed ctjs" '
-CT_URL=$(curl -s https://api.github.com/repos/ct-js/ct-js/releases/latest |
-jq -r ".assets[] | select(.name|test(\"AppImage\")) | .browser_download_url" | head -n 1)
+CT_URL=$(
+  curl -s https://api.github.com/repos/ct-js/ct-js/releases/latest |
+  jq -r "
+    .assets[]
+    | select(.name | test(\"linux64.*\\.zip$\"))
+    | .browser_download_url
+  " | head -n1
+)
 
-safe_wget "$CT_URL" /opt/gamedev/engines/ctjs.AppImage || return 0
-chmod +x /opt/gamedev/engines/ctjs.AppImage
-sudo ln -sf /opt/gamedev/engines/ctjs.AppImage /usr/local/bin/ctjs
+if [ -z "$CT_URL" ]; then
+    echo "⚠️ Could not find ct.js Linux x64 ZIP"
+    return 0
+fi
+
+mkdir -p /opt/gamedev/engines/ctjs
+
+safe_wget "$CT_URL" /tmp/ctjs.zip || {
+    echo "⚠️ ct.js download failed"
+    return 0
+}
+
+unzip -o /tmp/ctjs.zip -d /opt/gamedev/engines/ctjs || {
+    echo "⚠️ Failed to extract ct.js"
+    return 0
+}
+
+chmod +x /opt/gamedev/engines/ctjs/ctjs 2>/dev/null || true
+
+if [ -f /opt/gamedev/engines/ctjs/ctjs ]; then
+    sudo ln -sf /opt/gamedev/engines/ctjs/ctjs /usr/local/bin/ctjs
+else
+    echo "⚠️ ct.js executable not found after extraction"
+fi
 '
 
 run_step "RenPy" "is_installed renpy" '
@@ -442,16 +482,36 @@ sudo apt install -y tiled
 '
 
 run_step "LDtk" "false" '
-LDTK_URL=$(curl -s https://api.github.com/repos/deepnight/ldtk/releases/latest |
-jq -r ".assets[] | select(.name|test(\"Linux.*zip\")) | .browser_download_url" | head -n 1)
+LDTK_URL=$(
+  curl -s https://api.github.com/repos/deepnight/ldtk/releases/latest |
+  jq -r "
+    .assets[]
+    | select(.name==\"ubuntu-distribution.zip\")
+    | .browser_download_url
+  " | head -n1
+)
 
-safe_wget "$LDTK_URL" /tmp/ldtk.zip || return 0
+if [ -z "$LDTK_URL" ]; then
+  echo "⚠️ Could not find LDtk Linux build"
+  return 0
+fi
+
+safe_wget "$LDTK_URL" /tmp/ldtk.zip || {
+  echo "⚠️ LDtk download failed"
+  return 0
+}
+
 mkdir -p /opt/gamedev/tools/ldtk
-unzip -o /tmp/ldtk.zip -d /opt/gamedev/tools/ldtk
+unzip -o /tmp/ldtk.zip -d /opt/gamedev/tools/ldtk || return 0
 
 LDTK_BIN=$(safe_find_exec /opt/gamedev/tools/ldtk)
-chmod +x "$LDTK_BIN"
-sudo ln -sf "$LDTK_BIN" /usr/local/bin/ldtk
+
+if [ -n "$LDTK_BIN" ]; then
+  chmod +x "$LDTK_BIN"
+  sudo ln -sf "$LDTK_BIN" /usr/local/bin/ldtk
+else
+  echo "⚠️ Could not locate LDtk executable"
+fi
 '
 
 run_step "LDtk Sync Pipeline" "is_installed ldtk-sync" '
@@ -478,10 +538,28 @@ chmod +x /usr/local/bin/ldtk-sync
 # -----------------------------
 
 run_step "Obsidian" "is_installed obsidian" '
-OBSIDIAN_URL=$(curl -s https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest |
-jq -r ".assets[] | select(.name|test(\"AppImage\")) | .browser_download_url" | head -n 1)
+mkdir -p /opt/gamedev/tools
 
-safe_wget "$OBSIDIAN_URL" /opt/gamedev/tools/obsidian.AppImage || return 0
+OBSIDIAN_URL=$(
+  curl -s https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest |
+  jq -r "
+    .assets[]
+    | select(.name | endswith(\".AppImage\"))
+    | select(.name | ascii_downcase | contains(\"arm64\") | not)
+    | .browser_download_url
+  " | head -n1
+)
+
+if [ -z "$OBSIDIAN_URL" ]; then
+  echo "⚠️ Could not find Obsidian AppImage"
+  return 0
+fi
+
+safe_wget "$OBSIDIAN_URL" /opt/gamedev/tools/obsidian.AppImage || {
+  echo "⚠️ Obsidian download failed"
+  return 0
+}
+
 chmod +x /opt/gamedev/tools/obsidian.AppImage
 sudo ln -sf /opt/gamedev/tools/obsidian.AppImage /usr/local/bin/obsidian
 '
@@ -491,15 +569,26 @@ sudo ln -sf /opt/gamedev/tools/obsidian.AppImage /usr/local/bin/obsidian
 # -----------------------------
 
 run_step "itch.io Butler" "is_installed butler" '
-safe_wget https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default /tmp/butler.zip || exit 1
+safe_wget https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default /tmp/butler.zip || {
+    echo "⚠️ Failed to download Butler"
+    return 0
+}
 
 rm -rf /tmp/butler_unpack
 mkdir -p /tmp/butler_unpack
-unzip /tmp/butler.zip -d /tmp/butler_unpack
 
-BUTLER_BIN=$(find /tmp/butler_unpack -type f -name "butler" | head -n 1)
+unzip -o /tmp/butler.zip -d /tmp/butler_unpack || {
+    echo "⚠️ Failed to extract Butler"
+    return 0
+}
 
-register_bin butler "$BUTLER_BIN"
+BUTLER_BIN=$(find /tmp/butler_unpack -type f -name butler | head -n1)
+
+if [ -n "$BUTLER_BIN" ]; then
+    register_bin butler "$BUTLER_BIN"
+else
+    echo "⚠️ Could not locate Butler executable"
+fi
 '
 
 # -----------------------------
