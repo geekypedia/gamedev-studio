@@ -335,7 +335,7 @@ export NVM_DIR="$HOME/.nvm"
 nvm install --lts
 nvm use --lts
 
-npm install -g vite create-react-app react phaser excalibur
+npm install -g vite create-react-app react phaser excalibur nw
 '
 
 # -----------------------------
