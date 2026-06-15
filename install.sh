@@ -1160,6 +1160,22 @@ sudo apt install -y hydrogen hydrogen-drumkits geonkick
 # LEVEL EDITORS
 # -----------------------------
 
+run_step "Tiled Map Editor" "is_installed tiled" '
+echo "📦 Installing Tiled Map Editor..."
+
+sudo apt install -y tiled || {
+    echo "⚠️ Failed to install Tiled via apt"
+    return 0
+}
+
+echo "🧭 Verifying installation..."
+if command -v tiled >/dev/null 2>&1; then
+    echo "✅ Tiled installed successfully"
+else
+    echo "⚠️ Tiled installed but binary not found"
+fi
+'
+
 run_step "LDtk" "false" '
 API="https://api.github.com/repos/deepnight/ldtk/releases/latest"
 
