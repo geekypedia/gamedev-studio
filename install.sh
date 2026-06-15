@@ -1061,6 +1061,44 @@ run_step "LOVE2D" "is_installed love" '
 sudo apt install -y love
 '
 
+run_step "microStudio" "is_installed microstudio" '
+API="https://api.github.com/repos/pmgl/microstudio/releases/latest"
+
+echo "🌐 Fetching microStudio latest release..."
+
+DEB_URL=$(curl -s "$API" | jq -r "
+  .assets[]
+  | select(.name != null)
+  | select(.name | test(\"linux.*\\.deb$\"; \"i\"))
+  | .browser_download_url
+" | head -n 1)
+
+if [ -z "$DEB_URL" ]; then
+    echo "⚠️ microStudio Linux DEB not found"
+    curl -s "$API" | jq -r ".assets[].name"
+    return 0
+fi
+
+echo "⬇️ Downloading: $DEB_URL"
+
+safe_wget "$DEB_URL" "$TMP_DIR/microstudio.deb" || {
+    echo "⚠️ Download failed"
+    return 0
+}
+
+echo "📦 Installing microStudio..."
+
+sudo dpkg -i "$TMP_DIR/microstudio.deb" || {
+    echo "⚠️ dpkg failed, fixing dependencies..."
+    sudo apt-get install -f -y || {
+        echo "⚠️ dependency fix failed"
+        return 0
+    }
+}
+
+echo "✅ microStudio installed successfully"
+'
+
 # -----------------------------
 # CREATIVE TOOLS
 # -----------------------------
