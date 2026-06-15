@@ -171,10 +171,54 @@ is_ok() {
 # -----------------------------
 # BINARY REGISTRY (FIX)
 # -----------------------------
+create_desktop_entry() {
+    local app="$1"
+    local display_name="${2:-$1}"
+
+    local bin
+    bin=$(command -v "$app" 2>/dev/null)
+
+    if [ -z "$bin" ]; then
+        echo "⚠️ Cannot create desktop entry: $app not found"
+        return 1
+    fi
+
+    local real_bin
+    real_bin=$(readlink -f "$bin")
+
+    local icon=""
+
+    icon=$(find "$(dirname "$real_bin")" \
+        -type f \
+        \( -iname "*.png" -o -iname "*.svg" -o -iname "*.xpm" \) \
+        | head -n1)
+
+    [ -z "$icon" ] && icon="$app"
+
+    sudo tee "/usr/share/applications/${app}.desktop" >/dev/null <<EOF
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=$display_name
+Exec=$bin
+Icon=$icon
+Terminal=false
+Categories=Development;
+StartupNotify=true
+EOF
+
+    sudo chmod 644 "/usr/share/applications/${app}.desktop"
+
+    command -v update-desktop-database >/dev/null 2>&1 &&
+        sudo update-desktop-database /usr/share/applications >/dev/null 2>&1 || true
+
+    echo "🖥️ Desktop launcher created: $display_name"
+}
 
 register_bin() {
     local name="$1"
     local target="$2"
+    local display_name="${3:-$name}"
 
     if [ -z "$target" ] || [ ! -f "$target" ]; then
         echo "⚠ Cannot register $name (missing binary: $target)"
@@ -183,6 +227,8 @@ register_bin() {
 
     chmod +x "$target"
     sudo ln -sf "$target" /usr/local/bin/"$name"
+
+    create_desktop_entry "$name" "$display_name"
 }
 
 
@@ -362,7 +408,7 @@ sudo mkdir -p "$BIN"
 sudo chown -R "$USER:$USER" "$BASE"
 
 # Now create subfolders as normal user (no sudo needed)
-mkdir -p "$BASE"/{engines,tools,art,web,audio,dev,pipelines}
+mkdir -p "$BASE"/{engines,tools,art}
 
 # Create and Take ownership of the tmp too
 sudo mkdir -p "$TMP_DIR"
@@ -564,7 +610,7 @@ fi
 
 sudo install -Dm755 "$GODOT_BIN" /opt/gamedev/engines/godot
 
-register_bin godot /opt/gamedev/engines/godot
+register_bin godot /opt/gamedev/engines/godot "Godot"
 '
 
 run_step "Godot Export Templates" "false" '
@@ -633,8 +679,7 @@ safe_wget "$GDEV_URL" /opt/gamedev/engines/gdevelop.AppImage || {
     return 0
 }
 
-chmod +x /opt/gamedev/engines/gdevelop.AppImage
-sudo ln -sf /opt/gamedev/engines/gdevelop.AppImage /usr/local/bin/gdevelop
+register_bin gdevelop /opt/gamedev/engines/gdevelop.AppImage "GDevelop"
 '
 
 run_step "ct.js" "is_installed ctjs" '
@@ -692,8 +737,7 @@ if [ -z "$CT_BIN_FINAL" ]; then
   return 0
 fi
 
-chmod +x "$CT_BIN_FINAL"
-sudo ln -sf "$CT_BIN_FINAL" /usr/local/bin/ctjs
+register_bin ctjs "$CT_BIN_FINAL" "Ct.js"
 '
 
 run_step "RenPy" "is_installed renpy" '
@@ -760,7 +804,7 @@ if [ -z "$RENPY_LAUNCHER" ]; then
     return 0
 fi
 
-register_bin renpy "$RENPY_LAUNCHER"
+register_bin renpy "$RENPY_LAUNCHER" "Ren'Py"
 '
 
 run_step "LOVE2D" "is_installed love" '
@@ -823,8 +867,7 @@ if [ -z "$PIXEL_BIN" ]; then
     return 0
 fi
 
-chmod +x "$PIXEL_BIN"
-sudo ln -sf "$PIXEL_BIN" /usr/local/bin/pixelorama
+register_bin pixelorama "$PIXEL_BIN" "Pixelorama"
 '
 
 run_step "LibreSprite" "is_installed libresprite" '
@@ -870,8 +913,7 @@ if [ -z "$LS_BIN" ]; then
     return 0
 fi
 
-chmod +x "$LS_BIN"
-sudo ln -sf "$LS_BIN" /usr/local/bin/libresprite
+register_bin libresprite "$LS_BIN" "LibreSprite"
 '
 
 # -----------------------------
@@ -943,8 +985,7 @@ if [ -z "$LDTK_BIN" ]; then
   return 0
 fi
 
-chmod +x "$LDTK_BIN"
-sudo ln -sf "$LDTK_BIN" /usr/local/bin/ldtk
+register_bin ldtk "$LDTK_BIN" "LDtk"
 '
 
 
@@ -995,8 +1036,7 @@ safe_wget "$OBSIDIAN_URL" /opt/gamedev/tools/obsidian.AppImage || {
   return 0
 }
 
-chmod +x /opt/gamedev/tools/obsidian.AppImage
-sudo ln -sf /opt/gamedev/tools/obsidian.AppImage /usr/local/bin/obsidian
+register_bin obsidian /opt/gamedev/tools/obsidian.AppImage "Obsidian"
 '
 
 # -----------------------------
@@ -1049,7 +1089,7 @@ mkdir -p "$INSTALL_DIR"
 cp "$BUTLER_BIN" "$INSTALL_DIR/butler"
 chmod +x "$INSTALL_DIR/butler"
 
-register_bin butler "$INSTALL_DIR/butler"
+register_bin butler "$INSTALL_DIR/butler" "Butler"
 '
 
 # -----------------------------
