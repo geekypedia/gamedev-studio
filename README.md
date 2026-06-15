@@ -84,7 +84,6 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 - Inkscape
 - Pixelorama
 - LibreSprite
-- Piskel
 
 ---
 
