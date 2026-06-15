@@ -803,6 +803,7 @@ if [ -z "$GODOT_BIN" ]; then
     return 0
 fi
 
+rm -rf /opt/gamedev/engines/godot
 mkdir -p /opt/gamedev/engines/godot
 
 sudo install -Dm755 "$GODOT_BIN" /opt/gamedev/engines/godot/godot
@@ -877,6 +878,7 @@ if [ -z "$GDEV_URL" ]; then
     return 0
 fi
 
+rm -rf /opt/gamedev/engines/gdevelop
 mkdir -p /opt/gamedev/engines/gdevelop
 
 safe_wget "$GDEV_URL" /opt/gamedev/engines/gdevelop/gdevelop.AppImage || {
@@ -890,7 +892,6 @@ register_bin gdevelop /opt/gamedev/engines/gdevelop/gdevelop.AppImage "GDevelop"
 
 run_step "ct.js" "is_installed ctjs" '
 mkdir -p "$TMP_DIR"
-mkdir -p /opt/gamedev/engines/ctjs
 
 CT_URL=$(
   curl -s https://api.github.com/repos/ct-js/ct-js/releases/latest |
