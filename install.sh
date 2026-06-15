@@ -661,7 +661,7 @@ VERSION=$(curl -s "$API" | jq -r ".tag_name")
 TEMPLATE_DIR="$HOME/.local/share/godot/export_templates/$VERSION"
 
 # skip if already installed
-if [ -d "$TEMPLATE_DIR" ] && [ "$(ls -A "$TEMPLATE_DIR" 2>/dev/null)" ]; then
+if [ "$FORCE_UPDATE" -eq 0 ] && [ -d "$TEMPLATE_DIR" ] && [ "$(ls -A "$TEMPLATE_DIR" 2>/dev/null)" ]; then
     echo "✅ Already installed for $VERSION"
     return 0
 fi
@@ -848,7 +848,7 @@ if [ -z "$RENPY_LAUNCHER" ]; then
     return 0
 fi
 
-register_bin renpy "$RENPY_LAUNCHER" "Ren'Py"
+register_bin renpy "$RENPY_LAUNCHER" "RenPy"
 '
 
 run_step "LOVE2D" "is_installed love" '
