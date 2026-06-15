@@ -127,7 +127,7 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 | Flag | Description |
 |------|-------------|
 | `--force` / `-f` | Reinstall and overwrite all tools |
-| `--upgrade` | Runs only system upgrade (`apt upgrade`) |
+| `--upgrade` | Runs system upgrade (`apt upgrade`) before installation |
 | *(none)* | Safe mode (skip existing installs) |
 
 ---
