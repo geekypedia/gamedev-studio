@@ -63,6 +63,46 @@ safe_wget() {
     local out="$2"
 
     if [ -z "$url" ] || [ "$url" = "null" ]; then
+        echo "⚠️ safe_wget: empty URL"
+        return 1
+    fi
+
+    echo "⬇️ Downloading: $url"
+
+    # Try curl first
+    if command -v curl >/dev/null 2>&1; then
+        curl -L --fail --progress-bar "$url" -o "$out"
+        local status=$?
+
+    # Fallback to wget
+    elif command -v wget >/dev/null 2>&1; then
+        wget --show-progress -O "$out" "$url"
+        local status=$?
+
+    else
+        echo "❌ Neither curl nor wget is installed"
+        return 1
+    fi
+
+    # Validate file only if download succeeded
+    if [ $status -ne 0 ]; then
+        echo "⚠️ Download failed"
+        return 1
+    fi
+
+    if [ ! -s "$out" ]; then
+        echo "⚠️ Downloaded file is empty"
+        return 1
+    fi
+
+    return 0
+}
+
+safe_wget_silent() {
+    local url="$1"
+    local out="$2"
+
+    if [ -z "$url" ] || [ "$url" = "null" ]; then
         return 1
     fi
 
