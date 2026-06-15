@@ -75,6 +75,8 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 - ExcaliburJS
 - NW
 - Electron
+- http-server
+- serve
 - SQLite Browser
 
 ---
