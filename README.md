@@ -72,6 +72,7 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 - Phaser
 - ExcaliburJS
 - create-react-app
+- NW
 
 ---
 
