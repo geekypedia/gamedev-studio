@@ -69,6 +69,10 @@ safe_wget() {
 
     echo "⬇️ Downloading: $url"
 
+    # Create isolated temp directory per run
+    local TMP_DIR="/tmp/5ddd20fa-76f4-40a2-8fc1-9599cac0924e"
+    mkdir -p "$TMP_DIR"
+
     download() {
         if command -v curl >/dev/null 2>&1; then
             curl -L --fail --progress-bar "$url" -o "$1"
@@ -85,14 +89,14 @@ safe_wget() {
         [ -s "$out" ] && return 0
     fi
 
-    echo "⚠️ Primary download path failed, retrying in /tmp..."
+    echo "⚠️ Primary download path failed, retrying in isolated tmp..."
 
-    local tmpfile="/tmp/$(basename "$out")"
+    local tmpfile="$TMP_DIR/$(basename "$out")"
 
     if download "$tmpfile"; then
         if [ -s "$tmpfile" ]; then
             mv "$tmpfile" "$out" 2>/dev/null || {
-                echo "⚠️ Cannot move to target, keeping in /tmp: $tmpfile"
+                echo "⚠️ Cannot move to target, keeping in sandbox: $tmpfile"
                 return 0
             }
             return 0
@@ -384,11 +388,11 @@ sudo ln -sf /opt/gamedev/engines/gdevelop.AppImage /usr/local/bin/gdevelop
 run_step "ct.js" "is_installed ctjs" '
 CT_URL=$(
   curl -s https://api.github.com/repos/ct-js/ct-js/releases/latest |
-  jq -r "
+  jq -r '
     .assets[]
-    | select(.name | test(\"linux64.*\\.zip$\"))
+    | select(.name | test("linux64.*zip$"))
     | .browser_download_url
-  " | head -n1
+  ' | head -n1
 )
 
 if [ -z "$CT_URL" ]; then
