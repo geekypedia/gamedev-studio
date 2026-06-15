@@ -228,8 +228,19 @@ curl -fsSL https://code-server.dev/install.sh | sudo bash
 # -----------------------------
 
 run_step "Google Chrome" "is_ok google-chrome google-chrome-stable chromium" '
-safe_wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb /tmp/chrome.deb &&
-sudo apt install -f -y /tmp/chrome.deb
+safe_wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb /tmp/chrome.deb || {
+  echo "⚠️ Download failed"
+  return 0
+}
+
+sudo dpkg -i /tmp/chrome.deb || {
+  echo "⚠️ dpkg install had dependency issues, fixing..."
+}
+
+sudo apt-get install -f -y || {
+  echo "⚠️ apt fix failed"
+  return 0
+}
 '
 
 # -----------------------------
@@ -258,15 +269,38 @@ register_bin godot /opt/gamedev/engines/godot
 '
 
 run_step "Godot Export Templates" "false" '
-TEMPLATE_URL=$(curl -s https://api.github.com/repos/godotengine/godot/releases/latest |
-jq -r ".assets[] | select(.name|test(\"export_templates.*zip\")) | .browser_download_url" | head -n 1)
+API="https://api.github.com/repos/godotengine/godot/releases/latest"
 
-safe_wget "$TEMPLATE_URL" /tmp/godot_templates.zip || exit 1
+TEMPLATE_URL=$(curl -s "$API" | jq -r "
+  .assets[]
+  | select(.name | test(\"export_templates.*\\.tpz\"))
+  | .browser_download_url
+" | head -n 1)
 
-VERSION=$(curl -s https://api.github.com/repos/godotengine/godot/releases/latest | jq -r ".tag_name")
+if [ -z "$TEMPLATE_URL" ]; then
+  echo "⚠️ Could not find export templates URL"
+  curl -s "$API" | jq -r ".assets[].name"
+  return 0
+fi
 
-mkdir -p ~/.local/share/godot/export_templates/$VERSION
-unzip -o /tmp/godot_templates.zip -d ~/.local/share/godot/export_templates/$VERSION
+echo "Downloading: $TEMPLATE_URL"
+
+safe_wget "$TEMPLATE_URL" /tmp/godot_templates.tpz || {
+  echo "⚠️ Download failed, skipping templates"
+  return 0
+}
+
+VERSION=$(curl -s "$API" | jq -r ".tag_name")
+
+mkdir -p "$HOME/.local/share/godot/export_templates/$VERSION" || {
+  echo "⚠️ Failed to create directory"
+  return 0
+}
+
+unzip -o /tmp/godot_templates.tpz -d "$HOME/.local/share/godot/export_templates/$VERSION" || {
+  echo "⚠️ Unzip failed"
+  return 0
+}
 '
 
 run_step "GDevelop" "is_installed gdevelop" '
