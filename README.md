@@ -63,6 +63,7 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 - Ren’Py (Python)
 - LÖVE2D (Lua)
 - microStudio (Lua, JavaScript, Python)
+- Defold (Lua)
 
 ---
 
