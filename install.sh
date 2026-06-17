@@ -1137,6 +1137,43 @@ sudo dpkg -i "$TMP_DIR/microstudio.deb" || {
 echo "✅ microStudio installed successfully"
 '
 
+run_step "Defold" "is_installed defold" '
+mkdir -p "$TMP_DIR"
+
+DEFOLD_ZIP="$TMP_DIR/defold.zip"
+
+safe_wget \
+    "https://github.com/defold/defold/releases/latest/download/Defold-x86_64-linux.zip" \
+    "$DEFOLD_ZIP" || {
+    echo "⚠️ Defold download failed"
+    return 0
+}
+
+rm -rf "$TMP_DIR/defold"
+mkdir -p "$TMP_DIR/defold"
+
+unzip -o "$DEFOLD_ZIP" -d "$TMP_DIR/defold" || {
+    echo "⚠️ Defold unzip failed"
+    return 0
+}
+
+DEFOLD_DIR=$(find "$TMP_DIR/defold" -maxdepth 1 -type d -name "Defold" | head -n 1)
+
+if [ -z "$DEFOLD_DIR" ]; then
+    echo "⚠️ Defold directory not found"
+    return 0
+fi
+
+rm -rf /opt/gamedev/engines/Defold
+mkdir -p /opt/gamedev/engines
+
+sudo mv "$DEFOLD_DIR" /opt/gamedev/engines/Defold
+
+sudo chmod +x /opt/gamedev/engines/Defold/Defold
+
+register_bin defold /opt/gamedev/engines/Defold/Defold "Defold"
+'
+
 # -----------------------------
 # CREATIVE TOOLS
 # -----------------------------
