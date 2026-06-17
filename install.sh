@@ -1588,6 +1588,14 @@ chmod +x "$INSTALL_DIR/butler"
 register_bin butler "$INSTALL_DIR/butler" "Butler"
 '
 
+
+# -----------------------------
+# OWNERSHIP
+# -----------------------------
+
+# Take ownership of the whole gamedev tree
+sudo chown -R "$USER:$USER" "$BASE"
+
 # -----------------------------
 # SUMMARY
 # -----------------------------
