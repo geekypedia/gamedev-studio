@@ -654,9 +654,9 @@ sudo apt upgrade -y
 fi
 
 run_step "System Dependencies Install" \
-"is_ok git curl wget unzip jq" '
+"is_ok git curl wget unzip jq pv" '
 sudo apt install -y \
-git curl wget unzip jq zenity inotify-tools \
+git curl wget unzip jq pv zenity inotify-tools \
 build-essential software-properties-common \
 libfuse2 flatpak python3 python3-pip
 '
@@ -1079,7 +1079,7 @@ rm -rf /opt/gamedev/engines/renpy
 mkdir -p /opt/gamedev/engines/renpy
 
 if [ "$EXT" = "tar.bz2" ]; then
-    tar -xjf "$OUT" -C /opt/gamedev/engines/renpy || {
+    tar -xvjf "$OUT" -C /opt/gamedev/engines/renpy || {
         echo "⚠️ Extraction failed (tar.bz2)"
         return 0
     }
@@ -1201,7 +1201,7 @@ safe_wget \
 rm -rf "$TMP_DIR/gideros"
 mkdir -p "$TMP_DIR/gideros"
 
-tar -xJf "$GIDEROS_ARCHIVE" -C "$TMP_DIR/gideros" || {
+tar -xvJf "$GIDEROS_ARCHIVE" -C "$TMP_DIR/gideros" || {
     echo "⚠️ Gideros extraction failed"
     return 0
 }
