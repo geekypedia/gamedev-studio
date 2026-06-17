@@ -352,6 +352,7 @@ extract_appimage_icon_from_symlnk() {
 create_desktop_entry() {
     local app="$1"
     local display_name="${2:-$1}"
+    local base_path="$3"
 
     local bin
     bin=$(command -v "$app" 2>/dev/null)
@@ -365,7 +366,11 @@ create_desktop_entry() {
     real_bin=$(readlink -f "$bin")
 
     local base_dir
-    base_dir=$(dirname "$real_bin")
+    if [ -n "$base_path" ]; then
+        base_dir="$base_path"
+    else
+        base_dir=$(dirname "$real_bin")
+    fi
 
     local icon=""
 
@@ -1178,7 +1183,7 @@ EOF
 
 sudo chmod +x /usr/local/bin/defold
 
-create_desktop_entry defold "Defold"
+create_desktop_entry defold "Defold" "/opt/gamedev/engines/Defold"
 '
 
 # -----------------------------
