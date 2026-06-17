@@ -1186,6 +1186,74 @@ sudo chmod +x /usr/local/bin/defold
 create_desktop_entry defold "Defold" "/opt/gamedev/engines/Defold"
 '
 
+run_step "Gideros" "is_installed giderosstudio" '
+mkdir -p "$TMP_DIR"
+
+GIDEROS_ARCHIVE="$TMP_DIR/gideros.tar.xz"
+
+safe_wget \
+    "https://github.com/gideros/gideros/releases/latest/download/Gideros.tar.xz" \
+    "$GIDEROS_ARCHIVE" || {
+    echo "⚠️ Gideros download failed"
+    return 0
+}
+
+rm -rf "$TMP_DIR/gideros"
+mkdir -p "$TMP_DIR/gideros"
+
+tar -xJf "$GIDEROS_ARCHIVE" -C "$TMP_DIR/gideros" || {
+    echo "⚠️ Gideros extraction failed"
+    return 0
+}
+
+GIDEROS_DIR=$(find "$TMP_DIR/gideros" -maxdepth 1 -type d -name "Gideros Studio" | head -n 1)
+
+if [ -z "$GIDEROS_DIR" ]; then
+    echo "⚠️ Gideros Studio directory not found"
+    return 0
+fi
+
+rm -rf /opt/gamedev/engines/Gideros
+mkdir -p /opt/gamedev/engines
+
+sudo mv "$GIDEROS_DIR" /opt/gamedev/engines/Gideros
+
+sudo chmod +x /opt/gamedev/engines/Gideros/GiderosStudio
+sudo chmod +x /opt/gamedev/engines/Gideros/GiderosPlayer
+sudo chmod +x /opt/gamedev/engines/Gideros/GiderosFontCreator
+sudo chmod +x /opt/gamedev/engines/Gideros/GiderosTexturePacker
+
+sudo tee /usr/local/bin/giderosstudio > /dev/null << "EOF"
+#!/bin/bash
+cd /opt/gamedev/engines/Gideros && LD_LIBRARY_PATH=/opt/gamedev/engines/Gideros ./GiderosStudio "$@"
+EOF
+
+sudo tee /usr/local/bin/giderosplayer > /dev/null << "EOF"
+#!/bin/bash
+cd /opt/gamedev/engines/Gideros && LD_LIBRARY_PATH=/opt/gamedev/engines/Gideros ./GiderosPlayer "$@"
+EOF
+
+sudo tee /usr/local/bin/giderosfontcreator > /dev/null << "EOF"
+#!/bin/bash
+cd /opt/gamedev/engines/Gideros && LD_LIBRARY_PATH=/opt/gamedev/engines/Gideros ./GiderosFontCreator "$@"
+EOF
+
+sudo tee /usr/local/bin/giderostexturepacker > /dev/null << "EOF"
+#!/bin/bash
+cd /opt/gamedev/engines/Gideros && LD_LIBRARY_PATH=/opt/gamedev/engines/Gideros ./GiderosTexturePacker "$@"
+EOF
+
+sudo chmod +x /usr/local/bin/giderosstudio
+sudo chmod +x /usr/local/bin/giderosplayer
+sudo chmod +x /usr/local/bin/giderosfontcreator
+sudo chmod +x /usr/local/bin/giderostexturepacker
+
+create_desktop_entry giderosstudio "Gideros Studio" "/opt/gamedev/engines/Gideros"
+create_desktop_entry giderosplayer "Gideros Player" "/opt/gamedev/engines/Gideros"
+create_desktop_entry giderosfontcreator "Gideros Font Creator" "/opt/gamedev/engines/Gideros"
+create_desktop_entry giderostexturepacker "Gideros Texture Packer" "/opt/gamedev/engines/Gideros"
+'
+
 # -----------------------------
 # CREATIVE TOOLS
 # -----------------------------
