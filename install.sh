@@ -1171,7 +1171,14 @@ sudo mv "$DEFOLD_DIR" /opt/gamedev/engines/Defold
 
 sudo chmod +x /opt/gamedev/engines/Defold/Defold
 
-register_bin defold /opt/gamedev/engines/Defold/Defold "Defold"
+sudo tee /usr/local/bin/defold << 'EOF'
+#!/bin/bash
+cd /opt/gamedev/engines/Defold/ && ./Defold "$@"
+EOF
+
+sudo chmod +x /usr/local/bin/defold
+
+create_desktop_entry defold "Defold"
 '
 
 # -----------------------------
