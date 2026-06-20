@@ -168,6 +168,10 @@ is_ok() {
     return 0
 }
 
+is_pip_installed() {
+    python3 -c "import $1" 2>/dev/null
+}
+
 # -----------------------------
 # BINARY REGISTRY (FIX)
 # -----------------------------
@@ -1398,35 +1402,48 @@ sudo dpkg -i "$TMP_DIR/gbstudio.deb" || {
     }
 }
 '
+# -----------------------------
+# Python Libraries TOOLS
+# -----------------------------
 
-run_step "Python Game Dev Libraries" "command -v python3 >/dev/null" '
-PIP_BIN=$(command -v pip3 || command -v pip)
+run_step "pygame" "is_pip_installed pygame" '
+python3 -m pip install -U pygame
+'
 
-if [ -z "$PIP_BIN" ]; then
-    echo "⚠️ pip not found"
-    return 0
-fi
+run_step "pyglet" "is_pip_installed pyglet" '
+python3 -m pip install -U pyglet
+'
 
-echo "🐍 Using: $PIP_BIN"
+run_step "kivy" "is_pip_installed kivy" '
+python3 -m pip install -U kivy
+'
 
-sudo "$PIP_BIN" install -U \
-    pygame \
-    pyglet \
-    kivy \
-    arcade \
-    moderngl \
-    pymunk \
-    pytmx \
-    pyinstaller \
-    noise \
-    pillow \
-    numpy \
-    attrs || {
-        echo "⚠️ Some packages failed to install"
-        return 0
-    }
+run_step "arcade" "is_pip_installed arcade" '
+python3 -m pip install -U arcade
+'
 
-echo "✅ Python game development libraries installed"
+run_step "moderngl" "is_pip_installed moderngl" '
+python3 -m pip install -U moderngl
+'
+
+run_step "pymunk" "is_pip_installed pymunk" '
+python3 -m pip install -U pymunk
+'
+
+run_step "pillow" "is_pip_installed PIL" '
+python3 -m pip install -U pillow
+'
+
+run_step "numpy" "is_pip_installed numpy" '
+python3 -m pip install -U numpy
+'
+
+run_step "noise" "is_pip_installed noise" '
+python3 -m pip install -U noise
+'
+
+run_step "pyinstaller" "is_pip_installed PyInstaller" '
+python3 -m pip install -U pyinstaller
 '
 
 # -----------------------------
