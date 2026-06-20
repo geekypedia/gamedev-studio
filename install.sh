@@ -1186,6 +1186,10 @@ sudo chmod +x /usr/local/bin/defold
 create_desktop_entry defold "Defold" "/opt/gamedev/engines/Defold"
 '
 
+# -----------------------------
+# ADDITIONAL GAME ENGINES
+# -----------------------------
+
 run_step "Gideros" "is_installed giderosstudio" '
 mkdir -p "$TMP_DIR"
 
@@ -1252,6 +1256,147 @@ create_desktop_entry giderosstudio "Gideros Studio" "/opt/gamedev/engines/Gidero
 create_desktop_entry giderosplayer "Gideros Player" "/opt/gamedev/engines/Gideros"
 create_desktop_entry giderosfontcreator "Gideros Font Creator" "/opt/gamedev/engines/Gideros"
 create_desktop_entry giderostexturepacker "Gideros Texture Packer" "/opt/gamedev/engines/Gideros"
+'
+
+run_step "Solarus" "is_installed solarus-editor" '
+SOLARUS_VERSION="2.0.4"
+
+EDITOR_URL="https://gitlab.com/api/v4/projects/solarus-games%2Fsolarus/packages/generic/solarus/${SOLARUS_VERSION}/solarus-v2.0.4-linux-x64.tar.gz"
+LAUNCHER_URL="https://gitlab.com/api/v4/projects/solarus-games%2Fsolarus/packages/generic/solarus/${SOLARUS_VERSION}/solarus-launcher-v2.0.4-linux-x64.tar.gz"
+
+EDITOR_TAR="$TMP_DIR/solarus-editor.tar.gz"
+LAUNCHER_TAR="$TMP_DIR/solarus-launcher.tar.gz"
+
+APP_DIR="/opt/gamedev/tools/solarus"
+
+safe_wget "$EDITOR_URL" "$EDITOR_TAR" || {
+  echo "⚠️ Solarus Editor download failed"
+  return 0
+}
+
+safe_wget "$LAUNCHER_URL" "$LAUNCHER_TAR" || {
+  echo "⚠️ Solarus Launcher download failed"
+  return 0
+}
+
+rm -rf "$APP_DIR"
+mkdir -p "$APP_DIR/editor" "$APP_DIR/launcher"
+
+tar -xzf "$EDITOR_TAR" -C "$APP_DIR/editor" || {
+  echo "⚠️ Solarus Editor extraction failed"
+  return 0
+}
+
+tar -xzf "$LAUNCHER_TAR" -C "$APP_DIR/launcher" || {
+  echo "⚠️ Solarus Launcher extraction failed"
+  return 0
+}
+
+EDITOR_BIN=$(find "$APP_DIR/editor" -type f -name "*.AppImage" | head -n1)
+LAUNCHER_BIN=$(find "$APP_DIR/launcher" -type f -name "*.AppImage" | head -n1)
+
+if [ -z "$EDITOR_BIN" ]; then
+  echo "⚠️ Could not locate Solarus Editor AppImage"
+  find "$APP_DIR/editor" -type f | head -50
+  return 0
+fi
+
+if [ -z "$LAUNCHER_BIN" ]; then
+  echo "⚠️ Could not locate Solarus Launcher AppImage"
+  find "$APP_DIR/launcher" -type f | head -50
+  return 0
+fi
+
+chmod +x "$EDITOR_BIN" "$LAUNCHER_BIN"
+
+extract_appimage_icon "$EDITOR_BIN"
+register_bin solarus-editor "$EDITOR_BIN" "Solarus Editor"
+
+extract_appimage_icon "$LAUNCHER_BIN"
+register_bin solarus-launcher "$LAUNCHER_BIN" "Solarus Launcher"
+'
+
+run_step "Eldiron" "is_installed eldiron" '
+API="https://api.github.com/repos/markusmoenig/Eldiron/releases/latest"
+
+echo "🌐 Fetching Eldiron latest release..."
+
+DEB_URL=$(curl -s "$API" | jq -r "
+  .assets[]
+  | select(.name != null)
+  | select(.name | endswith(\".deb\"))
+  | .browser_download_url
+" | head -n1)
+
+if [ -z "$DEB_URL" ]; then
+    echo "⚠️ Eldiron Linux DEB not found"
+    curl -s "$API" | jq -r ".assets[].name"
+    return 0
+fi
+
+echo "⬇️ Downloading: $DEB_URL"
+
+safe_wget "$DEB_URL" "$TMP_DIR/eldiron.deb" || {
+    echo "⚠️ Download failed"
+    return 0
+}
+
+echo "📦 Installing Eldiron..."
+
+sudo dpkg -i "$TMP_DIR/eldiron.deb" || {
+    echo "⚠️ dpkg failed, fixing dependencies..."
+    sudo apt-get install -f -y || {
+        echo "⚠️ dependency fix failed"
+        return 0
+    }
+
+    sudo dpkg -i "$TMP_DIR/eldiron.deb" || {
+        echo "⚠️ installation failed"
+        return 0
+    }
+}
+'
+
+run_step "GB Studio" "is_installed gb-studio" '
+API="https://api.github.com/repos/chrismaltby/gb-studio/releases/latest"
+
+echo "🌐 Fetching GB Studio latest release..."
+
+DEB_URL=$(curl -s "$API" | jq -r "
+  .assets[]
+  | select(.name != null)
+  | select(.name | endswith(\".deb\"))
+  | select(.name | contains(\"arm64\") | not)
+  | .browser_download_url
+" | head -n1)
+
+if [ -z "$DEB_URL" ]; then
+    echo "⚠️ GB Studio Linux DEB not found"
+    curl -s "$API" | jq -r ".assets[].name"
+    return 0
+fi
+
+echo "⬇️ Downloading: $DEB_URL"
+
+safe_wget "$DEB_URL" "$TMP_DIR/gbstudio.deb" || {
+    echo "⚠️ Download failed"
+    return 0
+}
+
+echo "📦 Installing GB Studio..."
+
+sudo dpkg -i "$TMP_DIR/gbstudio.deb" || {
+    echo "⚠️ dpkg failed, fixing dependencies..."
+    sudo apt-get install -f -y || {
+        echo "⚠️ dependency fix failed"
+        return 0
+    }
+
+    sudo dpkg -i "$TMP_DIR/gbstudio.deb" || {
+        echo "⚠️ installation failed"
+        return 0
+    }
+}
 '
 
 # -----------------------------
