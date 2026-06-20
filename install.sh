@@ -134,7 +134,7 @@ is_installed() {
     command -v "$1" >/dev/null 2>&1
 }
 
-run_step() {
+run_step_new() {
     local NAME="$1"
     local CHECK_CMD="$2"
     shift 2
@@ -169,7 +169,7 @@ run_step() {
     return $RUN_STATUS
 }
 
-run_step_legacy() {
+run_step() {
     local NAME="$1"
     local CHECK_CMD="$2"
     shift 2
