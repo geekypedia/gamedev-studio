@@ -156,7 +156,8 @@ is_installed() {
 list_header(){
     # List only
     if [[ "$LIST_STEPS" -eq 1 ]]; then
-        printf "%-25s %s\n" "Package" "Description"
+        printf "%-25s | %-40s\n" "Package" "Description"
+        printf "%-25s | %-40s\n" "-------" "-----------"
         return 0
     fi
 
@@ -180,7 +181,7 @@ run_step() {
 
     # List only
     if [[ "$LIST_STEPS" -eq 1 ]]; then
-        printf "%-25s %s\n" "$NAME" "$DESCRIPTION"
+        printf "%-25s | %-40s\n" "$NAME" "$DESCRIPTION"
         return 0
     fi
     
