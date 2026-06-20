@@ -148,10 +148,28 @@ is_installed() {
     command -v "$1" >/dev/null 2>&1
 }
 
+should_run_step() {
+    local STEP_NAME="$1"
+
+    # if no filter → run everything
+    [[ -z "$UPDATE_ONLY" ]] && return 0
+
+    # match step name (case-insensitive, partial match safe)
+    echo "$STEP_NAME" | grep -qi "$UPDATE_ONLY"
+}
+
 run_step() {
     local NAME="$1"
     local CHECK_CMD="$2"
     shift 2
+
+    # Skip if --update filter is active and doesn't match
+    if [[ -n "$UPDATE_ONLY" ]]; then
+        if ! should_run_step "$NAME"; then
+            echo "⏭ Skipping (filtered by --update $UPDATE_ONLY)"
+            return 0
+        fi
+    fi
 
     echo
     echo "--------------------------------------------------"
