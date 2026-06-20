@@ -569,7 +569,8 @@ check_apt_conflicts() {
 }
 
 is_npm_installed() {
-    npm list -g --depth=0 "$1" >/dev/null 2>&1
+    npm list -g --depth=0 "$1" >/dev/null 2>&1 ||
+    command -v "$1" >/dev/null 2>&1
 }
 
 # -----------------------------
