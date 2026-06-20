@@ -187,8 +187,8 @@ run_step() {
     fi
 
     if [[ "$SKIP" -eq 1 ]]; then
-        echo "✓ $NAME already installed (skipping)"
-        INSTALLED+=("$NAME (already present)")
+        echo "✓ $DESCRIPTION($NAME) already installed (skipping)"
+        INSTALLED+=("$DESCRIPTION($NAME) (already present)")
         return 0
     fi
 
@@ -205,10 +205,10 @@ run_step() {
     local EXIT_CODE=$?
 
     if [[ $EXIT_CODE -eq 0 ]]; then
-        success "$NAME"
+        success "$DESCRIPTION($NAME)"
     else
-        echo "⚠️ $NAME failed (continuing...)"
-        failure "$NAME"
+        echo "⚠️ $DESCRIPTION($NAME) failed (continuing...)"
+        failure "$DESCRIPTION($NAME)"
     fi
 
     return 0
