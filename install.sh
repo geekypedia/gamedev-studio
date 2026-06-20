@@ -166,7 +166,7 @@ run_step() {
     # Skip if --update filter is active and doesn't match
     if [[ -n "$UPDATE_ONLY" ]]; then
         if ! should_run_step "$NAME"; then
-            echo "⏭ Skipping (filtered by --update $UPDATE_ONLY)"
+            # echo "⏭ Skipping $NAME (filtered by --update $UPDATE_ONLY)"
             return 0
         fi
     fi
