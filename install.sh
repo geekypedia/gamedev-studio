@@ -589,7 +589,7 @@ is_npm_installed() {
 }
 
 is_nvm_usable() {
-    export NVM_DIR="$(eval echo ~${SUDO_USER:-$USER})/.nvm" [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+    export NVM_DIR="$(eval echo ~${SUDO_USER:-$USER})/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 }
 
 # -----------------------------
@@ -740,7 +740,7 @@ flatpak install -y flathub com.usebottles.bottles || true
 # NODE / NVM
 # -----------------------------
 
-run_step "Node.js (NVM + LTS)" '
+run_step "Node.js (NVM + LTS)" "is_nvm_usable" '
 NVM_PATH="$(eval echo ~${SUDO_USER:-$USER})/.nvm/nvm.sh"
 [ ! -s "$NVM_PATH" ]
 ' '
