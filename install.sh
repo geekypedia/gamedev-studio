@@ -688,9 +688,11 @@ flatpak install -y flathub com.usebottles.bottles || true
 # NODE / NVM
 # -----------------------------
 
-run_step "Node.js (NVM + LTS)" "is_installed node" '
+run_step "Node.js (NVM + LTS)" '[ ! -s "$HOME/.nvm/nvm.sh" ]' '
+set -e
+
 if [ ! -d "$HOME/.nvm" ]; then
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 fi
 
 export NVM_DIR="$HOME/.nvm"
@@ -698,6 +700,9 @@ export NVM_DIR="$HOME/.nvm"
 
 nvm install --lts
 nvm use --lts
+nvm alias default "lts/*"
+
+echo "✅ NVM + LTS Node installed"
 '
 
 run_step "TSC" "is_installed tsc" '
