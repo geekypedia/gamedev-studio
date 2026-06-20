@@ -913,7 +913,13 @@ INSTALLED_VERSION_RAW=$(godot --version 2>/dev/null || true)
 
 # normalize Godot version: 4.6.3.stable.official.xxxxx → 4.6.3-stable
 if [ -n "$INSTALLED_VERSION_RAW" ]; then
-    INSTALLED_VERSION=$(echo "$INSTALLED_VERSION_RAW" | awk -F. '{print $1"."$2"."$3"-"$4}')
+    BASE_VERSION=$(echo "$INSTALLED_VERSION_RAW" | cut -d. -f1-3)
+
+    if echo "$INSTALLED_VERSION_RAW" | grep -q "stable"; then
+        INSTALLED_VERSION="${BASE_VERSION}-stable"
+    else
+        INSTALLED_VERSION="$BASE_VERSION"
+    fi
 else
     INSTALLED_VERSION=""
 fi
