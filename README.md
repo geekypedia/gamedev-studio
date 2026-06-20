@@ -65,6 +65,10 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 - microStudio (Lua, JavaScript, Python)
 - Defold (Lua)
 - Gideros Studio (Lua)
+- GB Studio
+- Solarus (Lua)
+- Eldiron (Python)
+- Pygame (Python)
 
 ---
 
