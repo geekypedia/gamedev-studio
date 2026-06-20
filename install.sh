@@ -144,19 +144,34 @@ run_step() {
     echo "Installing: $NAME"
     echo "--------------------------------------------------"
 
-    # Skip only if check succeeds
+    # IMPORTANT: always fail-safe check evaluation
+    local SKIP=0
+
     if [[ "$FORCE_UPDATE" -eq 0 ]]; then
         if eval "$CHECK_CMD"; then
-            echo "✓ $NAME already installed (skipping)"
-            INSTALLED+=("$NAME (already present)")
-            return 0
+            SKIP=1
         fi
-    else
+    fi
+
+    if [[ "$SKIP" -eq 1 ]]; then
+        echo "✓ $NAME already installed (skipping)"
+        INSTALLED+=("$NAME (already present)")
+        return 0
+    fi
+
+    if [[ "$FORCE_UPDATE" -eq 1 ]]; then
         echo "⚠ Force mode: reinstalling $NAME"
     fi
 
-    # Run install (NEVER break pipeline on failure)
-    if eval "$*"; then
+    # run install safely (NEVER break script even if step crashes)
+    (
+        set +e
+        eval "$*"
+    )
+
+    local EXIT_CODE=$?
+
+    if [[ $EXIT_CODE -eq 0 ]]; then
         success "$NAME"
     else
         echo "⚠️ $NAME failed (continuing...)"
