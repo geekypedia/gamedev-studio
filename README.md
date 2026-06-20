@@ -96,6 +96,8 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 - Solarus (Lua)
 - Eldiron (Python)
 - Pygame (Python)
+- Solar2D (Lua)
+- GameMaker (GML/JavaScript/TypeScript)
 
 ---
 
