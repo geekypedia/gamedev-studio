@@ -1399,6 +1399,36 @@ sudo dpkg -i "$TMP_DIR/gbstudio.deb" || {
 }
 '
 
+run_step "Python Game Dev Libraries" "command -v python3 >/dev/null" '
+PIP_BIN=$(command -v pip3 || command -v pip)
+
+if [ -z "$PIP_BIN" ]; then
+    echo "⚠️ pip not found"
+    return 0
+fi
+
+echo "🐍 Using: $PIP_BIN"
+
+sudo "$PIP_BIN" install -U \
+    pygame \
+    pyglet \
+    kivy \
+    arcade \
+    moderngl \
+    pymunk \
+    pytmx \
+    pyinstaller \
+    noise \
+    pillow \
+    numpy \
+    attrs || {
+        echo "⚠️ Some packages failed to install"
+        return 0
+    }
+
+echo "✅ Python game development libraries installed"
+'
+
 # -----------------------------
 # CREATIVE TOOLS
 # -----------------------------
