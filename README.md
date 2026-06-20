@@ -57,19 +57,26 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 ### 🎯 Update a single package
 
 ```bash
-sudo ~/gamedev-studio.sh --update your-package
+~/gamedev-studio.sh --update your-package
 ```
 
 ##### More usable with -f option
 
 ```bash
-sudo ~/gamedev-studio.sh --update your-package -f
+~/gamedev-studio.sh --update your-package -f
 ```
 
 #### Example
 
 ```bash
-sudo ~/gamedev-studio.sh --update godot -f
+~/gamedev-studio.sh --update godot -f
+```
+---
+
+### 🎯 List available packages
+
+```bash
+~/gamedev-studio.sh --list
 ```
 
 ---
@@ -166,7 +173,8 @@ sudo ~/gamedev-studio.sh --update godot -f
 |------|-------------|
 | `--force` / `-f` | Reinstall and overwrite all tools |
 | `--upgrade` | Runs system upgrade (`apt upgrade`) before installation |
-| `--update <step>` | Runs only a specific installation step (e.g. `godot`, `electron`) |
+| `--update <package>` / `-u <package>` | Runs only a specific installation package (e.g. `godot`, `electron`) |
+| `--list` / `-l` | Lists available packages |
 | *(none)* | Safe mode (skip existing installs) |
 
 ---
