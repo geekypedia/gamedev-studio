@@ -1320,21 +1320,24 @@ extract_appimage_icon "$LAUNCHER_BIN"
 register_bin solarus-launcher "$LAUNCHER_BIN" "Solarus Launcher"
 '
 
-run_step "Eldiron" "is_installed eldiron-creator" '
-API="https://api.github.com/repos/markusmoenig/Eldiron/releases/latest"
+run_step "Eldiron" "is_installed eldiron" '
+API="https://api.github.com/repos/markusmoenig/Eldiron/releases"
 
-echo "🌐 Fetching Eldiron latest release..."
+echo "🌐 Fetching latest available Eldiron release..."
 
-DEB_URL=$(curl -s "$API" | jq -r "
-  .assets[]
-  | select(.name != null)
+RELEASES=$(curl -s "$API")
+
+DEB_URL=$(echo "$RELEASES" | jq -r "
+  .[]
+  | select(.assets? != null)
+  | .assets[]
+  | select(.name? != null)
   | select(.name | endswith(\".deb\"))
   | .browser_download_url
-" | head -n1)
+" | head -n 1)
 
 if [ -z "$DEB_URL" ]; then
-    echo "⚠️ Eldiron Linux DEB not found"
-    curl -s "$API" | jq -r ".assets[].name"
+    echo "⚠️ No Eldiron .deb found in releases"
     return 0
 fi
 
