@@ -160,7 +160,8 @@ should_run_step() {
 
 run_step() {
     local NAME="$1"
-    local CHECK_CMD="$2"
+    local DESCRIPTION="$2"
+    local CHECK_CMD="$3"
     shift 2
 
     # Skip if --update filter is active and doesn't match
@@ -743,17 +744,17 @@ prep(){
     # SYSTEM FLOW
     # -----------------------------
     
-    run_step "APT Update" "true" '
+    run_step "apt" "APT Update" "true" '
     sudo apt update -y
     '
     
     if [[ "$RUN_UPGRADE_STEP" -eq 1 ]]; then
-    run_step "APT Upgrade" "true" '
+    run_step "upgrade" "APT Upgrade" "true" '
     sudo apt upgrade -y
     '
     fi
     
-    run_step "System Dependencies Install" \
+    run_step "deps" "System Dependencies Install" \
     "is_ok git curl wget unzip jq pv" '
     sudo apt install -y \
     git curl wget unzip jq pv zenity inotify-tools \
@@ -766,7 +767,7 @@ prep(){
     # -----------------------------
     
     if [[ "$RUN_UPGRADE_STEP" -eq 1 ]]; then
-    run_step "GPU Drivers" "nvidia-smi >/dev/null 2>&1 || lspci | grep -i nvidia" '
+    run_step "drivers" "GPU Drivers" "nvidia-smi >/dev/null 2>&1 || lspci | grep -i nvidia" '
     sudo ubuntu-drivers autoinstall
     '
     fi
@@ -775,8 +776,10 @@ prep(){
     # FLATPAK
     # -----------------------------
     
-    run_step "Flatpak + Bottles" "is_installed flatpak" '
-    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo &&
+    run_step "flatpack" "Flatpak" "is_installed flatpak" '
+    flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+    '
+    run_step "bottles" "Bottles" "is_installed bottles" '
     flatpak install -y flathub com.usebottles.bottles || true
     '
 }
@@ -787,7 +790,7 @@ execute(){
     # NODE / NVM
     # -----------------------------
     
-    run_step "Node.js (NVM + LTS)" "is_nvm_usable" '
+    run_step "node" "Node.js LTS using NVM" "is_nvm_usable" '
     NVM_PATH="$(eval echo ~${SUDO_USER:-$USER})/.nvm/nvm.sh"
     [ ! -s "$NVM_PATH" ]
     ' '
@@ -827,39 +830,39 @@ execute(){
     echo "✅ NVM + LTS Node installed"
     '
     
-    run_step "TSC" "is_installed tsc" '
+    run_step "tsc" "TypeScript Compiler" "is_installed tsc" '
     sudo apt install node-typescript -y || echo "⚠️ TypeScript install failed"
     '
     
-    run_step "TypeScript" "is_npm_installed typescript" '
+    run_step "typescript" "TypeScript" "is_npm_installed typescript" '
     npm install -g typescript --progress=true --verbose || echo "⚠️ TypeScript install failed"
     '
     
-    run_step "Vite" "is_installed vite" '
+    run_step "vite" "Vite" "is_installed vite" '
     npm install -g vite --progress=true --verbose || echo "⚠️ Vite install failed"
     '
     
-    run_step "Create Vite" "is_installed create-vite" '
+    run_step "create-vite" "Create Vite" "is_installed create-vite" '
     npm install -g create-vite --progress=true --verbose || echo "⚠️ create-vite install failed"
     '
     
-    run_step "React CLI" "is_installed create-react-app" '
+    run_step "create-react-app" "React CLI" "is_installed create-react-app" '
     npm install -g create-react-app --progress=true --verbose || echo "⚠️ create-react-app install failed"
     '
     
-    run_step "Phaser CLI" "is_npm_installed phaser" '
+    run_step "phaser" "Phaser CLI" "is_npm_installed phaser" '
     npm install -g phaser --progress=true --verbose || echo "⚠️ Phaser install failed"
     '
     
-    run_step "Excalibur CLI" "is_npm_installed excalibur" '
+    run_step "excalibur" "Excalibur CLI" "is_npm_installed excalibur" '
     npm install -g excalibur --progress=true --verbose || echo "⚠️ Excalibur install failed"
     '
     
-    run_step "NW.js CLI" "is_npm_installed nw" '
+    run_step "nw" "NW.js CLI" "is_npm_installed nw" '
     npm install -g nw --progress=true --verbose || echo "⚠️ NW.js install failed"
     '
     
-    run_step "Electron CLI" "is_npm_installed electron" '
+    run_step "electron" "Electron CLI" "is_npm_installed electron" '
     npm install -g electron --progress=true --verbose || echo "⚠️ Electron install failed"
     '
     
@@ -867,7 +870,7 @@ execute(){
     # CODE EDITORS
     # -----------------------------
     
-    run_step "VS Code Repo Setup" "is_installed code" '
+    run_step "code-setup" "VS Code Repo Setup" "is_installed code" '
     echo "🧹 Cleaning old VS Code / Microsoft repository definitions..."
     
     # Remove all known VS Code / Microsoft repo definitions
@@ -913,33 +916,33 @@ execute(){
     echo "✅ VS Code repository configured"
     '
     
-    run_step "VS Code Install" "is_installed code" '
+    run_step "code" "VS Code Install" "is_installed code" '
     sudo apt install -y code || {
         echo "⚠️ VS Code installation failed"
         return 0
     }
     '
     
-    run_step "Code Server" "is_installed code-server" '
+    run_step "code-server" "Code Server" "is_installed code-server" '
     curl -fsSL https://code-server.dev/install.sh | sudo bash || {
       echo "⚠️ code-server install failed"
       return 0
     }
     '
     
-    run_step "HTTP Server" "is_installed http-server" '
+    run_step "http-server" "HTTP Server" "is_installed http-server" '
     npm install -g http-server || echo "⚠️ http-server install failed"
     '
     
-    run_step "Serve" "is_installed serve" '
+    run_step "serve" "Serve" "is_installed serve" '
     npm install -g serve || echo "⚠️ serve install failed"
     '
     
-    run_step "SQLite (CLI)" "is_installed sqlite3" '
+    run_step "sqlite" "SQLite (CLI)" "is_installed sqlite3" '
     sudo apt install -y sqlite3 sqlite3-tools || echo "⚠️ SQLite install failed"
     '
     
-    run_step "SQLite Browser" "is_installed sqlitebrowser" '
+    run_step "sqlitebrowser" "SQLite Browser" "is_installed sqlitebrowser" '
     echo "📦 Installing DB Browser for SQLite..."
     
     sudo apt install -y sqlitebrowser || {
@@ -959,7 +962,7 @@ execute(){
     # WEB BROWSER
     # -----------------------------
     
-    run_step "Google Chrome" "is_ok google-chrome google-chrome-stable chromium" '
+    run_step "chrome" "Google Chrome" "is_ok google-chrome google-chrome-stable chromium" '
     mkdir -p "$TMP_DIR"
     
     CHROME_DEB="$TMP_DIR/chrome.deb"
@@ -983,7 +986,7 @@ execute(){
     # GAME ENGINES
     # -----------------------------
     
-    run_step "Godot" "is_installed godot" '
+    run_step "godot" "Godot" "is_installed godot" '
     mkdir -p "$TMP_DIR"
     
     GODOT_URL=$(
@@ -1027,7 +1030,7 @@ execute(){
     register_bin godot /opt/gamedev/engines/godot/godot "Godot"
     '
     
-    run_step "Godot Export Templates" "false" '
+    run_step "godot-templates" "Godot Export Templates" "false" '
     mkdir -p "$TMP_DIR"
     
     API="https://api.github.com/repos/godotengine/godot/releases"
@@ -1111,7 +1114,7 @@ execute(){
     echo "✅ Installed Godot templates for $VERSION"
     '
     
-    run_step "GDevelop" "is_installed gdevelop" '
+    run_step "gdevelop" "GDevelop" "is_installed gdevelop" '
     GDEV_URL=$(
       curl -s https://api.github.com/repos/4ian/GDevelop/releases/latest |
       jq -r "
@@ -1139,7 +1142,7 @@ execute(){
     register_bin gdevelop /opt/gamedev/engines/gdevelop/gdevelop.AppImage "GDevelop"
     '
     
-    run_step "ct.js" "is_installed ctjs" '
+    run_step "ctjs" "Ct.js" "is_installed ctjs" '
     mkdir -p "$TMP_DIR"
     
     CT_URL=$(
@@ -1197,7 +1200,7 @@ execute(){
     register_bin ctjs "$CT_BIN_FINAL" "Ct.js"
     '
     
-    run_step "RenPy" "is_installed renpy" '
+    run_step "renpy" "RenPy" "is_installed renpy" '
     
     mkdir -p "$TMP_DIR"
     
@@ -1264,11 +1267,11 @@ execute(){
     register_bin renpy "$RENPY_LAUNCHER" "RenPy"
     '
     
-    run_step "LOVE2D" "is_installed love" '
+    run_step "love" "LOVE2D" "is_installed love" '
     sudo apt install -y love
     '
     
-    run_step "microStudio" "is_installed microstudio" '
+    run_step "microstudio" "microStudio" "is_installed microstudio" '
     API="https://api.github.com/repos/pmgl/microstudio/releases/latest"
     
     echo "🌐 Fetching microStudio latest release..."
@@ -1306,7 +1309,7 @@ execute(){
     echo "✅ microStudio installed successfully"
     '
     
-    run_step "Defold" "is_installed defold" '
+    run_step "defold" "Defold" "is_installed defold" '
     mkdir -p "$TMP_DIR"
     
     DEFOLD_ZIP="$TMP_DIR/defold.zip"
@@ -1354,7 +1357,7 @@ execute(){
     # ADDITIONAL GAME ENGINES
     # -----------------------------
     
-    run_step "Gideros" "is_installed giderosstudio" '
+    run_step "gideros" "Gideros" "is_installed giderosstudio" '
     mkdir -p "$TMP_DIR"
     
     GIDEROS_ARCHIVE="$TMP_DIR/gideros.tar.xz"
@@ -1422,7 +1425,7 @@ execute(){
     create_desktop_entry giderostexturepacker "Gideros Texture Packer" "/opt/gamedev/engines/Gideros"
     '
     
-    run_step "Solarus" "is_installed solarus-editor" '
+    run_step "solarus" "Solarus" "is_installed solarus-editor" '
     SOLARUS_VERSION="2.0.4"
     
     EDITOR_URL="https://gitlab.com/api/v4/projects/solarus-games%2Fsolarus/packages/generic/solarus/${SOLARUS_VERSION}/solarus-v2.0.4-linux-x64.tar.gz"
@@ -1480,7 +1483,7 @@ execute(){
     register_bin solarus-launcher "$LAUNCHER_BIN" "Solarus Launcher"
     '
     
-    run_step "Eldiron" "is_installed eldiron-creator" '
+    run_step "eldiron" "Eldiron" "is_installed eldiron-creator" '
     API="https://api.github.com/repos/markusmoenig/Eldiron/releases"
     
     echo "🌐 Fetching latest available Eldiron release..."
@@ -1524,7 +1527,7 @@ execute(){
     }
     '
     
-    run_step "GB Studio" "is_installed gb-studio" '
+    run_step "gb-studio" "GB Studio" "is_installed gb-studio" '
     API="https://api.github.com/repos/chrismaltby/gb-studio/releases/latest"
     
     echo "🌐 Fetching GB Studio latest release..."
@@ -1569,10 +1572,10 @@ execute(){
     # Python Libraries TOOLS
     # -----------------------------
     
-    run_step "Python Game Dev Env" "test -d /opt/gamedev/python-env" '
+    run_step  "python-env" "Python Game Dev Env" "test -d /opt/gamedev/python-env" '
     python3 -m venv /opt/gamedev/python-env
     '
-    run_step "Python Game Dev Packages" "test -f /opt/gamedev/python-env/bin/python" '
+    run_step "pygame" "Python Game Dev Packages" "test -f /opt/gamedev/python-env/bin/python" '
     /opt/gamedev/python-env/bin/python -m pip install -U \
       pygame pyglet kivy arcade moderngl pymunk pillow numpy noise pyinstaller
     '
@@ -1581,23 +1584,23 @@ execute(){
     # CREATIVE TOOLS
     # -----------------------------
     
-    run_step "Blender" "is_installed blender" '
+    run_step "Blender" "Blender" "is_installed blender" '
     sudo apt install -y blender
     '
     
-    run_step "GIMP" "is_installed gimp" '
+    run_step "GIMP" "GIMP" "is_installed gimp" '
     sudo apt install -y gimp
     '
     
-    run_step "Krita" "is_installed krita" '
+    run_step "Krita" "Krita" "is_installed krita" '
     sudo apt install -y krita
     '
     
-    run_step "Inkscape" "is_installed inkscape" '
+    run_step "Inkscape" "Inkscape" "is_installed inkscape" '
     sudo apt install -y inkscape
     '
     
-    run_step "Pixelorama" "is_installed pixelorama" '
+    run_step "Pixelorama" "Pixelorama" "is_installed pixelorama" '
     API="https://api.github.com/repos/Orama-Interactive/Pixelorama/releases/latest"
     
     PIXEL_URL=$(
@@ -1644,7 +1647,7 @@ execute(){
     register_bin pixelorama "$PIXEL_BIN" "Pixelorama"
     '
     
-    run_step "LibreSprite" "is_installed libresprite" '
+    run_step "LibreSprite" "LibreSprite" "is_installed libresprite" '
     API="https://api.github.com/repos/LibreSprite/LibreSprite/releases/latest"
     
     ZIP_URL=$(
@@ -1694,35 +1697,35 @@ execute(){
     # AUDIO / VIDEO
     # -----------------------------
     
-    run_step "VLC" "is_installed vlc" '
+    run_step "VLC" "VLC" "is_installed vlc" '
     sudo apt install -y vlc || echo "⚠️ VLC install failed"
     '
     
-    run_step "Kdenlive" "is_installed kdenlive" '
+    run_step "Kdenlive" "Kdenlive" "is_installed kdenlive" '
     sudo apt install -y kdenlive || echo "⚠️ Kdenlive install failed"
     '
     
-    run_step "OBS Studio" "is_installed obs" '
+    run_step "obs" "OBS Studio" "is_installed obs" '
     sudo apt install -y obs-studio || echo "⚠️ OBS Studio install failed"
     '
     
-    run_step "LMMS" "is_installed lmms" '
+    run_step "lmms" "LMMS" "is_installed lmms" '
     sudo apt install -y lmms || echo "⚠️ LMMS install failed"
     '
     
-    run_step "Audacity" "is_installed audacity" '
+    run_step "Audacity" "Audacity" "is_installed audacity" '
     sudo apt install -y audacity || echo "⚠️ Audacity install failed"
     '
     
-    run_step "Ardour" "is_installed ardour" '
+    run_step "Ardour" "Ardour" "is_installed ardour" '
     sudo apt install -y ardour || echo "⚠️ Ardour install failed"
     '
     
-    run_step "Hydrogen Drum Machine" "is_installed hydrogen" '
+    run_step "hydrogen" "Hydrogen Drum Machine" "is_installed hydrogen" '
     sudo apt install -y hydrogen hydrogen-drumkits || echo "⚠️ Hydrogen install failed"
     '
     
-    run_step "Geonkick" "is_installed geonkick" '
+    run_step "geonkick" "Geonkick" "is_installed geonkick" '
     sudo apt install -y geonkick || echo "⚠️ Geonkick install failed"
     '
     
@@ -1730,7 +1733,7 @@ execute(){
     # LEVEL EDITORS
     # -----------------------------
     
-    run_step "Tiled Map Editor" "is_installed tiled" '
+    run_step "tiled" "Tiled Map Editor" "is_installed tiled" '
     echo "📦 Installing Tiled Map Editor..."
     
     sudo apt install -y tiled || {
@@ -1746,7 +1749,7 @@ execute(){
     fi
     '
     
-    run_step "LDtk" "is_installed ldtk" '
+    run_step "ldtk" "LDtk" "is_installed ldtk" '
     API="https://api.github.com/repos/deepnight/ldtk/releases/latest"
     
     LDTK_URL=$(
@@ -1806,7 +1809,7 @@ execute(){
     '
     
     
-    run_step "LDtk Sync Pipeline" "is_installed ldtk-sync" '
+    run_step "ldtk-sync" "LDtk Sync Pipeline" "is_installed ldtk-sync" '
     sudo tee /usr/local/bin/ldtk-sync >/dev/null <<EOF
     #!/usr/bin/env bash
     
@@ -1830,7 +1833,7 @@ execute(){
     # PRODUCTIVITY
     # -----------------------------
     
-    run_step "Obsidian" "is_installed obsidian" '
+    run_step "Obsidian" "Obsidian" "is_installed obsidian" '
     mkdir -p /opt/gamedev/tools
     
     OBSIDIAN_URL=$(
@@ -1862,7 +1865,7 @@ execute(){
     # DEPLOYMENT
     # -----------------------------
     
-    run_step "itch.io Butler" "is_installed butler" '
+    run_step "butler" "itch.io Butler" "is_installed butler" '
     mkdir -p "$TMP_DIR"
     
     BUTLER_URLS=(
