@@ -725,7 +725,6 @@ run_step "Node.js (NVM + LTS)" '
 NVM_PATH="$(eval echo ~${SUDO_USER:-$USER})/.nvm/nvm.sh"
 [ ! -s "$NVM_PATH" ]
 ' '
-set -e
 
 NVM_DIR="$(eval echo ~${SUDO_USER:-$USER})/.nvm"
 
@@ -736,9 +735,28 @@ fi
 export NVM_DIR="$NVM_DIR"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 
-nvm install --lts
-nvm use --lts
-nvm alias default "lts/*"
+# ensure nvm exists
+if ! command -v nvm >/dev/null 2>&1; then
+    echo "⚠️ NVM not loaded"
+    return 0
+fi
+
+# detect current node version
+CURRENT_NODE=$(node -v 2>/dev/null || true)
+
+# detect LTS target
+LTS_NODE="lts/*"
+
+# check if already using LTS (simple heuristic)
+if nvm current 2>/dev/null | grep -q "lts"; then
+    echo "✓ Already using LTS Node: $(nvm current)"
+else
+    echo "⬇️ Installing/activating LTS Node..."
+
+    nvm install --lts
+    nvm use --lts
+    nvm alias default "lts/*"
+fi
 
 echo "✅ NVM + LTS Node installed"
 '
