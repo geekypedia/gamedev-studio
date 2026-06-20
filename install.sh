@@ -144,6 +144,41 @@ run_step() {
     echo "Installing: $NAME"
     echo "--------------------------------------------------"
 
+    if [[ "$FORCE_UPDATE" -eq 0 ]]; then
+        eval "$CHECK_CMD"
+        local CHECK_STATUS=$?
+
+        if [[ $CHECK_STATUS -eq 0 ]]; then
+            echo "✓ $NAME already installed (skipping)"
+            INSTALLED+=("$NAME (already present)")
+            return 0
+        fi
+    else
+        echo "⚠ Force mode: reinstalling $NAME"
+    fi
+
+    eval "$*"
+    local RUN_STATUS=$?
+
+    if [[ $RUN_STATUS -eq 0 ]]; then
+        success "$NAME"
+    else
+        failure "$NAME"
+    fi
+
+    return $RUN_STATUS
+}
+
+run_step_legacy() {
+    local NAME="$1"
+    local CHECK_CMD="$2"
+    shift 2
+
+    echo
+    echo "--------------------------------------------------"
+    echo "Installing: $NAME"
+    echo "--------------------------------------------------"
+
     if [[ "$FORCE_UPDATE" -eq 0 ]] && eval "$CHECK_CMD"; then
         echo "✓ $NAME already installed (skipping)"
         INSTALLED+=("$NAME (already present)")
