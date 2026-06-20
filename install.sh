@@ -1974,4 +1974,6 @@ init
 list_header
 prep
 execute
-finalize
+if [[ "$LIST_STEPS" -ne 1 ]]; then
+    finalize
+fi
