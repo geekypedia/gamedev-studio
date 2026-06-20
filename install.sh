@@ -1589,6 +1589,56 @@ execute(){
         }
     }
     '
+    
+    # -----------------------------
+    # EXTRA GAME ENGINES
+    # -----------------------------
+
+    run_step "snapd" "Snap Support" "command -v snap >/dev/null 2>&1" '
+        if ! command -v snap >/dev/null 2>&1; then
+            echo "Installing snapd..."
+    
+            if ! sudo apt install -y snapd; then
+                echo "Standard snapd install failed, attempting Linux Mint workaround..."
+    
+                NOSNAP="/etc/apt/preferences.d/nosnap.pref"
+                BACKUP="/tmp/nosnap.pref.bak"
+    
+                if [ -f "$NOSNAP" ]; then
+                    sudo mv "$NOSNAP" "$BACKUP"
+                fi
+    
+                sudo apt update
+                sudo apt install -y snapd
+    
+                if [ -f "$BACKUP" ]; then
+                    sudo mv "$BACKUP" "$NOSNAP"
+                fi
+            fi
+        fi
+    
+        command -v snap >/dev/null 2>&1
+    '
+    
+    run_step "solar2d" "Solar2D" "command -v solar2d >/dev/null 2>&1 || snap list solar2d >/dev/null 2>&1" '
+    
+        if ! command -v snap >/dev/null 2>&1; then
+            echo "Snap is required for Solar2D."
+            exit 1
+        fi
+    
+        sudo snap install solar2d
+    '
+
+    run_step "gamemaker" "GameMaker" "command -v gamemaker >/dev/null 2>&1" '
+        TMP_DEB="/tmp/GameMaker.deb"
+    
+        curl -fL "https://gamemaker.io/en/download/ubuntu/lts/GameMaker.zip" -o "$TMP_DEB"
+        sudo apt install -y "$TMP_DEB"
+    
+        rm -f "$TMP_DEB"
+    '
+    
     # -----------------------------
     # Python Libraries TOOLS
     # -----------------------------
