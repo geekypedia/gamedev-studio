@@ -948,15 +948,19 @@ register_bin godot /opt/gamedev/engines/godot/godot "Godot"
 run_step "Godot Export Templates" "false" '
 mkdir -p "$TMP_DIR"
 
-API="https://api.github.com/repos/godotengine/godot/releases/latest"
+API="https://api.github.com/repos/godotengine/godot/releases"
 
-# get latest version from API
-LATEST_VERSION=$(curl -s "$API" | jq -r ".tag_name")
+echo "🌐 Fetching Godot export templates..."
 
-# detect installed Godot version (if present)
+RELEASE_JSON=$(curl -s "$API")
+
+# get latest version tag (first release in list)
+LATEST_VERSION=$(echo "$RELEASE_JSON" | jq -r ".[0].tag_name // empty")
+
+# detect installed Godot version
 INSTALLED_VERSION_RAW=$(godot --version 2>/dev/null || true)
 
-# normalize Godot version: 4.6.3.stable.official.xxxxx → 4.6.3-stable
+# normalize: 4.6.3.stable.official.xxxxx → 4.6.3-stable
 if [ -n "$INSTALLED_VERSION_RAW" ]; then
     BASE_VERSION=$(echo "$INSTALLED_VERSION_RAW" | cut -d. -f1-3)
 
@@ -969,14 +973,14 @@ else
     INSTALLED_VERSION=""
 fi
 
-# decide which version to use
+# decide version
 if [ "$FORCE_UPDATE" -eq 1 ]; then
     VERSION="$LATEST_VERSION"
 else
     VERSION="$INSTALLED_VERSION"
 fi
 
-# fallback if detection failed
+# fallback
 if [ -z "$VERSION" ] || [ "$VERSION" = "-" ]; then
     VERSION="$LATEST_VERSION"
 fi
@@ -989,20 +993,20 @@ if [ "$FORCE_UPDATE" -eq 0 ] && [ -d "$TEMPLATE_DIR" ] && [ "$(ls -A "$TEMPLATE_
     return 0
 fi
 
-echo "⬇️ Fetching templates for $VERSION"
+echo "⬇️ Searching export templates for $VERSION"
 
-TEMPLATE_URL=$(
-  curl -s "$API" |
-  jq -r ".assets[]
-    | select(.name != null)
-    | select(.name | test(\"export_templates\"))
-    | .browser_download_url
-  " | head -n 1
-)
+TEMPLATE_URL=$(echo "$RELEASE_JSON" | jq -r "
+  .[]
+  | .assets[]?
+  | select(.name? != null)
+  | select(.name | test(\"export_templates\"))
+  | .browser_download_url
+" | head -n 1)
 
 if [ -z "$TEMPLATE_URL" ]; then
-    echo "⚠️ Could not find export templates URL"
-    curl -s "$API" | jq -r ".assets[].name"
+    echo "⚠️ No export templates found in GitHub releases"
+    echo "📦 Available assets (first release):"
+    echo "$RELEASE_JSON" | jq -r ".[0].assets[].name? // empty"
     return 0
 fi
 
