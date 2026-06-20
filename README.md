@@ -59,13 +59,15 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 ```bash
 sudo ~/gamedev-studio.sh --update your-package
 ```
-# More usable with -f option
+
+##### More usable with -f option
 
 ```bash
 sudo ~/gamedev-studio.sh --update your-package -f
 ```
 
-## Example
+#### Example
+
 ```bash
 sudo ~/gamedev-studio.sh --update godot -f
 ```
