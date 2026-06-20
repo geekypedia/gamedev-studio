@@ -144,11 +144,9 @@ run_step() {
     echo "Installing: $NAME"
     echo "--------------------------------------------------"
 
+    # Skip only if check succeeds
     if [[ "$FORCE_UPDATE" -eq 0 ]]; then
-        eval "$CHECK_CMD"
-        local CHECK_STATUS=$?
-
-        if [[ $CHECK_STATUS -eq 0 ]]; then
+        if eval "$CHECK_CMD"; then
             echo "✓ $NAME already installed (skipping)"
             INSTALLED+=("$NAME (already present)")
             return 0
@@ -157,16 +155,15 @@ run_step() {
         echo "⚠ Force mode: reinstalling $NAME"
     fi
 
-    eval "$*"
-    local RUN_STATUS=$?
-
-    if [[ $RUN_STATUS -eq 0 ]]; then
+    # Run install (NEVER break pipeline on failure)
+    if eval "$*"; then
         success "$NAME"
     else
+        echo "⚠️ $NAME failed (continuing...)"
         failure "$NAME"
     fi
 
-    return $RUN_STATUS
+    return 0
 }
 
 run_step_legacy() {
