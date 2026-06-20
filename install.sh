@@ -1630,7 +1630,7 @@ execute(){
         sudo snap install solar2d
     '
 
-    run_step "gamemaker" "GameMaker" "command -v gamemaker >/dev/null 2>&1" '
+    run_step "gamemaker" "GameMaker" "command -v GameMaker >/dev/null 2>&1" '
         TMP_DEB="/tmp/GameMaker.deb"
     
         curl -fL "https://gamemaker.io/en/download/ubuntu/lts/GameMaker.zip" -o "$TMP_DEB"
