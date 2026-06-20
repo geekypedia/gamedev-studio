@@ -800,7 +800,7 @@ prep(){
     run_step "flatpack" "Flatpak" "is_installed flatpak" '
     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
     '
-    run_step "bottles" "Bottles" "is_installed bottles" '
+    run_step "bottles" "Bottles (For running Windows Applications)" "is_installed bottles" '
     flatpak install -y flathub com.usebottles.bottles || true
     '
 }
@@ -1378,7 +1378,7 @@ execute(){
     # ADDITIONAL GAME ENGINES
     # -----------------------------
     
-    run_step "gideros" "Gideros" "is_installed giderosstudio" '
+    run_step "gideros" "Gideros Studio" "is_installed giderosstudio" '
     mkdir -p "$TMP_DIR"
     
     GIDEROS_ARCHIVE="$TMP_DIR/gideros.tar.xz"
@@ -1446,7 +1446,7 @@ execute(){
     create_desktop_entry giderostexturepacker "Gideros Texture Packer" "/opt/gamedev/engines/Gideros"
     '
     
-    run_step "solarus" "Solarus" "is_installed solarus-editor" '
+    run_step "solarus" "Solarus RPG Engine" "is_installed solarus-editor" '
     SOLARUS_VERSION="2.0.4"
     
     EDITOR_URL="https://gitlab.com/api/v4/projects/solarus-games%2Fsolarus/packages/generic/solarus/${SOLARUS_VERSION}/solarus-v2.0.4-linux-x64.tar.gz"
@@ -1504,7 +1504,7 @@ execute(){
     register_bin solarus-launcher "$LAUNCHER_BIN" "Solarus Launcher"
     '
     
-    run_step "eldiron" "Eldiron" "is_installed eldiron-creator" '
+    run_step "eldiron" "Eldiron RPG Engine" "is_installed eldiron-creator" '
     API="https://api.github.com/repos/markusmoenig/Eldiron/releases"
     
     echo "🌐 Fetching latest available Eldiron release..."
@@ -1605,23 +1605,23 @@ execute(){
     # CREATIVE TOOLS
     # -----------------------------
     
-    run_step "Blender" "Blender" "is_installed blender" '
+    run_step "blender" "Blender" "is_installed blender" '
     sudo apt install -y blender
     '
     
-    run_step "GIMP" "GIMP" "is_installed gimp" '
+    run_step "gimp" "GIMP" "is_installed gimp" '
     sudo apt install -y gimp
     '
     
-    run_step "Krita" "Krita" "is_installed krita" '
+    run_step "krita" "Krita" "is_installed krita" '
     sudo apt install -y krita
     '
     
-    run_step "Inkscape" "Inkscape" "is_installed inkscape" '
+    run_step "inkscape" "Inkscape" "is_installed inkscape" '
     sudo apt install -y inkscape
     '
     
-    run_step "Pixelorama" "Pixelorama" "is_installed pixelorama" '
+    run_step "pixelorama" "Pixelorama" "is_installed pixelorama" '
     API="https://api.github.com/repos/Orama-Interactive/Pixelorama/releases/latest"
     
     PIXEL_URL=$(
@@ -1668,7 +1668,7 @@ execute(){
     register_bin pixelorama "$PIXEL_BIN" "Pixelorama"
     '
     
-    run_step "LibreSprite" "LibreSprite" "is_installed libresprite" '
+    run_step "libresprite" "LibreSprite" "is_installed libresprite" '
     API="https://api.github.com/repos/LibreSprite/LibreSprite/releases/latest"
     
     ZIP_URL=$(
@@ -1718,11 +1718,11 @@ execute(){
     # AUDIO / VIDEO
     # -----------------------------
     
-    run_step "VLC" "VLC" "is_installed vlc" '
+    run_step "vlc" "VLC Media Player" "is_installed vlc" '
     sudo apt install -y vlc || echo "⚠️ VLC install failed"
     '
     
-    run_step "Kdenlive" "Kdenlive" "is_installed kdenlive" '
+    run_step "kdenlive" "Kdenlive Video Editor" "is_installed kdenlive" '
     sudo apt install -y kdenlive || echo "⚠️ Kdenlive install failed"
     '
     
@@ -1730,15 +1730,15 @@ execute(){
     sudo apt install -y obs-studio || echo "⚠️ OBS Studio install failed"
     '
     
-    run_step "lmms" "LMMS" "is_installed lmms" '
+    run_step "lmms" "LMMS Digital Audio Workstation" "is_installed lmms" '
     sudo apt install -y lmms || echo "⚠️ LMMS install failed"
     '
     
-    run_step "Audacity" "Audacity" "is_installed audacity" '
+    run_step "audacity" "Audacity Audio Editor" "is_installed audacity" '
     sudo apt install -y audacity || echo "⚠️ Audacity install failed"
     '
     
-    run_step "Ardour" "Ardour" "is_installed ardour" '
+    run_step "ardour" "Ardour Digital Audio Workstation" "is_installed ardour" '
     sudo apt install -y ardour || echo "⚠️ Ardour install failed"
     '
     
@@ -1770,7 +1770,7 @@ execute(){
     fi
     '
     
-    run_step "ldtk" "LDtk" "is_installed ldtk" '
+    run_step "ldtk" "LDtk (Level Designers Toolkit)" "is_installed ldtk" '
     API="https://api.github.com/repos/deepnight/ldtk/releases/latest"
     
     LDTK_URL=$(
@@ -1854,7 +1854,7 @@ execute(){
     # PRODUCTIVITY
     # -----------------------------
     
-    run_step "Obsidian" "Obsidian" "is_installed obsidian" '
+    run_step "obsidian" "Obsidian Markdown Editor" "is_installed obsidian" '
     mkdir -p /opt/gamedev/tools
     
     OBSIDIAN_URL=$(
