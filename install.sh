@@ -39,6 +39,7 @@ FORCE_UPDATE=0
 RUN_UPGRADE_STEP=0
 UPDATE_ONLY=""
 
+LIST_STEPS=0
 EXPECT_UPDATE_VALUE=0
 
 for arg in "$@"; do
@@ -51,8 +52,12 @@ for arg in "$@"; do
             RUN_UPGRADE_STEP=1
             ;;
 
-        --update)
+        --update|-u)
             EXPECT_UPDATE_VALUE=1
+            ;;
+
+        --list|-l)
+            LIST_STEPS=1
             ;;
 
         *)
@@ -61,7 +66,7 @@ for arg in "$@"; do
                 EXPECT_UPDATE_VALUE=0
             else
                 echo "Unknown option: $arg"
-                echo "Usage: $0 [--force|-f] [--upgrade] [--update step_name]"
+                echo "Usage: $0 [--force|-f] [--upgrade] [--update|-u step_name] [--list|-l]"
                 exit 1
             fi
             ;;
@@ -164,6 +169,12 @@ run_step() {
     local CHECK_CMD="$3"
     shift 2
 
+    # List only
+    if [[ "$LIST_STEPS" -eq 1 ]]; then
+        echo "$NAME: $DESCRIPTION"
+        return 0
+    fi
+    
     # Skip if --update filter is active and doesn't match
     if [[ -n "$UPDATE_ONLY" ]]; then
         if ! should_run_step "$NAME"; then
