@@ -588,6 +588,10 @@ is_npm_installed() {
     command -v "$1" >/dev/null 2>&1
 }
 
+is_nvm_usable() {
+    export NVM_DIR="$(eval echo ~${SUDO_USER:-$USER})/.nvm" [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+}
+
 # -----------------------------
 # INSTALLER ENGINE
 # -----------------------------
