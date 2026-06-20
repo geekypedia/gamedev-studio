@@ -153,6 +153,15 @@ is_installed() {
     command -v "$1" >/dev/null 2>&1
 }
 
+list_header(){
+    # List only
+    if [[ "$LIST_STEPS" -eq 1 ]]; then
+        printf "%-25s %s\n" "Package" "Description"
+        return 0
+    fi
+
+}
+
 should_run_step() {
     local STEP_NAME="$1"
 
@@ -171,7 +180,7 @@ run_step() {
 
     # List only
     if [[ "$LIST_STEPS" -eq 1 ]]; then
-        echo "$NAME: $DESCRIPTION"
+        printf "%-25s %s\n" "$NAME" "$DESCRIPTION"
         return 0
     fi
     
@@ -1962,6 +1971,7 @@ finalize(){
 }
 
 init
+list_header
 prep
 execute
 finalize
