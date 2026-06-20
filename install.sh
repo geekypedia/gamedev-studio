@@ -37,19 +37,33 @@ failure() {
 
 FORCE_UPDATE=0
 RUN_UPGRADE_STEP=0
+UPDATE_ONLY=""
+
+EXPECT_UPDATE_VALUE=0
 
 for arg in "$@"; do
     case "$arg" in
         --force|-f)
             FORCE_UPDATE=1
             ;;
+
         --upgrade)
             RUN_UPGRADE_STEP=1
             ;;
+
+        --update)
+            EXPECT_UPDATE_VALUE=1
+            ;;
+
         *)
-            echo "Unknown option: $arg"
-            echo "Usage: $0 [--force|-f] [--upgrade]"
-            exit 1
+            if [[ "$EXPECT_UPDATE_VALUE" -eq 1 ]]; then
+                UPDATE_ONLY="$arg"
+                EXPECT_UPDATE_VALUE=0
+            else
+                echo "Unknown option: $arg"
+                echo "Usage: $0 [--force|-f] [--upgrade] [--update step_name]"
+                exit 1
+            fi
             ;;
     esac
 done
