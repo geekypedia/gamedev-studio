@@ -1628,6 +1628,8 @@ execute(){
         fi
     
         sudo snap install solar2d
+
+        create_desktop_entry "solar2d" "Solar2D"
     '
 
     run_step "gamemaker" "GameMaker" "find /opt -maxdepth 2 -type f -path '/opt/GameMaker*/GameMaker' 2>&1" '
