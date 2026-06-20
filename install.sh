@@ -1409,44 +1409,12 @@ sudo dpkg -i "$TMP_DIR/gbstudio.deb" || {
 # Python Libraries TOOLS
 # -----------------------------
 
-run_step "pygame" "is_pip_installed pygame" '
-python3 -m pip install -U pygame
+run_step "Python Game Dev Env" "test -d /opt/gamedev/python-env" '
+python3 -m venv /opt/gamedev/python-env
 '
-
-run_step "pyglet" "is_pip_installed pyglet" '
-python3 -m pip install -U pyglet
-'
-
-run_step "kivy" "is_pip_installed kivy" '
-python3 -m pip install -U kivy
-'
-
-run_step "arcade" "is_pip_installed arcade" '
-python3 -m pip install -U arcade
-'
-
-run_step "moderngl" "is_pip_installed moderngl" '
-python3 -m pip install -U moderngl
-'
-
-run_step "pymunk" "is_pip_installed pymunk" '
-python3 -m pip install -U pymunk
-'
-
-run_step "pillow" "is_pip_installed PIL" '
-python3 -m pip install -U pillow
-'
-
-run_step "numpy" "is_pip_installed numpy" '
-python3 -m pip install -U numpy
-'
-
-run_step "noise" "is_pip_installed noise" '
-python3 -m pip install -U noise
-'
-
-run_step "pyinstaller" "is_pip_installed PyInstaller" '
-python3 -m pip install -U pyinstaller
+run_step "Python Game Dev Packages" "test -f /opt/gamedev/python-env/bin/python" '
+/opt/gamedev/python-env/bin/python -m pip install -U \
+  pygame pyglet kivy arcade moderngl pymunk pillow numpy noise pyinstaller
 '
 
 # -----------------------------
