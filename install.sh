@@ -662,7 +662,7 @@ run_step "System Dependencies Install" \
 sudo apt install -y \
 git curl wget unzip jq pv zenity inotify-tools \
 build-essential software-properties-common \
-libfuse2 flatpak python3 python3-pip
+libfuse2 flatpak python3 python3-pip python3-venv
 '
 
 # -----------------------------
