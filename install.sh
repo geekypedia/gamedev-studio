@@ -1320,7 +1320,7 @@ extract_appimage_icon "$LAUNCHER_BIN"
 register_bin solarus-launcher "$LAUNCHER_BIN" "Solarus Launcher"
 '
 
-run_step "Eldiron" "is_installed eldiron" '
+run_step "Eldiron" "is_installed eldiron-creator" '
 API="https://api.github.com/repos/markusmoenig/Eldiron/releases"
 
 echo "🌐 Fetching latest available Eldiron release..."
