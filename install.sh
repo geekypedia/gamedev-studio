@@ -905,7 +905,30 @@ mkdir -p "$TMP_DIR"
 
 API="https://api.github.com/repos/godotengine/godot/releases/latest"
 
-VERSION=$(curl -s "$API" | jq -r ".tag_name")
+# get latest version from API
+LATEST_VERSION=$(curl -s "$API" | jq -r ".tag_name")
+
+# detect installed Godot version (if present)
+INSTALLED_VERSION_RAW=$(godot --version 2>/dev/null || true)
+
+# normalize Godot version: 4.6.3.stable.official.xxxxx → 4.6.3-stable
+if [ -n "$INSTALLED_VERSION_RAW" ]; then
+    INSTALLED_VERSION=$(echo "$INSTALLED_VERSION_RAW" | awk -F. '{print $1"."$2"."$3"-"$4}')
+else
+    INSTALLED_VERSION=""
+fi
+
+# decide which version to use
+if [ "$FORCE_UPDATE" -eq 1 ]; then
+    VERSION="$LATEST_VERSION"
+else
+    VERSION="$INSTALLED_VERSION"
+fi
+
+# fallback if detection failed
+if [ -z "$VERSION" ] || [ "$VERSION" = "-" ]; then
+    VERSION="$LATEST_VERSION"
+fi
 
 TEMPLATE_DIR="$HOME/.local/share/godot/export_templates/$VERSION"
 
