@@ -195,7 +195,7 @@ run_step() {
 
     echo
     echo "--------------------------------------------------"
-    echo "Installing: $NAME"
+    echo "Installing: $DESCRIPTION ($NAME)"
     echo "--------------------------------------------------"
 
     # IMPORTANT: always fail-safe check evaluation
@@ -214,7 +214,7 @@ run_step() {
     fi
 
     if [[ "$FORCE_UPDATE" -eq 1 ]]; then
-        echo "⚠ Force mode: reinstalling $NAME"
+        echo "⚠ Force mode: reinstalling $DESCRIPTION ($NAME)"
     fi
 
     # run install safely (NEVER break script even if step crashes)
