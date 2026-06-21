@@ -780,7 +780,7 @@ prep(){
     sudo apt install -y \
     git curl wget unzip jq pv zenity inotify-tools \
     build-essential software-properties-common \
-    libfuse2 flatpak python3 python3-pip python3-venv
+    libfuse2 flatpak exfatprogs python3 python3-pip python3-venv
     '
     
     # -----------------------------
@@ -1321,7 +1321,7 @@ execute(){
     
     sudo dpkg -i "$TMP_DIR/microstudio.deb" || {
         echo "⚠️ dpkg failed, fixing dependencies..."
-        sudo apt-get install -f -y || {
+        sudo apt install -f -y || {
             echo "⚠️ dependency fix failed"
             return 0
         }
@@ -1536,7 +1536,7 @@ execute(){
     
     sudo dpkg -i "$TMP_DIR/eldiron.deb" || {
         echo "⚠️ dpkg failed, fixing dependencies..."
-        sudo apt-get install -f -y || {
+        sudo apt install -f -y || {
             echo "⚠️ dependency fix failed"
             return 0
         }
@@ -1578,7 +1578,7 @@ execute(){
     
     sudo dpkg -i "$TMP_DIR/gbstudio.deb" || {
         echo "⚠️ dpkg failed, fixing dependencies..."
-        sudo apt-get install -f -y || {
+        sudo apt install -f -y || {
             echo "⚠️ dependency fix failed"
             return 0
         }
