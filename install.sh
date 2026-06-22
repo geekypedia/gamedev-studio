@@ -155,6 +155,12 @@ safe_wget_silent() {
     [ -s "$out" ]
 }
 
+apt_updated_within_2h() {
+  local last
+  last=$(find /var/lib/apt/lists -type f -printf '%T@\n' 2>/dev/null | sort -n | tail -1)
+  [[ -n "$last" ]] && awk -v t="$last" 'BEGIN { exit !(systime() - t <= 7200) }'
+}
+
 safe_find_exec() {
     find "$1" -type f -executable 2>/dev/null | head -n 1
 }
@@ -790,8 +796,10 @@ prep(){
     # SYSTEM FLOW
     # -----------------------------
     
-    run_step "apt" "APT Update" "true" '
-    sudo apt update -y
+    run_step "apt" "APT Update" "false" '
+        if [ "$FORCE_UPDATE" = "1" ] || ! apt_updated_within_2h; then
+            sudo apt update -y
+        fi
     '
     
     if [[ "$RUN_UPGRADE_STEP" -eq 1 ]]; then
