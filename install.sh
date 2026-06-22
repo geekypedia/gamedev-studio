@@ -42,6 +42,9 @@ UPDATE_ONLY=""
 LIST_STEPS=0
 EXPECT_UPDATE_VALUE=0
 
+SKIP_LIST=""
+EXPECT_SKIP_VALUE=0
+
 for arg in "$@"; do
     case "$arg" in
         --force|-f)
@@ -56,6 +59,10 @@ for arg in "$@"; do
             EXPECT_UPDATE_VALUE=1
             ;;
 
+        --skip|-s)
+            EXPECT_SKIP_VALUE=1
+            ;;
+
         --list|-l)
             LIST_STEPS=1
             ;;
@@ -64,6 +71,9 @@ for arg in "$@"; do
             if [[ "$EXPECT_UPDATE_VALUE" -eq 1 ]]; then
                 UPDATE_ONLY="$arg"
                 EXPECT_UPDATE_VALUE=0
+            elif [[ "$EXPECT_SKIP_VALUE" -eq 1 ]]; then
+                SKIP_LIST="$arg"
+                EXPECT_SKIP_VALUE=0
             else
                 echo "Unknown option: $arg"
                 echo "Usage: $0 [--force|-f] [--upgrade] [--update|-u step_name] [--list|-l]"
@@ -191,6 +201,18 @@ run_step() {
             # echo "⏭ Skipping $NAME (filtered by --update $UPDATE_ONLY)"
             return 0
         fi
+    fi
+
+    # Skip if in --skip list
+    if [[ -n "$SKIP_LIST" ]]; then
+        IFS=',' read -ra SKIP_ITEMS <<< "$SKIP_LIST"
+
+        for item in "${SKIP_ITEMS[@]}"; do
+            if [[ "$item" == "$NAME" ]]; then
+                echo "⏭ Skipping $DESCRIPTION ($NAME) (requested via --skip)"
+                return 0
+            fi
+        done
     fi
 
     echo
