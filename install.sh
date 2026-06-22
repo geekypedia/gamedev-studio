@@ -161,6 +161,15 @@ apt_updated_within_2h() {
   [[ -n "$last" ]] && awk -v t="$last" 'BEGIN { exit !(systime() - t <= 7200) }'
 }
 
+set_first_run() {
+  mkdir -p "$TMP_DIR"
+  touch "$TMP_DIR/gamedev-studio-first-run"
+}
+
+first_run() {
+  [[ -f "$TMP_DIR/gamedev-studio-first-run" ]]
+}
+
 safe_find_exec() {
     find "$1" -type f -executable 2>/dev/null | head -n 1
 }
@@ -796,10 +805,9 @@ prep(){
     # SYSTEM FLOW
     # -----------------------------
     
-    run_step "apt" "APT Update" "false" '
-        if [ "$FORCE_UPDATE" = "1" ] || ! apt_updated_within_2h; then
-            sudo apt update -y
-        fi
+    run_step "apt" "APT Update" "first_run" '
+        sudo apt update -y
+        set_first_run
     '
     
     if [[ "$RUN_UPGRADE_STEP" -eq 1 ]]; then
