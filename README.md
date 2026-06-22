@@ -81,6 +81,20 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 
 ---
 
+### 🎯 Skip packages
+
+```bash
+~/gamedev-studio.sh --skip package1,package2
+```
+#### Example
+
+```bash
+~/gamedev-studio.sh --skip code,gideros,solar2d
+```
+
+---
+
+
 ## 🧱 What Gets Installed
 
 ### 🎮 Game Engines
@@ -176,6 +190,7 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 | `--force` / `-f` | Reinstall and overwrite all tools |
 | `--upgrade` | Runs system upgrade (`apt upgrade`) before installation |
 | `--update <package>` / `-u <package>` | Runs only a specific installation package (e.g. `godot`, `electron`) |
+| `--skip <package(s)>` / `-s <package(s)>` | Skips specific installation package(s) (e.g. `gideros,solar2d`) |
 | `--list` / `-l` | Lists available packages |
 | *(none)* | Safe mode (skip existing installs) |
 
