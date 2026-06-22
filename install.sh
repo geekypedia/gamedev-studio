@@ -209,7 +209,10 @@ run_step() {
 
         for item in "${SKIP_ITEMS[@]}"; do
             if [[ "$item" == "$NAME" ]]; then
+                echo
+                echo "--------------------------------------------------------------------------------"
                 echo "⏭ Skipping $DESCRIPTION ($NAME) (requested via --skip)"
+                echo "--------------------------------------------------------------------------------"
                 return 0
             fi
         done
