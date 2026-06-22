@@ -777,11 +777,36 @@ prep(){
     
     run_step "deps" "System Dependencies Install" \
     "is_ok git curl wget unzip jq pv" '
-    sudo apt install -y \
-    git curl wget unzip jq pv zenity inotify-tools \
-    build-essential software-properties-common \
-    libfuse2 flatpak exfatprogs python3 python3-pip python3-venv
-    '
+    # 1. System & Repository Management (Crucial for finding other packages)
+    sudo apt install -y software-properties-common
+    
+    # 2. Network & Core Data Retrieval (Needed to download external files)
+    sudo apt install -y curl
+    sudo apt install -y wget
+    sudo apt install -y git
+    
+    # 3. Base Compilation & System Libraries (Provides core development headers)
+    sudo apt install -y build-essential
+    sudo apt install -y libfuse2
+    
+    # 4. Python Environment (Best to build on top of core compilers)
+    sudo apt install -y python3
+    sudo apt install -y python3-pip
+    sudo apt install -y python3-venv
+    
+    # 5. Alternative Package & File Managers
+    sudo apt install -y flatpak
+    sudo apt install -y exfatprogs
+    
+    # 6. File & Text Utilities
+    sudo apt install -y unzip
+    sudo apt install -y jq
+    
+    # 7. System Monitoring & GUI Tools (Rely heavily on text/file utilities)
+    sudo apt install -y inotify-tools
+    sudo apt install -y pv
+    sudo apt install -y zenity
+'
     
     # -----------------------------
     # GPU DRIVERS
