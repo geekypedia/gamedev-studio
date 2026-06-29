@@ -829,6 +829,8 @@ prep(){
     # 3. Base Compilation & System Libraries (Provides core development headers)
     sudo apt install -y build-essential
     sudo apt install -y libfuse2
+    sudo apt install -y libsdl2-dev
+    sudo apt install -y libsdl2-image-dev
     
     # 4. Python Environment (Best to build on top of core compilers)
     sudo apt install -y python3
@@ -1716,7 +1718,7 @@ execute(){
     '
     run_step "pygame" "Python Game Dev Packages" "test -f /opt/gamedev/python-env/bin/python" '
     /opt/gamedev/python-env/bin/python -m pip install -U \
-      pygame pyglet kivy arcade moderngl pymunk pillow numpy noise pyinstaller
+      pygame pyglet kivy arcade moderngl pymunk pillow numpy noise pyinstaller pyxel
     '
     
     # -----------------------------
