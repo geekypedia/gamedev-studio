@@ -309,6 +309,13 @@ is_ok() {
     return 0
 }
 
+is_any_ok() {
+    for cmd in "$@"; do
+        command -v "$cmd" >/dev/null 2>&1 && return 0
+    done
+    return 1
+}
+
 is_pip_installed() {
     python3 -c "import $1" 2>/dev/null
 }
@@ -1066,7 +1073,7 @@ execute(){
     # WEB BROWSER
     # -----------------------------
     
-    run_step "chrome" "Google Chrome" "is_ok google-chrome google-chrome-stable chromium" '
+    run_step "chrome" "Google Chrome" "is_any_ok google-chrome google-chrome-stable chromium" '
     mkdir -p "$TMP_DIR"
     
     CHROME_DEB="$TMP_DIR/chrome.deb"
@@ -1150,14 +1157,21 @@ execute(){
     INSTALLED_VERSION_RAW=$(godot --version 2>/dev/null || true)
     
     # normalize: 4.6.3.stable.official.xxxxx → 4.6.3-stable
+    #if [ -n "$INSTALLED_VERSION_RAW" ]; then
+    #    BASE_VERSION=$(echo "$INSTALLED_VERSION_RAW" | cut -d. -f1-3)
+    #
+    #    if echo "$INSTALLED_VERSION_RAW" | grep -q "stable"; then
+    #        INSTALLED_VERSION="${BASE_VERSION}-stable"
+    #    else
+    #        INSTALLED_VERSION="$BASE_VERSION"
+    #    fi
+    #else
+    #    INSTALLED_VERSION=""
+    #fi
+
+    # normalize: 4.7.stable.official.xxxxx → 4.7.stable
     if [ -n "$INSTALLED_VERSION_RAW" ]; then
-        BASE_VERSION=$(echo "$INSTALLED_VERSION_RAW" | cut -d. -f1-3)
-    
-        if echo "$INSTALLED_VERSION_RAW" | grep -q "stable"; then
-            INSTALLED_VERSION="${BASE_VERSION}-stable"
-        else
-            INSTALLED_VERSION="$BASE_VERSION"
-        fi
+        INSTALLED_VERSION=$(echo "$INSTALLED_VERSION_RAW" | sed 's/\.official.*//')
     else
         INSTALLED_VERSION=""
     fi
