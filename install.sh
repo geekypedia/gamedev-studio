@@ -896,6 +896,21 @@ execute(){
     # ensure nvm exists
     if ! command -v nvm >/dev/null 2>&1; then
         echo "⚠️ NVM not loaded"
+
+            # Existing system node?
+            if command -v node >/dev/null 2>&1 && ! command -v nvm >/dev/null 2>&1; then
+            
+                # npm missing?
+                if ! command -v npm >/dev/null 2>&1; then
+                    echo "Installing npm for existing system Node..."
+                    sudo apt update
+                    sudo apt install -y npm
+                fi
+            
+                echo "Using existing system Node $(node -v)"
+                return 0
+            fi
+        
         return 0
     fi
     
