@@ -172,6 +172,7 @@ OR
 - Audacity
 - Ardour
 - Hydrogen Drum Machine
+- Revisto Drum Machine
 - Geonkick
 
 ---
