@@ -1543,9 +1543,9 @@ execute(){
     sudo chmod +x /opt/gamedev/engines/Defold/Defold
     
     sudo tee /usr/local/bin/defold << 'EOF'
-    #!/bin/bash
-    cd /opt/gamedev/engines/Defold/ && ./Defold "$@"
-    EOF
+#!/bin/bash
+cd /opt/gamedev/engines/Defold/ && ./Defold "$@"
+EOF
     
     sudo chmod +x /usr/local/bin/defold
     
@@ -2062,20 +2062,20 @@ EOF
     
     run_step "ldtk-sync" "LDtk Sync Pipeline" "is_installed ldtk-sync" '
     sudo tee /usr/local/bin/ldtk-sync >/dev/null <<EOF
-    #!/usr/bin/env bash
-    
-    WATCH_DIR="\${1:-\$PWD}"
-    
-    echo "👀 Watching LDtk files in: \$WATCH_DIR"
-    
-    inotifywait -m "\$WATCH_DIR" -e close_write |
-    while read path action file; do
-        if [[ "\$file" == *.ldtk ]]; then
-            echo "Exporting: \$file"
-            cp "\$path\$file" "\$WATCH_DIR/export_\$file.json"
-        fi
-    done
-    EOF
+#!/usr/bin/env bash
+
+WATCH_DIR="\${1:-\$PWD}"
+
+echo "👀 Watching LDtk files in: \$WATCH_DIR"
+
+inotifywait -m "\$WATCH_DIR" -e close_write |
+while read path action file; do
+    if [[ "\$file" == *.ldtk ]]; then
+        echo "Exporting: \$file"
+        cp "\$path\$file" "\$WATCH_DIR/export_\$file.json"
+    fi
+done
+EOF
     
     sudo chmod +x /usr/local/bin/ldtk-sync
     '
