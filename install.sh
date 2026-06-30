@@ -116,12 +116,12 @@ safe_wget() {
     if [[ "$FORCE_UPDATE" -eq 0 || "$SKIP_DOWNLOADS" -eq 1 ]]; then
         if [[ -s "$out" ]]; then
             echo "✓ Already downloaded: $out"
-            return 1
+            return 0
         fi
 
         if [[ -s "$tmpfile" ]]; then
             echo "✓ Already downloaded: $tmpfile"
-            return 1
+            return 0
         fi
     fi
 
