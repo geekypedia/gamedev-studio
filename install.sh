@@ -103,6 +103,65 @@ safe_wget() {
         return 1
     fi
 
+    mkdir -p "$TMP_DIR"
+    local tmpfile="$TMP_DIR/$(basename "$out")"
+
+    # Skip download if update isn't forced and we already have the file
+    if [[ "$FORCE_UPDATE" -eq 0 ]]; then
+        if [[ -s "$out" ]]; then
+            echo "✓ Already downloaded: $out"
+            return 1
+        fi
+
+        if [[ -s "$tmpfile" ]]; then
+            echo "✓ Already downloaded: $tmpfile"
+            return 1
+        fi
+    fi
+
+    echo "⬇️ Downloading: $url"
+
+    download() {
+        if command -v curl >/dev/null 2>&1; then
+            curl -L --fail --progress-bar "$url" -o "$1"
+        elif command -v wget >/dev/null 2>&1; then
+            wget --show-progress -O "$1" "$url"
+        else
+            echo "❌ Neither curl nor wget is installed"
+            return 1
+        fi
+    }
+
+    # Try requested location first
+    if download "$out"; then
+        [ -s "$out" ] && return 0
+    fi
+
+    echo "⚠️ Primary download path failed, retrying in isolated tmp..."
+
+    if download "$tmpfile"; then
+        if [ -s "$tmpfile" ]; then
+            mv "$tmpfile" "$out" 2>/dev/null || {
+                echo "⚠️ Cannot move to target, keeping in sandbox: $tmpfile"
+                return 0
+            }
+            return 0
+        fi
+    fi
+
+    echo "⚠️ Download failed"
+    return 1
+}
+
+safe_wget_legacy() {
+    local url="$1"
+    local out="$2"
+
+    if [ -z "$url" ] || [ "$url" = "null" ]; then
+        echo "⚠️ safe_wget: empty URL"
+        return 1
+    fi
+
     echo "⬇️ Downloading: $url"
 
     # Create isolated temp directory per run
@@ -1513,24 +1572,24 @@ execute(){
     sudo chmod +x /opt/gamedev/engines/Gideros/GiderosTexturePacker
     
     sudo tee /usr/local/bin/giderosstudio > /dev/null << "EOF"
-    #!/bin/bash
-    cd /opt/gamedev/engines/Gideros && LD_LIBRARY_PATH=/opt/gamedev/engines/Gideros ./GiderosStudio "$@"
-    EOF
+#!/bin/bash
+cd /opt/gamedev/engines/Gideros && LD_LIBRARY_PATH=/opt/gamedev/engines/Gideros ./GiderosStudio "$@"
+EOF
     
     sudo tee /usr/local/bin/giderosplayer > /dev/null << "EOF"
-    #!/bin/bash
-    cd /opt/gamedev/engines/Gideros && LD_LIBRARY_PATH=/opt/gamedev/engines/Gideros ./GiderosPlayer "$@"
-    EOF
+#!/bin/bash
+cd /opt/gamedev/engines/Gideros && LD_LIBRARY_PATH=/opt/gamedev/engines/Gideros ./GiderosPlayer "$@"
+EOF
     
     sudo tee /usr/local/bin/giderosfontcreator > /dev/null << "EOF"
-    #!/bin/bash
-    cd /opt/gamedev/engines/Gideros && LD_LIBRARY_PATH=/opt/gamedev/engines/Gideros ./GiderosFontCreator "$@"
-    EOF
+#!/bin/bash
+cd /opt/gamedev/engines/Gideros && LD_LIBRARY_PATH=/opt/gamedev/engines/Gideros ./GiderosFontCreator "$@"
+EOF
     
     sudo tee /usr/local/bin/giderostexturepacker > /dev/null << "EOF"
-    #!/bin/bash
-    cd /opt/gamedev/engines/Gideros && LD_LIBRARY_PATH=/opt/gamedev/engines/Gideros ./GiderosTexturePacker "$@"
-    EOF
+#!/bin/bash
+cd /opt/gamedev/engines/Gideros && LD_LIBRARY_PATH=/opt/gamedev/engines/Gideros ./GiderosTexturePacker "$@"
+EOF
     
     sudo chmod +x /usr/local/bin/giderosstudio
     sudo chmod +x /usr/local/bin/giderosplayer
