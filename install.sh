@@ -102,15 +102,17 @@ TMP_DIR="/tmp/$APPLICATION_ID"
 
 ownership(){
 
+    REAL_USER="${SUDO_USER:-$USER}"
+    
     echo "Taking ownership of $BASE and $TMP_DIR ..."
     
     # Take ownership of the whole gamedev tree
-    sudo chown -R "$USER:$USER" "$BASE"
+    sudo chown -R "$REAL_USER:$REAL_USER" "$BASE"
 
     # Take ownership of the tmp directory
-    sudo chown -R "$USER:$USER" "$TMP_DIR"
+    sudo chown -R "$REAL_USER:$REAL_USER" "$TMP_DIR"
 
-    echo "Ownership taken by $USER ..."
+    echo "Ownership taken by $REAL_USER ..."
 
 }
 
@@ -875,16 +877,14 @@ init() {
     sudo mkdir -p "$BASE"
     sudo mkdir -p "$BIN"
     
-    # Take ownership of the whole gamedev tree
-    sudo chown -R "$USER:$USER" "$BASE"
+    # Create tmp
+    sudo mkdir -p "$TMP_DIR"
+
+    ownership
     
     # Now create subfolders as normal user (no sudo needed)
     mkdir -p "$BASE"/{engines,tools,art}
     
-    # Create and Take ownership of the tmp too
-    sudo mkdir -p "$TMP_DIR"
-    sudo chown -R "$USER:$USER" "$TMP_DIR"
-
 }
 
 prep(){
