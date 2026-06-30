@@ -66,6 +66,19 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 ~/gamedev-studio.sh --update your-package -f
 ```
 
+##### If package is already downloaded in tmp folder and you just need to trigger re-installation
+
+```bash
+~/gamedev-studio.sh --update your-package -f --skip-downloads
+```
+
+OR
+
+```bash
+~/gamedev-studio.sh -u your-package -f -sd
+```
+
+
 #### Example
 
 ```bash
@@ -199,6 +212,7 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 | Flag | Description |
 |------|-------------|
 | `--force` / `-f` | Reinstall and overwrite all tools |
+| `--skip-downloads` / `-sd` | Skip downloading zip files to temp directory if it already exists (useful in combination with --force/-f |
 | `--upgrade` | Runs system upgrade (`apt upgrade`) before installation |
 | `--update <package>` / `-u <package>` | Runs only a specific installation package (e.g. `godot`, `electron`) |
 | `--skip <package(s)>` / `-s <package(s)>` | Skips specific installation package(s) (e.g. `gideros,solar2d`) |
