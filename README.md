@@ -98,30 +98,41 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 ## 🧱 What Gets Installed
 
 ### 🎮 Game Engines
-- Godot Engine (Python like GDScript)
+
+#### Python / Python-like
+- Godot Engine (Python-like GDScript)
+- Ren’Py (Python)
+- Pygame (Python)
+- Pyxel (Python)
+- Panda3D (Python)
+- Ursina (Python)
+- Eldiron (Python)
+
+#### Lua
+- LÖVE2D (Lua)
+- Defold (Lua)
+- Solarus (Lua)
+- Solar2D (Lua)
+- Gideros Studio (Lua)
+
+#### No-Code / Low-Code / Multi-Language
 - GDevelop (No-code, JavaScript supported)
 - Ct.js (Block-based, JavaScript, CoffeeScript)
-- Ren’Py (Python)
-- LÖVE2D (Lua)
 - microStudio (Lua, JavaScript, Python)
-- Defold (Lua)
-- Gideros Studio (Lua)
-- GB Studio
-- Solarus (Lua)
-- Eldiron (Python)
-- Pygame (Python)
-- Solar2D (Lua)
+- GB Studio (No-code)
 - GameMaker (GML/JavaScript/TypeScript)
+
+#### JavaScript / TypeScript
+- Phaser
+- ExcaliburJS
 
 ---
 
-### 🌐 Web Game + App Stack 
+### 🌐 Web App Stack 
 - Node.js (via NVM LTS)
 - Vite
 - React
 - create-react-app
-- Phaser
-- ExcaliburJS
 - NW
 - Electron
 - http-server
