@@ -45,10 +45,16 @@ EXPECT_UPDATE_VALUE=0
 SKIP_LIST=""
 EXPECT_SKIP_VALUE=0
 
+SKIP_DOWNLOADS=0
+
 for arg in "$@"; do
     case "$arg" in
         --force|-f)
             FORCE_UPDATE=1
+            ;;
+
+        --skip-downloads|-sd)
+            SKIP_DOWNLOADS=1
             ;;
 
         --upgrade)
@@ -107,7 +113,7 @@ safe_wget() {
     local tmpfile="$TMP_DIR/$(basename "$out")"
 
     # Skip download if update isn't forced and we already have the file
-    if [[ "$FORCE_UPDATE" -eq 0 ]]; then
+    if [[ "$FORCE_UPDATE" -eq 0 || "$SKIP_DOWNLOADS" -eq 1 ]]; then
         if [[ -s "$out" ]]; then
             echo "✓ Already downloaded: $out"
             return 1
