@@ -100,6 +100,16 @@ TMP_DIR="/tmp/$APPLICATION_ID"
 # SAFE HELPERS
 # -----------------------------
 
+ownership(){
+
+    # Take ownership of the whole gamedev tree
+    sudo chown -R "$USER:$USER" "$BASE"
+
+    # Take ownership of the tmp directory
+    sudo chown -R "$USER:$USER" "$TMP_DIR"
+
+}
+
 safe_wget() {
     local url="$1"
     local out="$2"
@@ -137,6 +147,8 @@ safe_wget() {
             return 1
         fi
     }
+
+    ownership
 
     # Try requested location first
     if download "$out"; then
@@ -2155,8 +2167,7 @@ finalize(){
     # OWNERSHIP
     # -----------------------------
     
-    # Take ownership of the whole gamedev tree
-    sudo chown -R "$USER:$USER" "$BASE"
+    ownership
     
     # -----------------------------
     # SUMMARY
