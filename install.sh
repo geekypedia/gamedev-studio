@@ -1979,6 +1979,10 @@ EOF
     run_step "geonkick" "Geonkick" "is_installed geonkick" '
     sudo apt install -y geonkick || echo "⚠️ Geonkick install failed"
     '
+
+    run_step "drum-machine" "Bottles (For running Windows Applications)" "is_ok drum-machine" '
+    flatpak install -y flathub io.github.revisto.drum-machine || true
+    '
     
     # -----------------------------
     # LEVEL EDITORS
