@@ -110,7 +110,7 @@ ownership(){
     # Take ownership of the tmp directory
     sudo chown -R "$USER:$USER" "$TMP_DIR"
 
-    echo "Ownership taken ..."
+    echo "Ownership taken by $USER ..."
 
 }
 
