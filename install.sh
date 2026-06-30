@@ -102,11 +102,15 @@ TMP_DIR="/tmp/$APPLICATION_ID"
 
 ownership(){
 
+    echo "Taking ownership of $BASE and $TMP_DIR ..."
+    
     # Take ownership of the whole gamedev tree
     sudo chown -R "$USER:$USER" "$BASE"
 
     # Take ownership of the tmp directory
     sudo chown -R "$USER:$USER" "$TMP_DIR"
+
+    echo "Ownership taken ..."
 
 }
 
