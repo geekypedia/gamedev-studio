@@ -511,6 +511,8 @@ extract_appimage_icon() {
 
     mkdir -p "$tmpdir"
 
+    chmod +x "$appimage"
+
     # extract AppImage filesystem
     if "$appimage" --appimage-extract >/dev/null 2>&1; then
 
