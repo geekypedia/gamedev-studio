@@ -116,6 +116,20 @@ ownership(){
 
 }
 
+safe_exists(){
+    local out="$1"
+
+    if [[ "$FORCE_UPDATE" -eq 0 || "$SKIP_DOWNLOADS" -eq 1 ]]; then
+        if [[ -s "$out" ]]; then
+            echo "✓ Cleanup not required for $out"
+            return 0
+        fi
+        return 1
+    else
+        return 1
+    fi
+}
+
 safe_wget() {
     local url="$1"
     local out="$2"
@@ -1329,11 +1343,16 @@ execute(){
         echo "⚠️ Could not find x86_64 AppImage"
         return 0
     fi
+
+    GDEV_BASE="/opt/gamedev/engines/gdevelop"
+    GDEV_PATH="$GDEV_BASE/gdevelop.AppImage"
+
+    safe_exists "$GDEV_PATH" || {
+        rm -rf "$GDEV_BASE"
+        mkdir -p "$GDEV_BASE"    
+    }
     
-    rm -rf /opt/gamedev/engines/gdevelop
-    mkdir -p /opt/gamedev/engines/gdevelop
-    
-    safe_wget "$GDEV_URL" /opt/gamedev/engines/gdevelop/gdevelop.AppImage || {
+    safe_wget "$GDEV_URL" "$GDEV_PATH" || {
         echo "⚠️ GDevelop download failed"
         return 0
     }
