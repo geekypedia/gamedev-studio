@@ -1037,9 +1037,39 @@ execute(){
     fi
     
     echo "✅ NVM + LTS Node installed"
+    
+    #######################################################
+    INSTALL_USER="${SUDO_USER:-$USER}"
+    USER_HOME="$(eval echo "~$INSTALL_USER")"
+    BASHRC="$USER_HOME/.bashrc"
+    
+    sudo -u "$INSTALL_USER" bash <<EOF
+    grep -q 'export NVM_DIR="\$HOME/.nvm"' "$BASHRC" || cat >> "$BASHRC" <<'EOT'
+    
+    # NVM
+    export NVM_DIR="\$HOME/.nvm"
+    [ -s "\$NVM_DIR/nvm.sh" ] && \. "\$NVM_DIR/nvm.sh"
+    EOT
+    EOF
+
+
+    ZSHRC="$USER_HOME/.zshrc"
+
+    sudo -u "$INSTALL_USER" bash <<EOF
+    touch "$ZSHRC"
+    grep -q 'export NVM_DIR="\$HOME/.nvm"' "$ZSHRC" || cat >> "$ZSHRC" <<'EOT'
+    
+    # NVM
+    export NVM_DIR="\$HOME/.nvm"
+    [ -s "\$NVM_DIR/nvm.sh" ] && \. "\$NVM_DIR/nvm.sh"
+    EOT
+    EOF
+    #######################################################
+    echo ".bashrc and .zshrc updated"
+    
     '
 
-    run_step "node-fallback" "Node.js LTS using NVM" "is_nvm_usable" '
+    run_step "node-fallback" "Node.js LTS using NVM (fallback method)" "is_nvm_usable" '
     INSTALL_USER="${SUDO_USER:-$USER}"
     NVM_PATH="$(eval echo "~$INSTALL_USER")/.nvm/nvm.sh"
     [ ! -s "$NVM_PATH" ]
@@ -1066,9 +1096,42 @@ execute(){
     echo "✅ NVM $(nvm --version)"
     echo "✅ Node $(node -v)"
     echo "✅ npm $(npm -v)"
+
+    #######################################################
+    INSTALL_USER="${SUDO_USER:-$USER}"
+    USER_HOME="$(eval echo "~$INSTALL_USER")"
+    BASHRC="$USER_HOME/.bashrc"
+    
+    sudo -u "$INSTALL_USER" bash <<EOF
+    grep -q 'export NVM_DIR="\$HOME/.nvm"' "$BASHRC" || cat >> "$BASHRC" <<'EOT'
+    
+    # NVM
+    export NVM_DIR="\$HOME/.nvm"
+    [ -s "\$NVM_DIR/nvm.sh" ] && \. "\$NVM_DIR/nvm.sh"
+    EOT
+    EOF
+
+
+    ZSHRC="$USER_HOME/.zshrc"
+
+    sudo -u "$INSTALL_USER" bash <<EOF
+    touch "$ZSHRC"
+    grep -q 'export NVM_DIR="\$HOME/.nvm"' "$ZSHRC" || cat >> "$ZSHRC" <<'EOT'
+    
+    # NVM
+    export NVM_DIR="\$HOME/.nvm"
+    [ -s "\$NVM_DIR/nvm.sh" ] && \. "\$NVM_DIR/nvm.sh"
+    EOT
+    EOF
+    #######################################################
+    echo ".bashrc and .zshrc updated"
     '
 
-    run_step "npm-legacy" "Node.js LTS using NVM" "is_ok npm" '
+    run_step "node-legacy" "Node.js Legacy using APT" "is_ok node" '
+        sudo apt install -y nodejs
+    '
+
+    run_step "npm-legacy" "NPM Legacy using APT" "is_ok npm" '
         sudo apt install -y npm
     '
     
