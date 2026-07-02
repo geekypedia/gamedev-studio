@@ -1038,6 +1038,39 @@ execute(){
     
     echo "✅ NVM + LTS Node installed"
     '
+
+    run_step "node-fallback" "Node.js LTS using NVM" "is_nvm_usable" '
+    INSTALL_USER="${SUDO_USER:-$USER}"
+    NVM_PATH="$(eval echo "~$INSTALL_USER")/.nvm/nvm.sh"
+    [ ! -s "$NVM_PATH" ]
+' '
+    INSTALL_USER="${SUDO_USER:-$USER}"
+    USER_HOME="$(eval echo "~$INSTALL_USER")"
+    NVM_DIR="$USER_HOME/.nvm"
+
+    # Install NVM as the real user
+    if [ ! -s "$NVM_DIR/nvm.sh" ]; then
+        sudo -u "$INSTALL_USER" env HOME="$USER_HOME" bash -c \
+            "curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash"
+    fi
+
+    # Load NVM
+    export NVM_DIR="$NVM_DIR"
+    . "$NVM_DIR/nvm.sh"
+
+    # Install/use LTS Node
+    nvm install --lts
+    nvm alias default lts/*
+    nvm use --lts
+
+    echo "✅ NVM $(nvm --version)"
+    echo "✅ Node $(node -v)"
+    echo "✅ npm $(npm -v)"
+    '
+
+    run_step "npm-legacy" "Node.js LTS using NVM" "is_ok npm" '
+        sudo apt install -y npm
+    '
     
     run_step "tsc" "TypeScript Compiler" "is_installed tsc" '
     sudo apt install node-typescript -y || echo "⚠️ TypeScript install failed"
