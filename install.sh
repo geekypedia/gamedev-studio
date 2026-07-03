@@ -159,9 +159,9 @@ safe_wget() {
 
     download() {
         if command -v curl >/dev/null 2>&1; then
-            curl -L --fail --progress-bar "$url" -o "$1"
+            curl -L --fail --progress-bar -C - "$url" -o "$1"
         elif command -v wget >/dev/null 2>&1; then
-            wget --show-progress -O "$1" "$url"
+            wget -c --show-progress -O "$1" "$url"
         else
             echo "❌ Neither curl nor wget is installed"
             return 1
