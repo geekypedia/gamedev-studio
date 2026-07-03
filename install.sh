@@ -1028,7 +1028,7 @@ EOF
 
     sudo chmod +x /usr/local/bin/rofiapplauncher
     
-    create_desktop_entry "rofiapplauncher" "Rofi App Launcher"
+    create_desktop_entry "rofiapplauncher" "Rofi App Launcher" "" "Other;"
 
     '
 
