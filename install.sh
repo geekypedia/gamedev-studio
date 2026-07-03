@@ -965,12 +965,16 @@ prep(){
 
     run_step "rofi" "Rofi" "is_installed rofi" '
     sudo apt install -y rofi
-    git clone https://github.com/lr-tech/rofi-themes-collection.git "$TMP_DIR/rofi-themes-collection"
+    if [[ ! -d "$TMP_DIR"/rofi-themes-collection ]]; then
+        git clone https://github.com/lr-tech/rofi-themes-collection.git "$TMP_DIR"/rofi-themes-collection
+    fi
     mkdir -p ~/.local/share/rofi/themes/
-    cp themes/*.* ~/.local/share/rofi/themes/
-    git clone https://github.com/adi1090x/rofi.git "$TMP_DIR/rofi-adi1090x"
-    chdmod +x "$TMP_DIR/rofi-adi1090x/setup.sh"
-    "$TMP_DIR/rofi-adi1090x/setup.sh"
+    cp "$TMP_DIR"/rofi-themes-collection/themes/*.* ~/.local/share/rofi/themes/
+    if [[ ! -d "$TMP_DIR"/rofi-adi1090x ]]; then
+        git clone https://github.com/adi1090x/rofi.git "$TMP_DIR"/rofi-adi1090x
+    fi
+    chmod +x "$TMP_DIR"/rofi-adi1090x/setup.sh
+    "$TMP_DIR"/rofi-adi1090x/setup.sh
     '
 
     
