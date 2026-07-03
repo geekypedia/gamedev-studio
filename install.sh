@@ -993,17 +993,28 @@ prep(){
 
     ROFI_DIR = "~/.config/rofi"
     ROFI_BACKUPDIR = "$ROFI_DIR"."$REAL_USER"
+    ROFI_BACKUPDIR_ROOT = "$ROFI_DIR"."$USER"
+    local BACKUP_TS = get_timestamp
+    local BACKUP_DESTDIR = "$ROFI_BACKUPDIR"."$BACKUP_TS"
+    local BACKUP_DESTDIR_ROOT = "$ROFI_BACKUPDIR_ROOT"."$BACKUP_TS"
 
     if [[ -d "$ROFI_BACKUPDIR" ]]; then
-        echo "rofi backup config for adi1090x already exists ..."
-        local BACKUP_TS = get_timestamp
-        local BACKUP_DESTDIR = "$ROFI_BACKUPDIR"."$BACKUP_TS"
+        echo "rofi backup config for adi1090x already exists for $REAL_USER ..."
         mv "$ROFI_BACKUPDIR" "$BACKUP_DESTDIR"
+    fi
+
+    if [[ -d "$ROFI_BACKUPDIR_ROOT" ]]; then
+        echo "rofi backup config for adi1090x already exists for $USER ..."
+        mv "$ROFI_BACKUPDIR_ROOT" "$BACKUP_DESTDIR_ROOT"
+    fi
+
+    if [[ -d "$ROFI_DIR" ]]; then
+        echo "rofi config for adi1090x already exists ..."
         mv "$ROFI_DIR" "$BACKUP_DESTDIR"."original"
     fi
 
     echo "Installing adi1090x rofi themes ..."
-    cd "$TMP_DIR"/rofi-adi1090x && sudo ./setup.sh
+    cd "$TMP_DIR"/rofi-adi1090x && ./setup.sh
 
     ownership
     '
