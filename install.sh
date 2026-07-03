@@ -624,10 +624,9 @@ create_desktop_entry() {
         base_dir=$(dirname "$real_bin")
     fi
 
-    if [ -n "$category" ]; then
+    if [ -z "$category" ]; then
         category="Development;GameDev;"
     fi
-
 
     local icon=""
 
@@ -976,7 +975,7 @@ prep(){
     # FLATPAK
     # -----------------------------
     
-    run_step "flatpack" "Flatpak" "is_installed flatpak" '
+    run_step "flatpak" "Flatpak" "is_installed flatpak" '
     sudo apt install flatpak
     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
     '
@@ -2020,7 +2019,7 @@ EOF
         return 0
     fi
     
-    register_bin pixelorama "$PIXEL_BIN" "Pixelorama"
+    register_bin pixelorama "$PIXEL_BIN" "Pixelorama" "" "Graphics;"
     '
     
     run_step "libresprite" "LibreSprite" "is_installed libresprite" '
@@ -2066,7 +2065,7 @@ EOF
         return 0
     fi
     
-    register_bin libresprite "$LS_BIN" "LibreSprite"
+    register_bin libresprite "$LS_BIN" "LibreSprite" "" "Graphics;"
     '
     
     # -----------------------------
@@ -2185,7 +2184,7 @@ EOF
     fi
     
     extract_appimage_icon "$LDTK_BIN" 
-    register_bin ldtk "$LDTK_BIN" "LDtk"
+    register_bin ldtk "$LDTK_BIN" "LDtk" "" "Graphics;"
     '
     
     
@@ -2238,7 +2237,7 @@ EOF
       return 0
     }
     
-    register_bin obsidian /opt/gamedev/tools/obsidian/obsidian.AppImage "Obsidian"
+    register_bin obsidian /opt/gamedev/tools/obsidian/obsidian.AppImage "Obsidian" "" "Office;"
     '
     
     # -----------------------------
