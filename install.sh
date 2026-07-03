@@ -960,6 +960,7 @@ prep(){
     sudo apt install -y pv
     sudo apt install -y zenity
     sudo apt install -y papirus-icon-theme
+    sudo apt install -y plank
 '
     
     # -----------------------------
