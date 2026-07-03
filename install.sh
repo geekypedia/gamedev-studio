@@ -964,17 +964,33 @@ prep(){
 '
 
     run_step "rofi" "Rofi" "is_installed rofi" '
+    echo "Installing rofi ..."
     sudo apt install -y rofi
+    echo "rofi installed ..."
+    
     if [[ ! -d "$TMP_DIR"/rofi-themes-collection ]]; then
+        echo "Cloning rofi-themes-collection ..."
         git clone https://github.com/lr-tech/rofi-themes-collection.git "$TMP_DIR"/rofi-themes-collection
+    else
+        "rofi-themes-collection already cloned ..."
     fi
     mkdir -p ~/.local/share/rofi/themes/
     cp "$TMP_DIR"/rofi-themes-collection/themes/*.* ~/.local/share/rofi/themes/
+
     if [[ ! -d "$TMP_DIR"/rofi-adi1090x ]]; then
+        echo "Cloning adi1090x's rofi themes ..."
         git clone https://github.com/adi1090x/rofi.git "$TMP_DIR"/rofi-adi1090x
+    else
+        echo "adi1090x's rofi themes already cloned ..."
     fi
+
+    echo "Making the setup executable for adi1090x's rofi themes ..."
     chmod +x "$TMP_DIR"/rofi-adi1090x/setup.sh
-    "$TMP_DIR"/rofi-adi1090x/setup.sh
+
+    echo "Installing adi1090x's rofi themes ..."
+    cd "$TMP_DIR"/rofi-adi1090x && sudo ./setup.sh
+
+    ownership
     '
 
     
