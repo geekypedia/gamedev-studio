@@ -1026,6 +1026,8 @@ prep(){
 rofi -show drun -theme ~/.config/rofi/launchers/type-3/style-10.rasi
 EOF
 
+    sudo chmod +x /usr/local/bin/rofiapplauncher
+    
     create_desktop_entry "rofiapplauncher" "Rofi App Launcher"
 
     '
