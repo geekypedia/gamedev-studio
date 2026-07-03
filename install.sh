@@ -975,7 +975,7 @@ prep(){
         "rofi-themes-collection already cloned ..."
     fi
     mkdir -p ~/.local/share/rofi/themes/
-    cp -r "$TMP_DIR"/rofi-themes-collection/themes/ ~/.local/share/rofi/themes
+    cp -r "$TMP_DIR"/rofi-themes-collection/themes/* ~/.local/share/rofi/themes/
 
     if [[ ! -d "$TMP_DIR"/rofi-adi1090x ]]; then
         echo "Cloning adi1090x's rofi themes ..."
