@@ -2007,7 +2007,7 @@ EOF
         create_desktop_entry "solar2d" "Solar2D" "/snap/solar2d/current/meta/gui"
     '
 
-    run_step "gamemaker" "GameMaker" "find /opt -maxdepth 2 -type f -path '/opt/GameMaker*/GameMaker' 2>&1" '
+    run_step "gamemaker" "GameMaker" "find /opt -maxdepth 2 -type f -path '/opt/GameMaker*/GameMaker'  | grep -q . 2>&1" '
         TMP_DEB="/tmp/GameMaker.deb"
     
         curl -fL "https://gamemaker.io/en/download/ubuntu/lts/GameMaker.zip" -o "$TMP_DEB"
