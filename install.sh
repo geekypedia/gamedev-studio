@@ -999,6 +999,7 @@ prep(){
         local BACKUP_TS = get_timestamp
         local BACKUP_DESTDIR = "$ROFI_BACKUPDIR"."$BACKUP_TS"
         mv "$ROFI_BACKUPDIR" "$BACKUP_DESTDIR"
+        mv "$ROFI_DIR" "$BACKUP_DESTDIR"."original"
     fi
 
     echo "Installing adi1090x rofi themes ..."
