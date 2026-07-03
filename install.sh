@@ -697,6 +697,7 @@ register_bin() {
     local name="$1"
     local target="$2"
     local display_name="${3:-$name}"
+    local category="$4"
 
     if [ -z "$target" ] || [ ! -f "$target" ]; then
         echo "⚠ Cannot register $name (missing binary: $target)"
@@ -706,7 +707,7 @@ register_bin() {
     chmod +x "$target"
     sudo ln -sf "$target" /usr/local/bin/"$name"
 
-    create_desktop_entry "$name" "$display_name"
+    create_desktop_entry "$name" "$display_name" "" "$category"
 }
 
 
@@ -2019,7 +2020,7 @@ EOF
         return 0
     fi
     
-    register_bin pixelorama "$PIXEL_BIN" "Pixelorama" "" "Graphics;"
+    register_bin pixelorama "$PIXEL_BIN" "Pixelorama" "Graphics;"
     '
     
     run_step "libresprite" "LibreSprite" "is_installed libresprite" '
@@ -2065,7 +2066,7 @@ EOF
         return 0
     fi
     
-    register_bin libresprite "$LS_BIN" "LibreSprite" "" "Graphics;"
+    register_bin libresprite "$LS_BIN" "LibreSprite" "Graphics;"
     '
     
     # -----------------------------
@@ -2184,7 +2185,7 @@ EOF
     fi
     
     extract_appimage_icon "$LDTK_BIN" 
-    register_bin ldtk "$LDTK_BIN" "LDtk" "" "Graphics;"
+    register_bin ldtk "$LDTK_BIN" "LDtk" "Graphics;"
     '
     
     
@@ -2237,7 +2238,7 @@ EOF
       return 0
     }
     
-    register_bin obsidian /opt/gamedev/tools/obsidian/obsidian.AppImage "Obsidian" "" "Office;"
+    register_bin obsidian /opt/gamedev/tools/obsidian/obsidian.AppImage "Obsidian" "Office;"
     '
     
     # -----------------------------
