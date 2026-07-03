@@ -950,6 +950,7 @@ prep(){
     sudo apt install -y python3
     sudo apt install -y python3-pip
     sudo apt install -y python3-venv
+    sudo apt install -y python3-tk
     
     # 5. Alternative Package & File Managers
     sudo apt install -y flatpak
@@ -2023,8 +2024,8 @@ EOF
     python3 -m venv /opt/gamedev/python-env
     '
     run_step "pygame" "Python Game Dev Packages" "test -f /opt/gamedev/python-env/bin/python" '
-    /opt/gamedev/python-env/bin/python -m pip install -U \
-      pygame pyglet kivy arcade moderngl pymunk pillow numpy noise pyinstaller pyxel panda3d ursina
+        /opt/gamedev/python-env/bin/python -m pip install -U \
+        pygame pyglet kivy arcade moderngl pymunk pillow numpy noise pyinstaller pyxel panda3d ursina
     '
     
     # -----------------------------
