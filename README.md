@@ -139,6 +139,9 @@ OR
 - Phaser
 - ExcaliburJS
 
+#### For Modding
+- Flare
+
 ---
 
 ### 🌐 Web App Stack 
