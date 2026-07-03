@@ -2290,8 +2290,9 @@ EOF
     mkdir -p "$INSTALL_DIR"
     cp "$BUTLER_BIN" "$INSTALL_DIR/butler"
     chmod +x "$INSTALL_DIR/butler"
+    sudo ln -sf "$$INSTALL_DIR/butler" /usr/local/bin/butler
     
-    register_bin butler "$INSTALL_DIR/butler" "Butler"
+    #register_bin butler "$INSTALL_DIR/butler" "Butler"
     '
 }
 
