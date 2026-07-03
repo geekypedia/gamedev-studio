@@ -1026,7 +1026,7 @@ prep(){
 rofi -show drun -theme ~/.config/rofi/launchers/type-3/style-10.rasi
 EOF
 
-    create_desktop_entry "rofiapplauncer" "Rofi App Launcher"
+    create_desktop_entry "rofiapplauncher" "Rofi App Launcher"
 
     '
 
