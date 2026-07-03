@@ -976,19 +976,19 @@ prep(){
         echo "Cloning rofi-themes-collection ..."
         git clone https://github.com/lr-tech/rofi-themes-collection.git "$TMP_DIR"/rofi-themes-collection
     else
-        "rofi-themes-collection already cloned ..."
+        echo "rofi-themes-collection already cloned ..."
     fi
     mkdir -p ~/.local/share/rofi/themes/
     cp -r "$TMP_DIR"/rofi-themes-collection/themes/* ~/.local/share/rofi/themes/
 
     if [[ ! -d "$TMP_DIR"/rofi-adi1090x ]]; then
-        echo "Cloning adi1090x's rofi themes ..."
+        echo "Cloning adi1090x rofi themes ..."
         git clone https://github.com/adi1090x/rofi.git "$TMP_DIR"/rofi-adi1090x
     else
-        echo "adi1090x's rofi themes already cloned ..."
+        echo "adi1090x rofi themes already cloned ..."
     fi
 
-    echo "Making the setup executable for adi1090x's rofi themes ..."
+    echo "Making the setup executable for adi1090x rofi themes ..."
     chmod +x "$TMP_DIR"/rofi-adi1090x/setup.sh
 
     ROFI_DIR = "~/.config/rofi"
@@ -1001,7 +1001,7 @@ prep(){
         mv "$ROFI_BACKUPDIR" "$BACKUP_DESTDIR"
     fi
 
-    echo "Installing adi1090x's rofi themes ..."
+    echo "Installing adi1090x rofi themes ..."
     cd "$TMP_DIR"/rofi-adi1090x && sudo ./setup.sh
 
     ownership
