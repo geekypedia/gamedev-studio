@@ -604,6 +604,7 @@ create_desktop_entry() {
     local app="$1"
     local display_name="${2:-$1}"
     local base_path="$3"
+    local category="$4"
 
     local bin
     bin=$(command -v "$app" 2>/dev/null)
@@ -622,6 +623,11 @@ create_desktop_entry() {
     else
         base_dir=$(dirname "$real_bin")
     fi
+
+    if [ -n "$category" ]; then
+        category="Development;GameDev;"
+    fi
+
 
     local icon=""
 
@@ -676,7 +682,7 @@ Name=$display_name
 Exec=$bin
 Icon=$icon
 Terminal=false
-Categories=Development;GameDev;
+Categories=$category
 StartupNotify=true
 EOF
 
@@ -971,6 +977,7 @@ prep(){
     # -----------------------------
     
     run_step "flatpack" "Flatpak" "is_installed flatpak" '
+    sudo apt install flatpak
     flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
     '
     run_step "bottles" "Bottles (For running Windows Applications)" "is_installed bottles" '
@@ -2098,7 +2105,7 @@ EOF
     sudo apt install -y geonkick || echo "⚠️ Geonkick install failed"
     '
 
-    run_step "drum-machine" "Bottles (For running Windows Applications)" "is_ok drum-machine" '
+    run_step "drum-machine" "Revisto Drum Machine" "is_ok drum-machine" '
     flatpak install -y flathub io.github.revisto.drum-machine || true
     '
     
