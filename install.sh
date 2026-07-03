@@ -2015,6 +2015,11 @@ EOF
     
         rm -f "$TMP_DEB"
     '
+
+    run_step "flare" "Flare RPG Game Engine" "command -v flare >/dev/null 2>&1'
+        sudo apt install flare flare-game flare-engine
+    '
+    
     
     # -----------------------------
     # Python Libraries TOOLS
