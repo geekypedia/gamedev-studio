@@ -417,6 +417,10 @@ is_pip_installed() {
     python3 -c "import $1" 2>/dev/null
 }
 
+get_timestamp() {
+    date +"%Y-%m-%d-%H-%M-%S"
+}
+
 # -----------------------------
 # BINARY REGISTRY (FIX)
 # -----------------------------
@@ -986,6 +990,16 @@ prep(){
 
     echo "Making the setup executable for adi1090x's rofi themes ..."
     chmod +x "$TMP_DIR"/rofi-adi1090x/setup.sh
+
+    ROFI_DIR = "~/.config/rofi"
+    ROFI_BACKUPDIR = "$ROFI_DIR"."$REAL_USER"
+
+    if [[ -d "$ROFI_BACKUPDIR" ]]; then
+        echo "rofi backup config for adi1090x already exists ..."
+        local BACKUP_TS = get_timestamp
+        local BACKUP_DESTDIR = "$ROFI_BACKUPDIR"."$BACKUP_TS"
+        mv "$ROFI_BACKUPDIR" "$BACKUP_DESTDIR"
+    fi
 
     echo "Installing adi1090x's rofi themes ..."
     cd "$TMP_DIR"/rofi-adi1090x && sudo ./setup.sh
