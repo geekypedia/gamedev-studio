@@ -1020,6 +1020,14 @@ prep(){
     cd "$TMP_DIR"/rofi-adi1090x && ./setup.sh
 
     ownership
+
+    sudo tee /usr/local/bin/rofiapplauncher << 'EOF'
+#!/bin/bash
+rofi -show drun -theme ~/.config/rofi/launchers/type-3/style-10.rasi
+EOF
+
+    create_desktop_entry "rofiapplauncer" "Rofi App Launcher"
+
     '
 
     
