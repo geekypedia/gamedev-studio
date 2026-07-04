@@ -609,6 +609,7 @@ create_desktop_entry() {
     local display_name="${2:-$1}"
     local base_path="$3"
     local category="$4"
+    local bin_params="$5"
 
     local bin
     bin=$(command -v "$app" 2>/dev/null)
@@ -677,12 +678,17 @@ create_desktop_entry() {
         icon="$app"
     fi
 
+    bin_full="$bin"
+    if [ -n "$bin_params" ]; then
+        bin_full="${bin} ${bin_params}"
+    fi
+
     sudo tee "/usr/share/applications/${app}.desktop" >/dev/null <<EOF
 [Desktop Entry]
 Version=1.0
 Type=Application
 Name=$display_name
-Exec=$bin
+Exec=$bin_full
 Icon=$icon
 Terminal=false
 Categories=$category
@@ -702,6 +708,7 @@ register_bin() {
     local target="$2"
     local display_name="${3:-$name}"
     local category="$4"
+    local bin_params="$5"
 
     if [ -z "$target" ] || [ ! -f "$target" ]; then
         echo "⚠ Cannot register $name (missing binary: $target)"
@@ -711,7 +718,7 @@ register_bin() {
     chmod +x "$target"
     sudo ln -sf "$target" /usr/local/bin/"$name"
 
-    create_desktop_entry "$name" "$display_name" "" "$category"
+    create_desktop_entry "$name" "$display_name" "" "$category" "$bin_params"
 }
 
 
@@ -1535,7 +1542,7 @@ execute(){
     }
     
     extract_appimage_icon /opt/gamedev/engines/gdevelop/gdevelop.AppImage
-    register_bin gdevelop /opt/gamedev/engines/gdevelop/gdevelop.AppImage "GDevelop"
+    register_bin gdevelop /opt/gamedev/engines/gdevelop/gdevelop.AppImage "GDevelop" "" "--no-sandbox"
     '
     
     run_step "ctjs" "Ct.js" "is_installed ctjs" '
