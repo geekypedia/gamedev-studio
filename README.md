@@ -1,6 +1,14 @@
 # 🎮 Game Dev Studio Installer (Ubuntu)
 
 ![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04%2B-orange)
+![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04%2B-orange)
+![Linux Mint](https://img.shields.io/badge/Linux%20Mint-23-green)
+![Zorin OS](https://img.shields.io/badge/Zorin%20OS-18-blue)
+![Pop!_OS](https://img.shields.io/badge/Pop!_OS-24.04-cyan)
+![Xubuntu](https://img.shields.io/badge/Xubuntu-24.04-blue)
+![Lubuntu](https://img.shields.io/badge/Lubuntu-24.04-blue)
+![Kubuntu](https://img.shields.io/badge/Kubuntu-24.04-blue)
+![Ubuntu Studio](https://img.shields.io/badge/Ubuntu%20Studio-24.04-purple)
 ![Shell Script](https://img.shields.io/badge/Shell-Bash-blue)
 ![Status](https://img.shields.io/badge/Status-Active%20Project-brightgreen)
 
@@ -270,28 +278,3 @@ This project follows a Workstation-as-Code approach:
 - Minimal user input required
 - Optimized for indie game developers
 
----
-
-## 🧩 Supported Systems
-
-This project is compatible with the following Linux distributions:
-
-### 🐧 Ubuntu-based Distributions
-
-![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04%2B-orange)
-![Linux Mint](https://img.shields.io/badge/Linux%20Mint-Supported-green)
-![Zorin OS](https://img.shields.io/badge/Zorin%20OS-Supported-blue)
-![Pop!_OS](https://img.shields.io/badge/Pop!_OS-Supported-orange)
-![Xubuntu](https://img.shields.io/badge/Xubuntu-Supported-blue)
-![Lubuntu](https://img.shields.io/badge/Lubuntu-Supported-blue)
-![Kubuntu](https://img.shields.io/badge/Kubuntu-Supported-blue)
-![Ubuntu Studio](https://img.shields.io/badge/Ubuntu%20Studio-Supported-purple)
-
----
-
-### 📌 Version Notes
-
-- Ubuntu **24.04 LTS+** recommended
-- All Ubuntu-based distros are supported
-- Lightweight desktops (Lubuntu/Xubuntu) fully supported
-- KDE-based systems (Kubuntu) fully supported
