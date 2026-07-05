@@ -4,6 +4,18 @@
 ![Shell Script](https://img.shields.io/badge/Shell-Bash-blue)
 ![Status](https://img.shields.io/badge/Status-Active%20Project-brightgreen)
 
+#### Tested
+![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04%2B-orange)
+![Linux Mint](https://img.shields.io/badge/Linux%20Mint-Tested-green)
+![Zorin OS](https://img.shields.io/badge/Zorin%20OS-Tested-blue)
+![Pop!_OS](https://img.shields.io/badge/Pop!_OS-Tested-orange)
+![Xubuntu](https://img.shields.io/badge/Xubuntu-Tested-blue)
+![Lubuntu](https://img.shields.io/badge/Lubuntu-Tested-blue)
+![Kubuntu](https://img.shields.io/badge/Kubuntu-Tested-blue)
+![Ubuntu Studio](https://img.shields.io/badge/Ubuntu%20Studio-Tested-purple)
+![Shell Script](https://img.shields.io/badge/Shell-Bash-blue)
+![Status](https://img.shields.io/badge/Status-Active%20Project-brightgreen)
+
 ---
 
 ## 🚀 Overview
