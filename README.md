@@ -1,16 +1,17 @@
 # 🎮 Game Dev Studio Installer (Ubuntu)
 
-![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04%2B-orange)
 ![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04%2B-orange)
 ![Linux Mint](https://img.shields.io/badge/Linux%20Mint-23%2B-green)
 ![Zorin OS](https://img.shields.io/badge/Zorin%20OS-18%2B-blue)
 ![Pop!_OS](https://img.shields.io/badge/Pop!_OS-24.04%2B-cyan)
-![Xubuntu](https://img.shields.io/badge/Xubuntu-24.04%2B-blue)
+![Xubuntu](https://img.shields.io/badge/Xubuntu-24.04%2B-grey)
 ![Lubuntu](https://img.shields.io/badge/Lubuntu-24.04%2B-blue)
-![Kubuntu](https://img.shields.io/badge/Kubuntu-24.04%2B-blue)
-![Ubuntu Studio](https://img.shields.io/badge/Ubuntu%20Studio-24.04-purple)
+![Kubuntu](https://img.shields.io/badge/Kubuntu-24.04%2B-lightblue)
+![Ubuntu Studio](https://img.shields.io/badge/Ubuntu%20Studio-24.04%2B-purple)
+![Ubuntu-Based](https://img.shields.io/badge/Ubuntu-22.04%2B-orange)
 ![Shell Script](https://img.shields.io/badge/Shell-Bash-blue)
 ![Status](https://img.shields.io/badge/Status-Active%20Project-brightgreen)
+
 
 ---
 
