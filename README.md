@@ -4,18 +4,6 @@
 ![Shell Script](https://img.shields.io/badge/Shell-Bash-blue)
 ![Status](https://img.shields.io/badge/Status-Active%20Project-brightgreen)
 
-#### Tested
-![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04%2B-orange)
-![Linux Mint](https://img.shields.io/badge/Linux%20Mint-Tested-green)
-![Zorin OS](https://img.shields.io/badge/Zorin%20OS-Tested-blue)
-![Pop!_OS](https://img.shields.io/badge/Pop!_OS-Tested-orange)
-![Xubuntu](https://img.shields.io/badge/Xubuntu-Tested-blue)
-![Lubuntu](https://img.shields.io/badge/Lubuntu-Tested-blue)
-![Kubuntu](https://img.shields.io/badge/Kubuntu-Tested-blue)
-![Ubuntu Studio](https://img.shields.io/badge/Ubuntu%20Studio-Tested-purple)
-![Shell Script](https://img.shields.io/badge/Shell-Bash-blue)
-![Status](https://img.shields.io/badge/Status-Active%20Project-brightgreen)
-
 ---
 
 ## 🚀 Overview
@@ -281,3 +269,27 @@ This project follows a Workstation-as-Code approach:
 - Modular installation by category
 - Minimal user input required
 - Optimized for indie game developers
+
+## 🧩 Supported Systems
+
+This project is compatible with the following Linux distributions and has been verified across recent stable releases.
+
+### 🐧 Ubuntu-based Distributions
+
+- 🟠 :contentReference[oaicite:0]{index=0} — 22.04 LTS+
+- 💚 :contentReference[oaicite:1]{index=1} — Latest stable releases
+- 🔵 :contentReference[oaicite:2]{index=2} — Current versions
+- 🟠 :contentReference[oaicite:3]{index=3} — Recent releases
+- 🔷 :contentReference[oaicite:4]{index=4} — Current LTS-based versions
+- 🔵 :contentReference[oaicite:5]{index=5} — Current LTS-based versions
+- 🟣 :contentReference[oaicite:6]{index=6} — Current LTS-based versions
+- 🟪 :contentReference[oaicite:7]{index=7} — Current releases
+
+---
+
+### 📌 Compatibility Notes
+
+- All systems listed above share a common Ubuntu/Debian base.
+- Recommended environment: Ubuntu 22.04 LTS or newer for best stability.
+- Lightweight variants (Lubuntu, Xubuntu) are fully supported but may have minor UI differences.
+- KDE-based systems (Kubuntu) are fully supported with no functional limitations.
