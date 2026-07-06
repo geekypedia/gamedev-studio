@@ -1675,8 +1675,37 @@ execute(){
     '
 
     run_step "twine" "Twine" "is_installed twine" '
-        sudo apt install -y twine || echo "⚠️ Twine install failed"
-    '
+        echo "⚠️ Twine desktop is not available via APT, trying Flatpak..."
+    
+        if ! command -v flatpak >/dev/null 2>&1; then
+            sudo apt install -y flatpak || {
+                echo "❌ Flatpak installation failed"
+                return 0
+            }
+        fi
+    
+        flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+    
+        if flatpak install -y flathub org.twinery.Twine; then
+            echo "✅ Twine installed via Flathub"
+        else
+            echo "⚠️ Flatpak install failed, trying Snap..."
+    
+            if ! command -v snap >/dev/null 2>&1; then
+                sudo apt install -y snapd || {
+                    echo "❌ Snapd installation failed"
+                    return 0
+                }
+            fi
+    
+            sudo snap install twinejs || {
+                echo "⚠️ Twine Snap install failed"
+                return 0
+            }
+    
+            echo "✅ Twine installed via Snap"
+        fi
+    '    
     
     run_step "love" "LOVE2D" "is_installed love" '
         sudo apt install -y love || echo "⚠️ Love2D install failed"
