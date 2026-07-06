@@ -143,6 +143,7 @@ OR
 - GB Studio (No-code)
 - Twine (No-code)
 - TuesdayJS (No-code, JavaScript)
+- Inky (No-code)
 - GameMaker (GML/JavaScript/TypeScript)
 
 #### JavaScript / TypeScript
