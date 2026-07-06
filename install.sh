@@ -916,7 +916,7 @@ init() {
     ownership
     
     # Now create subfolders as normal user (no sudo needed)
-    mkdir -p "$BASE"/{engines,tools,art}
+    mkdir -p "$BASE"/{engines,tools}
     
 }
 
@@ -2125,7 +2125,7 @@ EOF
     echo "⬇️ Pixelorama URL: $PIXEL_URL"
     
     PIXEL_ARCHIVE="$TMP_DIR/pixelorama.tar.gz"
-    PIXEL_DIR="/opt/gamedev/art/pixelorama"
+    PIXEL_DIR="/opt/gamedev/tools/pixelorama"
     
     safe_wget "$PIXEL_URL" "$PIXEL_ARCHIVE" || {
         echo "⚠️ Pixelorama download failed"
@@ -2170,7 +2170,7 @@ EOF
     echo "⬇️ LibreSprite URL: $ZIP_URL"
     
     LIBRE_ZIP="$TMP_DIR/libresprite.zip"
-    LIBRE_DIR="/opt/gamedev/art/libresprite"
+    LIBRE_DIR="/opt/gamedev/tools/libresprite"
     
     safe_wget "$ZIP_URL" "$LIBRE_ZIP" || {
         echo "⚠️ LibreSprite download failed"
@@ -2195,6 +2195,63 @@ EOF
     
     register_bin libresprite "$LS_BIN" "LibreSprite" "Graphics;"
     '
+
+    run_step "effekseer" "Effekseer" "is_installed effekseer" '
+        mkdir -p "$TMP_DIR"
+    
+        EFK_ZIP="$TMP_DIR/Effekseer.zip"
+    
+        API="https://api.github.com/repos/effekseer/Effekseer/releases/latest"
+    
+        EFK_URL=$(
+          curl -s "$API" |
+          jq -r "
+              .assets[]
+              | select(
+                  (.name | ascii_downcase | contains(\"linux\")) and
+                  (.name | endswith(\".zip\"))
+                )
+              | .browser_download_url
+            " | head -n1
+        )
+    
+        if [ -z "$EFK_URL" ]; then
+          echo "⚠️ Could not find Effekseer Linux build"
+          return 0
+        fi
+    
+        safe_wget \
+            "$EFK_URL" \
+            "$EFK_ZIP" || {
+            echo "⚠️ Effekseer download failed"
+            return 0
+        }
+    
+        rm -rf "$TMP_DIR"/Effekseer
+        mkdir -p "$TMP_DIR"/Effekseer
+    
+        unzip -o "$EFK_ZIP" -d "$TMP_DIR"/Effekseer || {
+            echo "⚠️ Effekseer unzip failed"
+            return 0
+        }
+    
+        EFK_BASE_DIR="$TMP_DIR"/Effekseer
+        EFK_DIR=$(find "$EFK_BASE_DIR" -mindepth 1 -maxdepth 1 -type d -iname "*effekseer*" | head -n1)
+    
+        if [ ! -d "$EFK_DIR" ]; then
+            echo "⚠️ Effekseer directory not found"
+            return 0
+        fi
+    
+        rm -rf /opt/gamedev/tools/Effekseer
+        mkdir -p /opt/gamedev/tools
+    
+        sudo mv "$EFK_DIR" /opt/gamedev/tools/Effekseer
+    
+        EFK_BIN=/opt/gamedev/tools/Effekseer/Tool/Effekseer
+    
+        register_bin effekseer "$EFK_BIN" "Effekseer" "Graphics;"
+    '    
     
     # -----------------------------
     # AUDIO / VIDEO
