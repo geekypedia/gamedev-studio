@@ -1780,7 +1780,7 @@ execute(){
     
             register_bin tuesdayjs \
                 "$INSTALL_DIR/TuesdayJS.AppImage" \
-                "TuesdayJS" "Development;" "" "--no-sandbox"
+                "TuesdayJS" "" "--no-sandbox"
         fi
     '
     
