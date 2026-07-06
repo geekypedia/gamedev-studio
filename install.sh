@@ -2262,11 +2262,51 @@ EOF
     '
 
     run_step "synfig" "Synfig Studio" "is_installed synfig" '
-        sudo apt install -y synfigstudio || echo "⚠️ Synfig Studio install failed"
+        if sudo apt install -y synfigstudio; then
+            echo "✅ Synfig Studio installed via APT"
+        else
+            echo "⚠️ APT install failed, trying Flatpak (Flathub)..."
+    
+            if ! command -v flatpak >/dev/null 2>&1; then
+                sudo apt install -y flatpak || {
+                    echo "❌ Flatpak installation failed"
+                    return 0
+                }
+            fi
+    
+            flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+    
+            flatpak install -y flathub org.synfig.SynfigStudio || {
+                echo "⚠️ Synfig Studio Flatpak install failed"
+                return 0
+            }
+    
+            echo "✅ Synfig Studio installed via Flathub"
+        fi
     '
     
     run_step "opentoonz" "OpenToonz" "is_installed opentoonz" '
-        sudo apt install -y opentoonz || echo "⚠️ OpenToonz install failed"
+        if sudo apt install -y opentoonz; then
+            echo "✅ OpenToonz installed via APT"
+        else
+            echo "⚠️ APT install failed, trying Flatpak (Flathub)..."
+    
+            if ! command -v flatpak >/dev/null 2>&1; then
+                sudo apt install -y flatpak || {
+                    echo "❌ Flatpak installation failed"
+                    return 0
+                }
+            fi
+    
+            flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+    
+            flatpak install -y flathub io.github.OpenToonz.OpenToonz || {
+                echo "⚠️ OpenToonz Flatpak install failed"
+                return 0
+            }
+    
+            echo "✅ OpenToonz installed via Flathub"
+        fi
     '
     
     # -----------------------------
@@ -2432,9 +2472,28 @@ EOF
     '
 
     run_step "natron" "Natron" "is_installed natron" '
-        sudo apt install -y natron || echo "⚠️ Natron install failed"
-    '
+        if sudo apt install -y natron; then
+            echo "✅ Natron installed via APT"
+        else
+            echo "⚠️ APT install failed, trying Flatpak (Flathub)..."
     
+            if ! command -v flatpak >/dev/null 2>&1; then
+                sudo apt install -y flatpak || {
+                    echo "❌ Flatpak installation failed"
+                    return 0
+                }
+            fi
+    
+            flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+    
+            flatpak install -y flathub fr.natron.Natron || {
+                echo "⚠️ Natron Flatpak install failed"
+                return 0
+            }
+    
+            echo "✅ Natron installed via Flathub"
+        fi
+    '
 
     
     # -----------------------------
