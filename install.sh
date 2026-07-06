@@ -2247,11 +2247,27 @@ EOF
         mkdir -p /opt/gamedev/tools
     
         sudo mv "$EFK_DIR" /opt/gamedev/tools/Effekseer
+
+        # Download application icon
+        safe_wget \
+            "https://avatars.githubusercontent.com/u/5723431" \
+            "/opt/gamedev/tools/Effekseer/icon.png" || {
+            echo "⚠️ Failed to download Effekseer icon"
+        }
+
     
         EFK_BIN=/opt/gamedev/tools/Effekseer/Tool/Effekseer
     
         register_bin effekseer "$EFK_BIN" "Effekseer" "Graphics;"
-    '    
+    '
+
+    run_step "synfig" "Synfig Studio" "is_installed synfig" '
+        sudo apt install -y synfigstudio || echo "⚠️ Synfig Studio install failed"
+    '
+    
+    run_step "opentoonz" "OpenToonz" "is_installed opentoonz" '
+        sudo apt install -y opentoonz || echo "⚠️ OpenToonz install failed"
+    '
     
     # -----------------------------
     # AUDIO / VIDEO
@@ -2414,6 +2430,12 @@ EOF
     
         register_bin rfxgen "$RFX_BIN" "rFXGen" "AudioVideo;Audio;"
     '
+
+    run_step "natron" "Natron" "is_installed natron" '
+        sudo apt install -y natron || echo "⚠️ Natron install failed"
+    '
+    
+
     
     # -----------------------------
     # LEVEL EDITORS
