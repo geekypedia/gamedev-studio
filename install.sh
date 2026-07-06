@@ -2300,12 +2300,25 @@ EOF
     
             flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
     
-            flatpak install -y flathub io.github.OpenToonz.OpenToonz || {
-                echo "⚠️ OpenToonz Flatpak install failed"
-                return 0
-            }
+            if flatpak install -y flathub io.github.OpenToonz.OpenToonz; then
+                echo "✅ OpenToonz installed via Flathub"
+            else
+                echo "⚠️ Flatpak install failed, trying Snap..."
     
-            echo "✅ OpenToonz installed via Flathub"
+                if ! command -v snap >/dev/null 2>&1; then
+                    sudo apt install -y snapd || {
+                        echo "❌ Snapd installation failed"
+                        return 0
+                    }
+                fi
+    
+                sudo snap install opentoonz || {
+                    echo "⚠️ OpenToonz Snap install failed"
+                    return 0
+                }
+    
+                echo "✅ OpenToonz installed via Snap"
+            fi
         fi
     '
     
