@@ -173,6 +173,7 @@ OR
 - Pixelorama
 - LibreSprite
 - Effekseer
+- FreeTexturePacker
 - Synfig Studio
 - OpenToonz
 
