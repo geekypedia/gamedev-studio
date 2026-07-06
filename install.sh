@@ -1673,9 +1673,13 @@ execute(){
     
     register_bin renpy "$RENPY_LAUNCHER" "RenPy"
     '
+
+    run_step "twine" "Twine" "is_installed twine" '
+        sudo apt install -y twine || echo "⚠️ Twine install failed"
+    '
     
     run_step "love" "LOVE2D" "is_installed love" '
-    sudo apt install -y love
+        sudo apt install -y love || echo "⚠️ Love2D install failed"
     '
     
     run_step "microstudio" "microStudio" "is_installed microstudio" '
@@ -2333,6 +2337,11 @@ EOF
             echo "✅ Synfig Studio installed via Flathub"
         fi
     '
+
+    run_step "pencil2d" "Pencil2D" "is_installed pencil2d" '
+        sudo apt install -y pencil2d || echo "⚠️ Pencil2D install failed"
+    '
+
     
     run_step "opentoonz" "OpenToonz" "is_installed opentoonz" '
         if sudo apt install -y opentoonz; then
