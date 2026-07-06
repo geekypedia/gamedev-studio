@@ -62,7 +62,7 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 ```
 ---
 
-### 🎯 Update a single package
+### ⬆️ Update a single package
 
 ```bash
 ~/gamedev-studio.sh --update your-package
@@ -94,7 +94,7 @@ OR
 ```
 ---
 
-### 🎯 List available packages
+### 📦 List available packages
 
 ```bash
 ~/gamedev-studio.sh --list
@@ -102,7 +102,7 @@ OR
 
 ---
 
-### 🎯 Skip packages
+### ⏭️ Skip packages
 
 ```bash
 ~/gamedev-studio.sh --skip package1,package2
@@ -172,6 +172,7 @@ OR
 - Inkscape
 - Pixelorama
 - LibreSprite
+- Effekseer
 
 ---
 
@@ -205,7 +206,7 @@ OR
 
 ---
 
-### 🧩 Pipeline Tools
+### 🔧 Pipeline Tools
 - LDtk Sync Tool
 - Godot Export Templates for iOS, Android and Desktop
 - Adventure Game Studio Runtime
