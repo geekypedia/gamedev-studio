@@ -141,6 +141,7 @@ OR
 - Ct.js (Block-based, JavaScript, CoffeeScript)
 - microStudio (Lua, JavaScript, Python)
 - GB Studio (No-code)
+- Twine (No-code)
 - GameMaker (GML/JavaScript/TypeScript)
 
 #### JavaScript / TypeScript
@@ -175,6 +176,7 @@ OR
 - Effekseer
 - FreeTexturePacker
 - Synfig Studio
+- Pencil2D
 - OpenToonz
 
 ---
