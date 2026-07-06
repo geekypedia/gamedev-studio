@@ -2231,6 +2231,63 @@ EOF
     run_step "drum-machine" "Revisto Drum Machine" "is_ok drum-machine" '
     flatpak install -y flathub io.github.revisto.drum-machine || true
     '
+
+    run_step "famistudio" "FamiStudio" "is_installed famistudio" '
+    mkdir -p "$TMP_DIR"
+    
+    FAMI_ZIP="$TMP_DIR/FamiStudio.zip"
+
+    API="https://api.github.com/repos/BleuBleu/FamiStudio/releases/latest"
+    
+    FAMI_URL=$(
+      curl -s "$API" |
+      jq -r "
+          .assets[]
+          | select(
+              (.name | ascii_downcase | contains(\"linux\")) and
+              (.name | ascii_downcase | contains(\"amd64\")) and
+              (.name | endswith(\".zip\"))
+            )
+          | .browser_download_url
+        " | head -n1
+    )
+    
+    if [ -z "$FAMI_URL" ]; then
+      echo "⚠️ Could not find FamiStudio Linux build"
+      return 0
+    fi
+    
+    safe_wget \
+        "$FAMI_URL" \
+        "$FAMI_ZIP" || {
+        echo "⚠️ FamiStudio download failed"
+        return 0
+    }
+    
+    rm -rf "$TMP_DIR"/FamiStudio
+    mkdir -p "$TMP_DIR"/FamiStudio
+    
+    unzip -o "$FAMI_ZIP" -d "$TMP_DIR"/FamiStudio || {
+        echo "⚠️ FamiStudio unzip failed"
+        return 0
+    }
+    
+    FAMI_DIR="$TMP_DIR"/FamiStudio
+    
+    if [ ! -d "$FAMI_DIR" ]; then
+        echo "⚠️ FamiStudio directory not found"
+        return 0
+    fi
+    
+    rm -rf /opt/gamedev/tools/FamiStudio
+    mkdir -p /opt/gamedev/tools
+    
+    sudo mv "$FAMI_DIR" /opt/gamedev/tools/FamiStudio
+    
+    FAMI_BIN=/opt/gamedev/tools/FamiStudio/FamiStudio
+    
+    register_bin famistudio "$FAMI_BIN" "FamiStudio" "AudioVideo;Audio;"
+    '
     
     # -----------------------------
     # LEVEL EDITORS
