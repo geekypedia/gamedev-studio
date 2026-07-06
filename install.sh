@@ -2334,7 +2334,7 @@ EOF
         }
     
         RFX_BASE_DIR="$TMP_DIR"/rFXGen
-        RFX_DIR=$(find "$RFX_BASE_DIR" -maxdepth 1 -type d -name "rfxgen" | head -n 1)
+        RFX_DIR=$(find "$RFX_BASE_DIR" -mindepth 1 -maxdepth 1 -type d -iname "*rfxgen*" | head -n1)
     
         if [ ! -d "$RFX_DIR" ]; then
             echo "⚠️ rFXGen directory not found"
