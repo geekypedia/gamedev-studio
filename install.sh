@@ -1707,6 +1707,51 @@ execute(){
         fi
     '
 
+    run_step "inky" "Inky" "is_installed inky" '
+        mkdir -p "$TMP_DIR"
+    
+        INKY_ZIP="$TMP_DIR/Inky.zip"
+    
+        safe_wget \
+            "https://github.com/inkle/inky/releases/latest/download/Inky_linux.zip" \
+            "$INKY_ZIP" || {
+            echo "⚠️ Inky download failed"
+            return 0
+        }
+    
+        rm -rf "$TMP_DIR"/Inky
+        mkdir -p "$TMP_DIR"/Inky
+    
+        unzip -o "$INKY_ZIP" -d "$TMP_DIR"/Inky || {
+            echo "⚠️ Inky unzip failed"
+            return 0
+        }
+    
+        INKY_DIR="$TMP_DIR"/Inky
+    
+        if [ ! -d "$INKY_DIR" ]; then
+            echo "⚠️ Inky directory not found"
+            return 0
+        fi
+    
+        rm -rf /opt/gamedev/engines/Inky
+        mkdir -p /opt/gamedev/engines
+    
+        sudo mv "$INKY_DIR" /opt/gamedev/engines/Inky
+
+        # Download application icon
+        safe_wget \
+            "https://www.inklestudios.com/ink/img/inky-icon.png" \
+            "/opt/gamedev/engines/Inky/icon.png" || {
+            echo "⚠️ Failed to download Inky icon"
+        }
+
+    
+        INKY_BIN=/opt/gamedev/engines/Inky/Inky
+    
+        register_bin inky "$INKY_BIN" "Inky"  "" "--no-sandbox"
+    '
+
     run_step "tuesdayjs" "TuesdayJS" "is_installed tuesdayjs" '
         TMP_DEB="/tmp/TuesdayJS.deb"
         TMP_APPIMAGE="/tmp/TuesdayJS.AppImage"
@@ -1951,7 +1996,7 @@ EOF
     EDITOR_TAR="$TMP_DIR/solarus-editor.tar.gz"
     LAUNCHER_TAR="$TMP_DIR/solarus-launcher.tar.gz"
     
-    APP_DIR="/opt/gamedev/tools/solarus"
+    APP_DIR="/opt/gamedev/engines/solarus"
     
     safe_wget "$EDITOR_URL" "$EDITOR_TAR" || {
       echo "⚠️ Solarus Editor download failed"
