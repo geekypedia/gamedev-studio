@@ -186,6 +186,7 @@ OR
 - Hydrogen Drum Machine
 - Revisto Drum Machine
 - Geonkick
+- rFXGen
 
 ---
 
