@@ -2261,26 +2261,53 @@ EOF
         register_bin effekseer "$EFK_BIN" "Effekseer" "Graphics;"
     '
 
-    run_step "fretexpacker" "FreeTexturePacker" "is_installed freetexturepacker" '
+    run_step "freetexturepacker" "FreeTexturePacker" "is_installed freetexturepacker" '
         TMP_DEB="/tmp/FreeTexturePacker-amd64.deb"
+        TMP_APPIMAGE="/tmp/FreeTexturePacker-x86_64.AppImage"
+        INSTALL_DIR="/opt/gamedev/tools/FreeTexturePacker"
     
-        curl -fL \
+        USE_APPIMAGE=0
+    
+        if curl -fL \
             "https://github.com/odrick/free-tex-packer/releases/download/v0.6.7/FreeTexturePacker-amd64.deb" \
-            -o "$TMP_DEB" || {
-            echo "⚠️ FreeTexturePacker download failed"
-            return 0
-        }
+            -o "$TMP_DEB"; then
     
-        sudo dpkg -i "$TMP_DEB" || {
-            echo "⚠️ dpkg install failed, trying apt fix..."
-            sudo apt -f install -y || {
-                echo "⚠️ dependency fix failed"
+            if sudo dpkg -i "$TMP_DEB"; then
+                echo "✅ FreeTexturePacker installed via DEB"
                 rm -f "$TMP_DEB"
                 return 0
-            }
-        }
+            else
+                echo "⚠️ DEB install failed, trying dependency fix..."
+                sudo apt -f install -y || {
+                    echo "⚠️ dependency fix failed"
+                }
     
-        rm -f "$TMP_DEB"
+                USE_APPIMAGE=1
+            fi
+    
+            rm -f "$TMP_DEB"
+        else
+            echo "⚠️ DEB download failed, trying AppImage..."
+            USE_APPIMAGE=1
+        fi
+    
+        if [ "$USE_APPIMAGE" -eq 1 ]; then
+            curl -fL \
+                "https://github.com/odrick/free-tex-packer/releases/download/v0.6.7/FreeTexturePacker-x86_64.AppImage" \
+                -o "$TMP_APPIMAGE" || {
+                echo "⚠️ AppImage download failed"
+                return 0
+            }
+    
+            sudo mkdir -p "$INSTALL_DIR"
+            sudo mv "$TMP_APPIMAGE" "$INSTALL_DIR/FreeTexturePacker.AppImage"
+    
+            extract_appimage_icon "$INSTALL_DIR/FreeTexturePacker.AppImage"
+    
+            register_bin freetexturepacker \
+                "$INSTALL_DIR/FreeTexturePacker.AppImage" \
+                "FreeTexturePacker"
+        fi
     '
 
     run_step "synfig" "Synfig Studio" "is_installed synfig" '
