@@ -2306,7 +2306,7 @@ EOF
     
             register_bin freetexturepacker \
                 "$INSTALL_DIR/FreeTexturePacker.AppImage" \
-                "FreeTexturePacker"
+                "Free texture packer" "Graphics;"
         fi
     '
 
