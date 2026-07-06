@@ -173,6 +173,8 @@ OR
 - Pixelorama
 - LibreSprite
 - Effekseer
+- Synfig Studio
+- OpenToonz
 
 ---
 
@@ -188,6 +190,7 @@ OR
 - Revisto Drum Machine
 - Geonkick
 - rFXGen
+- Natron
 
 ---
 
