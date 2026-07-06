@@ -1710,7 +1710,7 @@ execute(){
     run_step "tuesdayjs" "TuesdayJS" "is_installed tuesdayjs" '
         TMP_DEB="/tmp/TuesdayJS.deb"
         TMP_APPIMAGE="/tmp/TuesdayJS.AppImage"
-        INSTALL_DIR="/opt/gamedev/tools/TuesdayJS"
+        INSTALL_DIR="/opt/gamedev/engines/TuesdayJS"
     
         API="https://api.github.com/repos/Kirilllive/tuesday-js/releases/latest"
     
@@ -1780,7 +1780,7 @@ execute(){
     
             register_bin tuesdayjs \
                 "$INSTALL_DIR/TuesdayJS.AppImage" \
-                "TuesdayJS" "Development;"
+                "TuesdayJS" "Development;" "" "--no-sandbox"
         fi
     '
     
