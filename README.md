@@ -142,6 +142,7 @@ OR
 - microStudio (Lua, JavaScript, Python)
 - GB Studio (No-code)
 - Twine (No-code)
+- TuesdayJS (No-code, JavaScript)
 - GameMaker (GML/JavaScript/TypeScript)
 
 #### JavaScript / TypeScript
