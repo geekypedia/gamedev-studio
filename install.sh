@@ -1705,7 +1705,83 @@ execute(){
     
             echo "✅ Twine installed via Snap"
         fi
-    '    
+    '
+
+    run_step "tuesdayjs" "TuesdayJS" "is_installed tuesdayjs" '
+        TMP_DEB="/tmp/TuesdayJS.deb"
+        TMP_APPIMAGE="/tmp/TuesdayJS.AppImage"
+        INSTALL_DIR="/opt/gamedev/tools/TuesdayJS"
+    
+        API="https://api.github.com/repos/Kirilllive/tuesday-js/releases/latest"
+    
+        DEB_URL=$(
+            curl -s "$API" |
+            jq -r "
+                .assets[]
+                | select(
+                    (.name | ascii_downcase | endswith(\".deb\")) and
+                    (.name | contains(\"linux\"))
+                )
+                | .browser_download_url
+            " | head -n1
+        )
+    
+        APPIMAGE_URL=$(
+            curl -s "$API" |
+            jq -r "
+                .assets[]
+                | select(
+                    (.name | ascii_downcase | endswith(\".appimage\"))
+                )
+                | .browser_download_url
+            " | head -n1
+        )
+    
+        USE_APPIMAGE=0
+    
+        if [ -n "$DEB_URL" ] && curl -fL "$DEB_URL" -o "$TMP_DEB"; then
+    
+            if sudo dpkg -i "$TMP_DEB"; then
+                echo "✅ TuesdayJS installed via DEB"
+                rm -f "$TMP_DEB"
+                return 0
+            else
+                echo "⚠️ DEB install failed, trying dependency fix..."
+                sudo apt -f install -y || {
+                    echo "⚠️ dependency fix failed"
+                }
+    
+                USE_APPIMAGE=1
+            fi
+    
+            rm -f "$TMP_DEB"
+        else
+            echo "⚠️ DEB download failed, trying AppImage..."
+            USE_APPIMAGE=1
+        fi
+    
+        if [ "$USE_APPIMAGE" -eq 1 ]; then
+    
+            if [ -z "$APPIMAGE_URL" ]; then
+                echo "⚠️ No AppImage found in latest release"
+                return 0
+            fi
+    
+            curl -fL "$APPIMAGE_URL" -o "$TMP_APPIMAGE" || {
+                echo "⚠️ AppImage download failed"
+                return 0
+            }
+    
+            sudo mkdir -p "$INSTALL_DIR"
+            sudo mv "$TMP_APPIMAGE" "$INSTALL_DIR/TuesdayJS.AppImage"
+    
+            extract_appimage_icon "$INSTALL_DIR/TuesdayJS.AppImage"
+    
+            register_bin tuesdayjs \
+                "$INSTALL_DIR/TuesdayJS.AppImage" \
+                "TuesdayJS" "Development;"
+        fi
+    '
     
     run_step "love" "LOVE2D" "is_installed love" '
         sudo apt install -y love || echo "⚠️ Love2D install failed"
