@@ -180,6 +180,7 @@ OR
 - Kdenlive
 - OBS Studio
 - LMMS
+- Fami Studio
 - Audacity
 - Ardour
 - Hydrogen Drum Machine
