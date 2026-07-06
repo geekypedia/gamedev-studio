@@ -140,7 +140,6 @@ OR
 - GDevelop (No-code, JavaScript supported)
 - Ct.js (Block-based, JavaScript, CoffeeScript)
 - microStudio (Lua, JavaScript, Python)
-- Adventure Game Studio (C-like)
 - GB Studio (No-code)
 - GameMaker (GML/JavaScript/TypeScript)
 
@@ -207,6 +206,7 @@ OR
 ### 🧩 Pipeline Tools
 - LDtk Sync Tool
 - Godot Export Templates for iOS, Android and Desktop
+- Adventure Game Studio Runtime
 
 ---
 
