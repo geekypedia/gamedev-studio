@@ -1737,28 +1737,29 @@ execute(){
             " | head -n1
         )
     
-        USE_APPIMAGE=0
+        USE_APPIMAGE=1
+
+        
+        # if [ -n "$DEB_URL" ] && curl -fL "$DEB_URL" -o "$TMP_DEB"; then
     
-        if [ -n "$DEB_URL" ] && curl -fL "$DEB_URL" -o "$TMP_DEB"; then
+        #     if sudo dpkg -i "$TMP_DEB"; then
+        #         echo "✅ TuesdayJS installed via DEB"
+        #         rm -f "$TMP_DEB"
+        #         return 0
+        #     else
+        #         echo "⚠️ DEB install failed, trying dependency fix..."
+        #         sudo apt -f install -y || {
+        #             echo "⚠️ dependency fix failed"
+        #         }
     
-            if sudo dpkg -i "$TMP_DEB"; then
-                echo "✅ TuesdayJS installed via DEB"
-                rm -f "$TMP_DEB"
-                return 0
-            else
-                echo "⚠️ DEB install failed, trying dependency fix..."
-                sudo apt -f install -y || {
-                    echo "⚠️ dependency fix failed"
-                }
+        #         USE_APPIMAGE=1
+        #     fi
     
-                USE_APPIMAGE=1
-            fi
-    
-            rm -f "$TMP_DEB"
-        else
-            echo "⚠️ DEB download failed, trying AppImage..."
-            USE_APPIMAGE=1
-        fi
+        #     rm -f "$TMP_DEB"
+        # else
+        #     echo "⚠️ DEB download failed, trying AppImage..."
+        #     USE_APPIMAGE=1
+        # fi
     
         if [ "$USE_APPIMAGE" -eq 1 ]; then
     
