@@ -938,7 +938,7 @@ prep(){
     fi
     
     run_step "deps" "System Dependencies Install" \
-    "is_ok git curl wget unzip jq pv" '
+    "is_ok git curl wget unzip jq pv flatpak dotnet" '
     # 1. System & Repository Management (Crucial for finding other packages)
     sudo apt install -y software-properties-common
     
@@ -973,6 +973,10 @@ prep(){
     sudo apt install -y zenity
     sudo apt install -y papirus-icon-theme
     sudo apt install -y plank
+
+    # 8. dotnet
+    sudo apt install dotnet-runtime-8.0
+    
 '
 
     run_step "rofi" "Rofi" "is_installed rofi" '
