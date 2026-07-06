@@ -2292,6 +2292,63 @@ EOF
     
     register_bin famistudio "$FAMI_BIN" "FamiStudio" "AudioVideo;Audio;"
     '
+
+    run_step "rfxgen" "rFXGen" "is_installed rfxgen" '
+        mkdir -p "$TMP_DIR"
+    
+        RFX_ZIP="$TMP_DIR/rFXGen.zip"
+    
+        API="https://api.github.com/repos/raysan5/rfxgen/releases/latest"
+    
+        RFX_URL=$(
+          curl -s "$API" |
+          jq -r "
+              .assets[]
+              | select(
+                  (.name | ascii_downcase | contains(\"linux\")) and
+                  (.name | ascii_downcase | contains(\"x64\")) and
+                  (.name | endswith(\".zip\"))
+                )
+              | .browser_download_url
+            " | head -n1
+        )
+    
+        if [ -z "$RFX_URL" ]; then
+          echo "⚠️ Could not find rFXGen Linux build"
+          return 0
+        fi
+    
+        safe_wget \
+            "$RFX_URL" \
+            "$RFX_ZIP" || {
+            echo "⚠️ rFXGen download failed"
+            return 0
+        }
+    
+        rm -rf "$TMP_DIR"/rFXGen
+        mkdir -p "$TMP_DIR"/rFXGen
+    
+        unzip -o "$RFX_ZIP" -d "$TMP_DIR"/rFXGen || {
+            echo "⚠️ rFXGen unzip failed"
+            return 0
+        }
+    
+        RFX_DIR="$TMP_DIR"/rFXGen
+    
+        if [ ! -d "$RFX_DIR" ]; then
+            echo "⚠️ rFXGen directory not found"
+            return 0
+        fi
+    
+        rm -rf /opt/gamedev/tools/rFXGen
+        mkdir -p /opt/gamedev/tools
+    
+        sudo mv "$RFX_DIR" /opt/gamedev/tools/rFXGen
+    
+        RFX_BIN=/opt/gamedev/tools/rFXGen/rfxgen
+    
+        register_bin rfxgen "$RFX_BIN" "rFXGen" "AudioVideo;Audio;"
+    '
     
     # -----------------------------
     # LEVEL EDITORS
