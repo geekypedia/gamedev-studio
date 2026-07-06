@@ -1669,44 +1669,6 @@ execute(){
     
     register_bin renpy "$RENPY_LAUNCHER" "RenPy"
     '
-
-    run_step "ags" "Adventure Game Studio" "is_installed ags" '
-        API="https://api.github.com/repos/adventuregamestudio/ags/releases/latest"
-        
-        echo "🌐 Fetching Adventure Game Studio latest release..."
-        
-        DEB_URL=$(curl -s "$API" | jq -r "
-          .assets[]
-          | select(.name != null)
-          | select(.name | contains(\"amd64\") and endswith(\".deb\"))
-          | .browser_download_url
-        " | head -n 1)
-        
-        if [ -z "$DEB_URL" ]; then
-            echo "⚠️ Adventure Game Studio AMD64 DEB not found"
-            curl -s "$API" | jq -r ".assets[].name"
-            return 0
-        fi
-        
-        echo "⬇️ Downloading: $DEB_URL"
-        
-        safe_wget "$DEB_URL" "$TMP_DIR/ags.deb" || {
-            echo "⚠️ Download failed"
-            return 0
-        }
-        
-        echo "📦 Installing Adventure Game Studio..."
-        
-        sudo dpkg -i "$TMP_DIR/ags.deb" || {
-            echo "⚠️ dpkg failed, fixing dependencies..."
-            sudo apt install -f -y || {
-                echo "⚠️ dependency fix failed"
-                return 0
-            }
-        }
-        
-        echo "✅ Adventure Game Studio installed successfully"
-    '
     
     run_step "love" "LOVE2D" "is_installed love" '
     sudo apt install -y love
@@ -2009,6 +1971,45 @@ EOF
         }
     }
     '
+
+    run_step "ags" "Adventure Game Studio Runtime" "is_installed ags" '
+        API="https://api.github.com/repos/adventuregamestudio/ags/releases/latest"
+        
+        echo "🌐 Fetching Adventure Game Studio latest release..."
+        
+        DEB_URL=$(curl -s "$API" | jq -r "
+          .assets[]
+          | select(.name != null)
+          | select(.name | contains(\"amd64\") and endswith(\".deb\"))
+          | .browser_download_url
+        " | head -n 1)
+        
+        if [ -z "$DEB_URL" ]; then
+            echo "⚠️ Adventure Game Studio Runtime AMD64 DEB not found"
+            curl -s "$API" | jq -r ".assets[].name"
+            return 0
+        fi
+        
+        echo "⬇️ Downloading: $DEB_URL"
+        
+        safe_wget "$DEB_URL" "$TMP_DIR/ags.deb" || {
+            echo "⚠️ Download failed"
+            return 0
+        }
+        
+        echo "📦 Installing Adventure Game Studio Runtime..."
+        
+        sudo dpkg -i "$TMP_DIR/ags.deb" || {
+            echo "⚠️ dpkg failed, fixing dependencies..."
+            sudo apt install -f -y || {
+                echo "⚠️ dependency fix failed"
+                return 0
+            }
+        }
+        
+        echo "✅ Adventure Game Studio Runtime installed successfully"
+    '
+    
     
     # -----------------------------
     # EXTRA GAME ENGINES
