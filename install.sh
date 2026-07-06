@@ -2251,7 +2251,7 @@ EOF
         # Download application icon
         safe_wget \
             "https://avatars.githubusercontent.com/u/5723431" \
-            "/opt/gamedev/tools/Effekseer/icon.png" || {
+            "/opt/gamedev/tools/Effekseer/Tool/icon.png" || {
             echo "⚠️ Failed to download Effekseer icon"
         }
 
