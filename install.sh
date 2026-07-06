@@ -1764,12 +1764,12 @@ execute(){
         if [ "$USE_APPIMAGE" -eq 1 ]; then
     
             if [ -z "$APPIMAGE_URL" ]; then
-                echo "⚠️ No AppImage found in latest release"
+                echo "⚠️ No AppImage found in latest release of TuesdayJS"
                 return 0
             fi
     
-            curl -fL "$APPIMAGE_URL" -o "$TMP_APPIMAGE" || {
-                echo "⚠️ AppImage download failed"
+            safe_wget "$APPIMAGE_URL" "$TMP_APPIMAGE" || {
+                echo "⚠️ TuesdayJS AppImage download failed"
                 return 0
             }
     
@@ -2378,9 +2378,9 @@ EOF
     
         USE_APPIMAGE=0
     
-        if curl -fL \
+        if safe_wget
             "https://github.com/odrick/free-tex-packer/releases/download/v0.6.7/FreeTexturePacker-amd64.deb" \
-            -o "$TMP_DEB"; then
+            "$TMP_DEB"; then
     
             if sudo dpkg -i "$TMP_DEB"; then
                 echo "✅ FreeTexturePacker installed via DEB"
@@ -2402,9 +2402,9 @@ EOF
         fi
     
         if [ "$USE_APPIMAGE" -eq 1 ]; then
-            curl -fL \
+            safe_wget \
                 "https://github.com/odrick/free-tex-packer/releases/download/v0.6.7/FreeTexturePacker-x86_64.AppImage" \
-                -o "$TMP_APPIMAGE" || {
+                "$TMP_APPIMAGE" || {
                 echo "⚠️ AppImage download failed"
                 return 0
             }
