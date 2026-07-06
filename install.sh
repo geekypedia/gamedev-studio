@@ -2261,6 +2261,28 @@ EOF
         register_bin effekseer "$EFK_BIN" "Effekseer" "Graphics;"
     '
 
+    run_step "fretexpacker" "FreeTexturePacker" "is_installed freetexturepacker" '
+        TMP_DEB="/tmp/FreeTexturePacker-amd64.deb"
+    
+        curl -fL \
+            "https://github.com/odrick/free-tex-packer/releases/download/v0.6.7/FreeTexturePacker-amd64.deb" \
+            -o "$TMP_DEB" || {
+            echo "⚠️ FreeTexturePacker download failed"
+            return 0
+        }
+    
+        sudo dpkg -i "$TMP_DEB" || {
+            echo "⚠️ dpkg install failed, trying apt fix..."
+            sudo apt -f install -y || {
+                echo "⚠️ dependency fix failed"
+                rm -f "$TMP_DEB"
+                return 0
+            }
+        }
+    
+        rm -f "$TMP_DEB"
+    '
+
     run_step "synfig" "Synfig Studio" "is_installed synfig" '
         if sudo apt install -y synfigstudio; then
             echo "✅ Synfig Studio installed via APT"
