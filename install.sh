@@ -2345,6 +2345,13 @@ EOF
         mkdir -p /opt/gamedev/tools
     
         sudo mv "$RFX_DIR" /opt/gamedev/tools/rFXGen
+
+        # Download application icon
+        safe_wget \
+            "https://www.raylibtech.com/rfxgen/rfxgen.png" \
+            "/opt/gamedev/tools/rFXGen/icon.png" || {
+            echo "⚠️ Failed to download rFXGen icon"
+        }
     
         RFX_BIN=/opt/gamedev/tools/rFXGen/rfxgen
     
