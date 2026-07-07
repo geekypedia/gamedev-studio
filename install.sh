@@ -1357,24 +1357,62 @@ execute(){
     # WEB BROWSER
     # -----------------------------
     
-    run_step "chrome" "Google Chrome" "is_any_ok google-chrome google-chrome-stable chromium" '
-    mkdir -p "$TMP_DIR"
+    run_step "chrome" "Chromium Browser" "is_any_ok chromium chromium-browser google-chrome google-chrome-stable" '
+        if sudo apt install -y chromium-browser; then
+            echo "✅ Chromium installed via APT"
+        elif sudo apt install -y chromium; then
+            echo "✅ Chromium installed via APT"
+        else
+            echo "⚠️ APT install failed, trying Flatpak (Flathub)..."
     
-    CHROME_DEB="$TMP_DIR/chrome.deb"
+            if ! command -v flatpak >/dev/null 2>&1; then
+                sudo apt install -y flatpak || {
+                    echo "❌ Flatpak installation failed"
+                    return 0
+                }
+            fi
     
-    safe_wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb "$CHROME_DEB" || {
-      echo "⚠️ Download failed"
-      return 0
-    }
+            flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
     
-    sudo dpkg -i "$CHROME_DEB" || {
-      echo "⚠️ dpkg install had dependency issues, fixing..."
-    }
+            if flatpak install -y flathub org.chromium.Chromium; then
+                echo "✅ Chromium installed via Flathub"
+            else
+                echo "⚠️ Flatpak install failed, trying Snap..."
     
-    sudo apt install -f -y || {
-      echo "⚠️ apt fix failed"
-      return 0
-    }
+                if ! command -v snap >/dev/null 2>&1; then
+                    sudo apt install -y snapd || {
+                        echo "❌ Snapd installation failed"
+                        return 0
+                    }
+                fi
+    
+                if sudo snap install chromium; then
+                    echo "✅ Chromium installed via Snap"
+                else
+                    echo "⚠️ Snap install failed, downloading Google Chrome..."
+    
+                    mkdir -p "$TMP_DIR"
+    
+                    CHROME_DEB="$TMP_DIR/chrome.deb"
+    
+                    safe_wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb "$CHROME_DEB" || {
+                        echo "⚠️ Download failed"
+                        return 0
+                    }
+    
+                    sudo dpkg -i "$CHROME_DEB" || {
+                        echo "⚠️ dpkg install had dependency issues, fixing..."
+                    }
+    
+                    if sudo apt install -f -y; then
+                        echo "✅ Google Chrome installed via downloaded .deb"
+                    else
+                        echo "⚠️ apt dependency fix failed"
+                        return 0
+                    fi
+                fi
+            fi
+        fi
     '
     
     # -----------------------------
