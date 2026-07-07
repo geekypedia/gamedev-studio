@@ -945,6 +945,7 @@ prep(){
     # 2. Network & Core Data Retrieval (Needed to download external files)
     sudo apt install -y curl
     sudo apt install -y wget
+    sudo apt install -y gnupg
     sudo apt install -y git
     
     # 3. Base Compilation & System Libraries (Provides core development headers)
@@ -1389,27 +1390,66 @@ execute(){
                 if sudo snap install chromium; then
                     echo "✅ Chromium installed via Snap"
                 else
-                    echo "⚠️ Snap install failed, downloading Google Chrome..."
-    
-                    mkdir -p "$TMP_DIR"
-    
-                    CHROME_DEB="$TMP_DIR/chrome.deb"
-    
-                    safe_wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb "$CHROME_DEB" || {
-                        echo "⚠️ Download failed"
-                        return 0
-                    }
-    
-                    sudo dpkg -i "$CHROME_DEB" || {
-                        echo "⚠️ dpkg install had dependency issues, fixing..."
-                    }
-    
-                    if sudo apt install -f -y; then
-                        echo "✅ Google Chrome installed via downloaded .deb"
+                    echo "⚠️ Snap install failed, installing Google Chrome using updated apt..."
+                        
+                    # Try installing from Google's APT repository first
+                    if ! command -v google-chrome >/dev/null 2>&1 && \
+                       ! command -v google-chrome-stable >/dev/null 2>&1; then
+                    
+                        echo "Adding Google Chrome APT repository..."
+
+                        # Create keyrings directory
+                        sudo install -d -m 0755 /etc/apt/keyrings
+
+                        
+                        # Download and install Google's signing key
+                        wget -qO- https://dl.google.com/linux/linux_signing_key.pub | \
+                            gpg --dearmor | \
+                            sudo tee /etc/apt/keyrings/google-chrome.gpg > /dev/null
+                        
+                        # Add Google's Chrome repository
+                        echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] https://dl.google.com/linux/chrome/deb/ stable main" | \
+                            sudo tee /etc/apt/sources.list.d/google-chrome.list
+
+                        sudo apt update
+                    
+                        if sudo apt install -y google-chrome-stable; then
+                    
+                            echo "✅ Google Chrome installed via APT repository."
+                    
+                        else
+                            echo "⚠️ APT installation failed, falling back to downloaded .deb..."
+                    
+                            mkdir -p "$TMP_DIR"
+                            CHROME_DEB="$TMP_DIR/chrome.deb"
+                    
+                            safe_wget \
+                                https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+                                "$CHROME_DEB" || {
+                                    echo "⚠️ Download failed"
+                                    return 0
+                                }
+                    
+                            sudo dpkg -i "$CHROME_DEB" || {
+                                echo "⚠️ dpkg install had dependency issues, fixing..."
+                            }
+                    
+                            if sudo apt install -f -y; then
+                                if command -v google-chrome >/dev/null 2>&1 || \
+                                   command -v google-chrome-stable >/dev/null 2>&1; then
+                                    echo "✅ Google Chrome installed via downloaded .deb"
+                                else
+                                    echo "⚠️ Chrome installation completed but executable not found"
+                                    return 0
+                                fi
+                            else
+                                echo "⚠️ apt dependency fix failed"
+                                return 0
+                            fi
+                        fi
                     else
-                        echo "⚠️ apt dependency fix failed"
-                        return 0
-                    fi
+                        echo "✅ Google Chrome is already installed."
+                    fi                   
                 fi
             fi
         fi
