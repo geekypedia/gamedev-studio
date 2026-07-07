@@ -1392,7 +1392,7 @@ execute(){
                 else
                     echo "⚠️ Snap install failed, installing Google Chrome using updated apt..."
                         
-                    # Try installing from Google's APT repository first
+                    # Try installing from Google APT repository first
                     if ! command -v google-chrome >/dev/null 2>&1 && \
                        ! command -v google-chrome-stable >/dev/null 2>&1; then
                     
@@ -1402,12 +1402,12 @@ execute(){
                         sudo install -d -m 0755 /etc/apt/keyrings
 
                         
-                        # Download and install Google's signing key
+                        # Download and install Google signing key
                         wget -qO- https://dl.google.com/linux/linux_signing_key.pub | \
                             gpg --dearmor | \
                             sudo tee /etc/apt/keyrings/google-chrome.gpg > /dev/null
                         
-                        # Add Google's Chrome repository
+                        # Add Google Chrome repository
                         echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] https://dl.google.com/linux/chrome/deb/ stable main" | \
                             sudo tee /etc/apt/sources.list.d/google-chrome.list
 
