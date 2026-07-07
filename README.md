@@ -204,7 +204,7 @@ OR
 - Curl / Wget / jq / unzip
 - VS Code
 - code-server
-- Google Chrome
+- Chromium/Chrome
 
 ---
 
