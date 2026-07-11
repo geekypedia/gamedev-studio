@@ -1494,9 +1494,13 @@ execute(){
         echo "⚠️ Godot binary not found"
         return 0
     fi
+
+    GODOT_DIR=$(dirname "$GODOT_BIN")
     
     rm -rf /opt/gamedev/engines/godot
-    mkdir -p /opt/gamedev/engines/godot
+    mkdir -p /opt/gamedev/engines
+
+    cp -a "$GODOT_DIR" /opt/gamedev/engines/godot
     
     sudo install -Dm755 "$GODOT_BIN" /opt/gamedev/engines/godot/godot
     
