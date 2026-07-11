@@ -1517,7 +1517,7 @@ execute(){
         return 0
     fi
     
-    GODOTNET_ZIP="$TMP_DIR/godot.zip"
+    GODOTNET_ZIP="$TMP_DIR/godotnet.zip"
     
     safe_wget "$GODOTNET_URL" "$GODOTNET_ZIP" || {
         echo "⚠️ Godot .NET download failed"
@@ -1546,13 +1546,61 @@ execute(){
 
     # Download application icon
     safe_wget \
-        "https://godotengine.org/assets/press/icon_monochrome_dark.png" \
+        "https://godotengine.org/assets/press/icon_monochrome_light.png" \
         "/opt/gamedev/engines/godotnet/icon.png" || {
         echo "⚠️ Failed to download icon"
     }
 
     
     register_bin godotnet /opt/gamedev/engines/godotnet/godotnet "Godot .NET"
+    '    
+
+    run_step "godot3" "Godot.NET" "is_installed godot3" '
+    mkdir -p "$TMP_DIR"
+    
+    GODOT3_URL=https://github.com/godotengine/godot/releases/download/3.6.2-stable/Godot_v3.6.2-stable_x11.64.zip
+    
+    if [ -z "$GODOT3_URL" ]; then
+        echo "⚠️ Godot3 download URL not found"
+        return 0
+    fi
+    
+    GODOT3_ZIP="$TMP_DIR/godotnet.zip"
+    
+    safe_wget "$GODOT3_URL" "$GODOT3_ZIP" || {
+        echo "⚠️ Godot3 download failed"
+        return 0
+    }
+    
+    rm -rf "$TMP_DIR/godot3"
+    mkdir -p "$TMP_DIR/godot3"
+    
+    unzip -o "$GODOT3_ZIP" -d "$TMP_DIR/godot3" || {
+        echo "⚠️ Godot3 unzip failed"
+        return 0
+    }
+    
+    GODOT3_BIN=$(find "$TMP_DIR/godot3" -type f -executable -name "*x86_64*" | head -n 1)
+    
+    if [ -z "$GODOT3_BIN" ]; then
+        echo "⚠️ Godot3 binary not found"
+        return 0
+    fi
+    
+    rm -rf /opt/gamedev/engines/godot3
+    mkdir -p /opt/gamedev/engines/godot3
+    
+    sudo install -Dm755 "$GODOT3_BIN" /opt/gamedev/engines/godot3/godot3
+
+    # Download application icon
+    safe_wget \
+        "https://godotengine.org/assets/press/icon_monochrome_dark.png" \
+        "/opt/gamedev/engines/godotnet/icon.png" || {
+        echo "⚠️ Failed to download icon"
+    }
+
+    
+    register_bin godot3 /opt/gamedev/engines/godot3/godot3 "Godot 3"
     '    
     
     run_step "godot-templates" "Godot Export Templates" "false" '
