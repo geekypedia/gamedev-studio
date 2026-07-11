@@ -1543,6 +1543,14 @@ execute(){
     mkdir -p /opt/gamedev/engines/godotnet
     
     sudo install -Dm755 "$GODOTNET_BIN" /opt/gamedev/engines/godotnet/godotnet
+
+    # Download application icon
+    safe_wget \
+        "https://godotengine.org/assets/press/icon_monochrome_dark.png" \
+        "/opt/gamedev/engines/godotnet/icon.png" || {
+        echo "⚠️ Failed to download icon"
+    }
+
     
     register_bin godotnet /opt/gamedev/engines/godotnet/godotnet "Godot .NET"
     '    
