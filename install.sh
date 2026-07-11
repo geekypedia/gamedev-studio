@@ -1546,7 +1546,7 @@ execute(){
 
     # Download application icon
     safe_wget \
-        "https://godotengine.org/assets/press/icon_monochrome_light.png" \
+        "https://godotengine.org/assets/press/icon_monochrome_dark.png" \
         "/opt/gamedev/engines/godotnet/icon.png" || {
         echo "⚠️ Failed to download icon"
     }
@@ -1595,7 +1595,7 @@ execute(){
     # Download application icon
     safe_wget \
         "https://godotengine.org/assets/press/icon_monochrome_dark.png" \
-        "/opt/gamedev/engines/godotnet/icon.png" || {
+        "/opt/gamedev/engines/godot3/icon.png" || {
         echo "⚠️ Failed to download icon"
     }
 
