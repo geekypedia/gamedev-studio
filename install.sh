@@ -1555,7 +1555,7 @@ execute(){
     register_bin godotnet /opt/gamedev/engines/godotnet/godotnet "Godot .NET"
     '    
 
-    run_step "godot3" "Godot.NET" "is_installed godot3" '
+    run_step "godot3" "Godot3" "is_installed godot3" '
     mkdir -p "$TMP_DIR"
     
     GODOT3_URL=https://github.com/godotengine/godot/releases/download/3.6.2-stable/Godot_v3.6.2-stable_x11.64.zip
@@ -1565,7 +1565,7 @@ execute(){
         return 0
     fi
     
-    GODOT3_ZIP="$TMP_DIR/godotnet.zip"
+    GODOT3_ZIP="$TMP_DIR/godot3.zip"
     
     safe_wget "$GODOT3_URL" "$GODOT3_ZIP" || {
         echo "⚠️ Godot3 download failed"
