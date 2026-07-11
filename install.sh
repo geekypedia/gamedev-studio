@@ -1580,7 +1580,7 @@ execute(){
         return 0
     }
     
-    GODOT3_BIN=$(find "$TMP_DIR/godot3" -type f -executable -name "*x86_64*" | head -n 1)
+    GODOT3_BIN=$(find "$TMP_DIR/godot3" -type f -executable -name "*x11.64*" | head -n 1)
     
     if [ -z "$GODOT3_BIN" ]; then
         echo "⚠️ Godot3 binary not found"
