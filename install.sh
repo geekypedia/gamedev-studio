@@ -976,8 +976,8 @@ prep(){
     sudo apt install -y plank
 
     # 8. dotnet
-    sudo apt install dotnet-runtime-8.0
-    
+    sudo apt install -y dotnet-runtime-8.0
+    sudo apt install -y dotnet-sdk-8.0
 '
 
     run_step "rofi" "Rofi" "is_installed rofi" '
@@ -1502,6 +1502,50 @@ execute(){
     
     register_bin godot /opt/gamedev/engines/godot/godot "Godot"
     '
+
+    run_step "godotnet" "Godot.NET" "is_installed godotnet" '
+    mkdir -p "$TMP_DIR"
+    
+    GODOTNET_URL=$(
+      curl -s https://api.github.com/repos/godotengine/godot/releases/latest |
+      jq -r ".assets[] | select(.name|test(\"mono.*linux.*x86_64.*zip\")) | .browser_download_url" |
+      head -n 1
+    )
+    
+    if [ -z "$GODOTNET_URL" ]; then
+        echo "⚠️ Godot .NET download URL not found"
+        return 0
+    fi
+    
+    GODOTNET_ZIP="$TMP_DIR/godot.zip"
+    
+    safe_wget "$GODOTNET_URL" "$GODOTNET_ZIP" || {
+        echo "⚠️ Godot .NET download failed"
+        return 0
+    }
+    
+    rm -rf "$TMP_DIR/godotnet"
+    mkdir -p "$TMP_DIR/godotnet"
+    
+    unzip -o "$GODOTNET_ZIP" -d "$TMP_DIR/godotnet" || {
+        echo "⚠️ Godot .NET unzip failed"
+        return 0
+    }
+    
+    GODOTNET_BIN=$(find "$TMP_DIR/godotnet" -type f -executable -name "*x86_64*" | head -n 1)
+    
+    if [ -z "$GODOTNET_BIN" ]; then
+        echo "⚠️ Godot .NET binary not found"
+        return 0
+    fi
+    
+    rm -rf /opt/gamedev/engines/godotnet
+    mkdir -p /opt/gamedev/engines/godotnet
+    
+    sudo install -Dm755 "$GODOTNET_BIN" /opt/gamedev/engines/godotnet/godotnet
+    
+    register_bin godotnet /opt/gamedev/engines/godotnet/godotnet "Godot .NET"
+    '    
     
     run_step "godot-templates" "Godot Export Templates" "false" '
     mkdir -p "$TMP_DIR"
