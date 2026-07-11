@@ -1538,9 +1538,13 @@ execute(){
         echo "⚠️ Godot .NET binary not found"
         return 0
     fi
+
+    GODOTNET_DIR=$(dirname "$GODOTNET_BIN")
     
     rm -rf /opt/gamedev/engines/godotnet
-    mkdir -p /opt/gamedev/engines/godotnet
+    mkdir -p /opt/gamedev/engines
+
+    cp -a "$GODOTNET_DIR" /opt/gamedev/engines/godotnet
     
     sudo install -Dm755 "$GODOTNET_BIN" /opt/gamedev/engines/godotnet/godotnet
 
@@ -1586,9 +1590,14 @@ execute(){
         echo "⚠️ Godot3 binary not found"
         return 0
     fi
+
+    GODOT3_DIR=$(dirname "$GODOT3_BIN")
+    
     
     rm -rf /opt/gamedev/engines/godot3
-    mkdir -p /opt/gamedev/engines/godot3
+    mkdir -p /opt/gamedev/engines
+
+    cp -a "$GODOT3_DIR" /opt/gamedev/engines/godot3
     
     sudo install -Dm755 "$GODOT3_BIN" /opt/gamedev/engines/godot3/godot3
 
