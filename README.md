@@ -145,7 +145,6 @@ OR
 - TuesdayJS (No-code, JavaScript)
 - Inky (No-code)
 - GameMaker (GML/JavaScript/TypeScript)
-- Intersect Engine (Free MMO RPG Maker)
 
 #### .NET/C#/Mono
 - Godot Engine .NET (C#)
@@ -154,8 +153,9 @@ OR
 - Phaser
 - ExcaliburJS
 
-#### For Modding
+#### Clients/Modding
 - Flare
+- Intersect Engine Client and Server (Free MMO RPG Maker)
 
 ---
 
