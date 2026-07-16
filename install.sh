@@ -610,6 +610,7 @@ create_desktop_entry() {
     local base_path="$3"
     local category="$4"
     local bin_params="$5"
+    local terminal="$6"
 
     local bin
     bin=$(command -v "$app" 2>/dev/null)
@@ -690,7 +691,7 @@ Type=Application
 Name=$display_name
 Exec=$bin_full
 Icon=$icon
-Terminal=false
+Terminal=${terminal:+true}${terminal:-false}
 Categories=$category
 StartupNotify=true
 EOF
@@ -2416,7 +2417,7 @@ EOF
         sudo apt install flare flare-game flare-engine
     '
 
-    run_step "intersect" "Intersect Engine" "is_installed intersect" '
+    run_step "intersect" "Intersect Engine" "is_installed intersect-client intersect-server" '
         mkdir -p "$TMP_DIR"
     
         INTERSECT_ZIP="$TMP_DIR/intersect.zip"
@@ -2463,12 +2464,12 @@ EOF
             "/opt/gamedev/engines/Intersect/Client and Editor/Intersect Client" \
             "/opt/gamedev/engines/Intersect/Server/Intersect Server"
 
-        sudo tee /usr/local/bin/intersect > /dev/null << "EOF"
+        sudo tee /usr/local/bin/intersect-client > /dev/null << "EOF"
 #!/bin/bash
 cd "/opt/gamedev/engines/Intersect/Client and Editor" && ./Intersect\ Client "\$@"
 EOF
 
-sudo chmod +x /usr/local/bin/intersect
+        sudo chmod +x /usr/local/bin/intersect-client
 
         sudo tee /usr/local/bin/intersect-server > /dev/null << "EOF"
 #!/bin/bash
@@ -2484,8 +2485,8 @@ EOF
             echo "⚠️ Failed to download icon"
         }
         
-        create_desktop_entry intersect "Intersect Engine" "/opt/gamedev/engines/Intersect"
-        create_desktop_entry intersect-server "Intersect Server" "/opt/gamedev/engines/Intersect"
+        create_desktop_entry intersect-client "Intersect Client" "/opt/gamedev/engines/Intersect"
+        create_desktop_entry intersect-server "Intersect Server" "/opt/gamedev/engines/Intersect" "" "" "true"
     '
     
     
