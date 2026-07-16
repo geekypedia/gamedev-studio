@@ -2449,6 +2449,10 @@ EOF
     sudo apt install -y inkscape
     '
     
+    run_step "pikopixel" "Piko Pixel" "is_installed PikoPixel" '
+    sudo apt install -y pikopixel.app
+    '
+
     run_step "pixelorama" "Pixelorama" "is_installed pixelorama" '
     API="https://api.github.com/repos/Orama-Interactive/Pixelorama/releases/latest"
     
