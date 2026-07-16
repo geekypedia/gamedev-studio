@@ -1,7 +1,7 @@
 # 🎮 Game Dev Studio Installer (Ubuntu)
 
 ![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04%2B-orange)
-![Linux Mint](https://img.shields.io/badge/Linux%20Mint-23%2B-green)
+![Linux Mint](https://img.shields.io/badge/Linux%20Mint-22%2B-green)
 ![Zorin OS](https://img.shields.io/badge/Zorin%20OS-18%2B-blue)
 ![Pop!_OS](https://img.shields.io/badge/Pop!_OS-24.04%2B-cyan)
 ![Xubuntu](https://img.shields.io/badge/Xubuntu-24.04%2B-silver)
