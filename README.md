@@ -145,6 +145,7 @@ OR
 - TuesdayJS (No-code, JavaScript)
 - Inky (No-code)
 - GameMaker (GML/JavaScript/TypeScript)
+- Intersect Engine (Free MMO RPG Maker)
 
 #### .NET/C#/Mono
 - Godot Engine .NET (C#)
