@@ -176,6 +176,7 @@ OR
 - GIMP
 - Krita
 - Inkscape
+- Piko Pixel
 - Pixelorama
 - LibreSprite
 - Effekseer
