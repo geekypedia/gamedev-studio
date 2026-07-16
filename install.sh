@@ -2415,6 +2415,78 @@ EOF
     run_step "flare" "Flare RPG Game Engine" "command -v flare >/dev/null 2>&1"'
         sudo apt install flare flare-game flare-engine
     '
+
+    run_step "intersect" "Intersect Engine" "is_installed intersect" '
+        mkdir -p "$TMP_DIR"
+    
+        INTERSECT_ZIP="$TMP_DIR/intersect.zip"
+    
+        RELEASES=$(safe_wget -qO- "https://api.github.com/repos/AscensionGameDev/Intersect-Engine/releases")
+    
+        ZIP_URL=$(echo "$RELEASES" | jq -r "
+          .[]
+          | select(.assets? != null)
+          | .assets[]
+          | select(.name? != null)
+          | select(
+              (.name | ascii_downcase | endswith(\".zip\")) and
+              (.name | ascii_downcase | contains(\"linux\")) and
+              (.name | ascii_downcase | contains(\"x64\")) and
+              (.name | ascii_downcase | contains(\"full\"))
+          )
+          | .browser_download_url
+        " | head -n 1)
+    
+        if [ -z "$ZIP_URL" ] || [ "$ZIP_URL" = "null" ]; then
+            ZIP_URL="https://github.com/AscensionGameDev/Intersect-Engine/releases/download/v0.8.0-beta.580/intersect-linux-x64-full-0.8.0-beta.580+build.f1bde62dc3fb12654a4a636d32441d62418a3a9c.zip"
+        fi
+    
+        safe_wget "$ZIP_URL" "$INTERSECT_ZIP" || {
+            echo "⚠️ Intersect Engine download failed"
+            return 0
+        }
+    
+        rm -rf "$TMP_DIR/intersect"
+        mkdir -p "$TMP_DIR/intersect"
+    
+        unzip -o "$INTERSECT_ZIP" -d "$TMP_DIR/intersect" || {
+            echo "⚠️ Intersect Engine unzip failed"
+            return 0
+        }
+    
+        rm -rf /opt/gamedev/engines/Intersect
+        mkdir -p /opt/gamedev/engines
+    
+        sudo mv "$TMP_DIR/intersect" /opt/gamedev/engines/Intersect
+    
+        sudo chmod +x \
+            "/opt/gamedev/engines/Intersect/Client and Editor/Intersect Client" \
+            "/opt/gamedev/engines/Intersect/Server/Intersect Server"
+
+        sudo tee /usr/local/bin/intersect > /dev/null << "EOF"
+#!/bin/bash
+cd "/opt/gamedev/engines/Intersect/Client and Editor" && ./Intersect\ Client "\$@"
+EOF
+
+sudo chmod +x /usr/local/bin/intersect
+
+        sudo tee /usr/local/bin/intersect-server > /dev/null << "EOF"
+#!/bin/bash
+cd "/opt/gamedev/engines/Intersect/Server" && ./Intersect\ Server "\$@"
+EOF
+
+        sudo chmod +x /usr/local/bin/intersect-server
+
+        # Download application icon
+        safe_wget \
+            "https://www.ascensiongamedev.com/uploads/monthly_2023_03/intersect-logo-qu.thumb.png.a5bec9d7eccb1650d14a20bc20b4d978.png" \
+            "/opt/gamedev/engines/Intersect/icon.png" || {
+            echo "⚠️ Failed to download icon"
+        }
+        
+        create_desktop_entry intersect "Intersect Engine" "/opt/gamedev/engines/Intersect"
+        create_desktop_entry intersect-server "Intersect Server" "/opt/gamedev/engines/Intersect"
+    '
     
     
     # -----------------------------
