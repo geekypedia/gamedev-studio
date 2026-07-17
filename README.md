@@ -26,7 +26,7 @@ It installs a full ecosystem of:
 - 🎧 Audio / video production suite  
 - 💻 Development environment  
 - 📦 Publishing tools  
-- 🧩 Game dev pipeline utilities  
+- 🧩 Game dev pipeline utilities and environment tools
 
 Built for speed, reproducibility, and zero manual setup.
 
@@ -219,10 +219,11 @@ OR
 
 ---
 
-### 🔧 Pipeline Tools
+### 🔧 Environment Tools
 - LDtk Sync Tool
 - Godot Export Templates for iOS, Android and Desktop
 - Adventure Game Studio Runtime
+- love.js
 
 ---
 
