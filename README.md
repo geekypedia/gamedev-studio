@@ -26,7 +26,7 @@ It installs a full ecosystem of:
 - 🎧 Audio / video production suite  
 - 💻 Development environment  
 - 📦 Publishing tools  
-- 🧩 Game dev pipeline utilities and environment tools
+- 🧩 Game dev pipeline utilities and environment/runtime/build tools
 
 Built for speed, reproducibility, and zero manual setup.
 
