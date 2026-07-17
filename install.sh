@@ -960,6 +960,8 @@ prep(){
     sudo apt install -y python3-pip
     sudo apt install -y python3-venv
     sudo apt install -y python3-tk
+    sudo apt install -y pipx
+    pipx ensurepath
     
     # 5. Alternative Package & File Managers
     sudo apt install -y flatpak
@@ -1265,6 +1267,11 @@ execute(){
     
     run_step "love.js" "Love.JS" "is_npm_installed love.js" '
     npm install -g love.js --progress=true --verbose || echo "⚠️ Love.JS install failed"
+    '
+
+    run_step "makelove" "Love2D build tool" "is_installed makelove" '
+    pipx install makelove
+    pipx inject makelove "setuptools<70" --force
     '
 
     # -----------------------------
