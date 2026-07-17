@@ -1263,6 +1263,10 @@ execute(){
     npm install -g electron --progress=true --verbose || echo "⚠️ Electron install failed"
     '
     
+    run_step "love.js" "Love.JS" "is_npm_installed love.js" '
+    npm install -g love.js --progress=true --verbose || echo "⚠️ Love.JS install failed"
+    '
+
     # -----------------------------
     # CODE EDITORS
     # -----------------------------
