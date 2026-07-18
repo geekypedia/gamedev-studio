@@ -2524,6 +2524,7 @@ EOF
         for pkg in pyinstaller pygbag; do
             pipx install ${FORCE_UPDATE:+--force} "$pkg" || echo "Failed to install $pkg"
         done
+        pipx ensurepath
     '
     
     # -----------------------------
