@@ -1264,6 +1264,18 @@ execute(){
     run_step "electron" "Electron CLI" "is_npm_installed electron" '
     npm install -g electron --progress=true --verbose || echo "⚠️ Electron install failed"
     '
+
+    run_step "babylonjs" "BabylonJS" "is_npm_installed @babylonjs/core" '
+        npm install -g @babylonjs/core --progress=true --verbose || echo "⚠️ BabylonJS Core install failed"
+        npm install -g @babylonjs/loaders --progress=true --verbose || echo "⚠️ BabylonJS Loaders install failed"
+        npm install -g @babylonjs/gui --progress=true --verbose || echo "⚠️ BabylonJS GUI install failed"
+        npm install -g @babylonjs/materials --progress=true --verbose || echo "⚠️ BabylonJS Materials install failed"
+        npm install -g @babylonjs/procedural-textures --progress=true --verbose || echo "⚠️ BabylonJS Procedural Textures install failed"
+        npm install -g @babylonjs/post-processes --progress=true --verbose || echo "⚠️ BabylonJS Post Processes install failed"
+        npm install -g @babylonjs/inspector --progress=true --verbose || echo "⚠️ BabylonJS Inspector install failed"
+        npm install -g @babylonjs/havok --progress=true --verbose || echo "⚠️ BabylonJS Havok install failed"
+        '
+    
     
     run_step "love.js" "Love.JS" "is_npm_installed love.js" '
     npm install -g love.js --progress=true --verbose || echo "⚠️ Love.JS install failed"
@@ -2370,6 +2382,30 @@ EOF
         }
         
         echo "✅ Adventure Game Studio Runtime installed successfully"
+    '
+
+    run_step "babylonjs-editor" "Babylon.JS Editor" "is_installed babylonjs-editor" '
+        BABYLON_URL=https://babylonjs-editor.fra1.cdn.digitaloceanspaces.com/updates/BabylonJS%20Editor-5.4.2.AppImage
+        BABYLON_BASE="/opt/gamedev/engines/babylonjs-editor"
+        BABYLON_PATH="$BABYLON_BASE/babylonjs-editor.AppImage"
+        
+        if [ -z "$BABYLON_URL" ]; then
+            echo "⚠️ Could not find x86_64 AppImage"
+            return 0
+        fi
+    
+        safe_exists "$BABYLON_PATH" || {
+            rm -rf "$BABYLON_BASE"
+            mkdir -p "$BABYLON_BASE"
+        }
+        
+        safe_wget "$BABYLON_URL" "$BABYLON_PATH" || {
+            echo "⚠️ Download failed"
+            return 0
+        }
+        
+        extract_appimage_icon "$BABYLON_PATH"
+        register_bin babylonjs-editor "$BABYLON_PATH" "Babylon.JS Editor" "" "--no-sandbox"
     '
     
     
