@@ -153,6 +153,7 @@ OR
 #### JavaScript / TypeScript
 - Phaser
 - ExcaliburJS
+- Babylon.JS
 
 #### Clients/Modding
 - Flare
