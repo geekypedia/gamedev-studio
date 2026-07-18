@@ -2508,15 +2508,22 @@ EOF
     run_step  "python-env" "Python Game Dev Env" "test -d /opt/gamedev/python-env" '
     python3 -m venv /opt/gamedev/python-env
     '
+    
     run_step "pygame" "Python Game Dev Packages" "test -f /opt/gamedev/python-env/bin/python" '
-        /opt/gamedev/python-env/bin/python -m pip install -U \
-        pygame pyglet kivy arcade moderngl pymunk pillow numpy noise pyinstaller pyxel panda3d ursina raylib pygbag
-    '
-
-    run_step "pipx-packages" "Python Game Dev Packages using pipx" "is_ok pygbag" '
-        pipx install ${FORCE_UPDATE:+--force} \
+        PYTHON=/opt/gamedev/python-env/bin/python
+    
+        for pkg in \
             pygame pyglet kivy arcade moderngl pymunk pillow numpy \
             noise pyinstaller pyxel panda3d ursina raylib pygbag
+        do
+            "$PYTHON" -m pip install -U "$pkg" || echo "Failed to install $pkg"
+        done
+    '
+
+    run_step "pipx-packages" "Python CLI Packages" "is_ok pygbag pyinstaller" '
+        for pkg in pyinstaller pygbag; do
+            pipx install ${FORCE_UPDATE:+--force} "$pkg" || echo "Failed to install $pkg"
+        done
     '
     
     # -----------------------------
