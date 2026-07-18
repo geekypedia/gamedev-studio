@@ -125,6 +125,7 @@ OR
 - Ren’Py (Python)
 - Pygame (Python)
 - Pyxel (Python)
+- Raylib (Python)
 - Panda3D (Python)
 - Ursina (Python)
 - Eldiron (Python)
