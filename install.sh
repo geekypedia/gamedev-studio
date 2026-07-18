@@ -2510,7 +2510,13 @@ EOF
     '
     run_step "pygame" "Python Game Dev Packages" "test -f /opt/gamedev/python-env/bin/python" '
         /opt/gamedev/python-env/bin/python -m pip install -U \
-        pygame pyglet kivy arcade moderngl pymunk pillow numpy noise pyinstaller pyxel panda3d ursina
+        pygame pyglet kivy arcade moderngl pymunk pillow numpy noise pyinstaller pyxel panda3d ursina raylib pygbag
+    '
+
+    run_step "pipx-packages" "Python Game Dev Packages using pipx" "is_ok pygbag" '
+        pipx install ${FORCE_UPDATE:+--force} \
+            pygame pyglet kivy arcade moderngl pymunk pillow numpy \
+            noise pyinstaller pyxel panda3d ursina raylib pygbag
     '
     
     # -----------------------------
