@@ -187,6 +187,7 @@ OR
 - Synfig Studio
 - Pencil2D
 - OpenToonz
+- ArmorPaint
 
 ---
 
