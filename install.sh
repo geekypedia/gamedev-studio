@@ -2871,6 +2871,66 @@ EOF
             fi
         fi
     '
+
+    run_step "armorpaint" "ArmorPaint" "is_installed armorpaint" '
+        ARMORPAINT_DIR="$BASE/tools/armorpaint"
+    
+        if [[ ! -d "$ARMORPAINT_DIR" ]]; then
+            echo "Cloning ArmorPaint..."
+            git clone --recursive https://github.com/armory3d/armorpaint.git "$ARMORPAINT_DIR"
+        else
+            echo "ArmorPaint repository already exists..."
+            cd "$ARMORPAINT_DIR"
+            git pull --rebase
+            git submodule update --init --recursive
+        fi
+    
+        cd "$ARMORPAINT_DIR"
+    
+        echo "Building ArmorPaint..."
+    
+        if [[ -f "./make" ]]; then
+            chmod +x ./make
+            ./make
+        elif [[ -f "./base/make" ]]; then
+            chmod +x ./base/make
+            ./base/make
+        else
+            echo "❌ ArmorPaint build script not found"
+            return 0
+        fi
+    
+        ARMORPAINT_BIN=$(find "$ARMORPAINT_DIR" -type f -name "ArmorPaint" -executable | head -n 1)
+    
+        if [[ -z "$ARMORPAINT_BIN" ]]; then
+            echo "❌ ArmorPaint binary not found after build"
+            return 0
+        fi
+    
+        echo "Downloading ArmorPaint icon..."
+    
+        ARMORPAINT_ICON="$ARMORPAINT_DIR/icon.png"
+    
+        if ! safe_wget \
+            "https://dn710809.ca.archive.org/0/items/github.com-armory3d-armorpaint_-_2019-11-03_09-06-40/cover.jpg" \
+            "$ARMORPAINT_ICON"; then
+    
+            echo "⚠️ Archive icon failed, trying official ArmorPaint icon..."
+    
+            if ! safe_wget \
+                "https://armorpaint.org/img/Logo.png" \
+                "$ARMORPAINT_ICON"; then
+    
+                echo "⚠️ Failed to download ArmorPaint icon"
+            fi
+        fi
+    
+        register_bin \
+            "armorpaint" \
+            "$ARMORPAINT_BIN" \
+            "ArmorPaint" \
+            "Graphics;"
+    '
     
     # -----------------------------
     # AUDIO / VIDEO
