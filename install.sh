@@ -2889,12 +2889,9 @@ EOF
     
         echo "Building ArmorPaint..."
     
-        if [[ -f "./make" ]]; then
-            chmod +x ./make
-            ./make
-        elif [[ -f "./base/make" ]]; then
+        if [[ -f "./base/make" ]]; then
             chmod +x ./base/make
-            ./base/make
+            cd paint && ../base/make --run
         else
             echo "❌ ArmorPaint build script not found"
             return 0
@@ -2904,26 +2901,35 @@ EOF
     
         if [[ -z "$ARMORPAINT_BIN" ]]; then
             echo "❌ ArmorPaint binary not found after build"
-            return 0
+            
+            echo "Finding manually ..."
+            ARMORPAINT_BIN_BASE="$ARMORPAINT_DIR"/paint/build/out
+            ARMORPAINT_BIN="$ARMORPAINT_BIN_BASE"/ArmorPaint
+            if [[ -z "$ARMORPAINT_BIN" ]]; then
+                echo "❌ ArmorPaint binary not found at all"
+                return 0
+            fi
+            
         fi
+        
     
         echo "Downloading ArmorPaint icon..."
     
-        ARMORPAINT_ICON="$ARMORPAINT_DIR/icon.png"
+        ARMORPAINT_ICON="$ARMORPAINT_BIN_BASE/icon.png"
     
-        if ! safe_wget \
-            "https://dn710809.ca.archive.org/0/items/github.com-armory3d-armorpaint_-_2019-11-03_09-06-40/cover.jpg" \
-            "$ARMORPAINT_ICON"; then
+        # if ! safe_wget \
+        #     "https://dn710809.ca.archive.org/0/items/github.com-armory3d-armorpaint_-_2019-11-03_09-06-40/cover.jpg" \
+        #     "$ARMORPAINT_ICON"; then
     
-            echo "⚠️ Archive icon failed, trying official ArmorPaint icon..."
+        #     echo "⚠️ Archive icon failed, trying official ArmorPaint icon..."
     
-            if ! safe_wget \
-                "https://armorpaint.org/img/Logo.png" \
-                "$ARMORPAINT_ICON"; then
+        #     if ! safe_wget \
+        #         "https://armorpaint.org/img/Logo.png" \
+        #         "$ARMORPAINT_ICON"; then
     
-                echo "⚠️ Failed to download ArmorPaint icon"
-            fi
-        fi
+        #         echo "⚠️ Failed to download ArmorPaint icon"
+        #     fi
+        # fi
     
         register_bin \
             "armorpaint" \
