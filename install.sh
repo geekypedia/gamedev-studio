@@ -517,6 +517,7 @@ extract_appimage_icon() {
 
     chmod +x "$appimage"
 
+    cd "$tmpdir"
     # extract AppImage filesystem
     if "$appimage" --appimage-extract >/dev/null 2>&1; then
 
@@ -542,6 +543,7 @@ extract_appimage_icon() {
         echo "⚠️ AppImage extraction failed"
         return 1
     fi
+    cd ~
 
     if [ -f "$icon_path" ]; then
         echo "🖼️ Icon saved: $icon_path"
