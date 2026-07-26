@@ -39,6 +39,13 @@ Built for speed, reproducibility, and zero manual setup.
 ```bash
 curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh && sudo ~/gamedev-studio.sh
 ```
+
+You can re-run the command if it breaks in between.
+
+```bash
+~/gamedev-studio.sh
+```
+
 ---
 
 ### 🔁 Install + System Upgrade
