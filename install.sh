@@ -613,6 +613,7 @@ create_desktop_entry() {
     local category="$4"
     local bin_params="$5"
     local terminal="$6"
+    local wmc="$7"
 
     local bin
     bin=$(command -v "$app" 2>/dev/null)
@@ -696,6 +697,7 @@ Icon=$icon
 Terminal=${terminal:+true}${terminal:-false}
 Categories=$category
 StartupNotify=true
+${wmc:+StartupWMClass=$wmc}
 EOF
 
     sudo chmod 644 "/usr/share/applications/${app}.desktop"
@@ -712,6 +714,7 @@ register_bin() {
     local display_name="${3:-$name}"
     local category="$4"
     local bin_params="$5"
+    local wmc="$6"
 
     if [ -z "$target" ] || [ ! -f "$target" ]; then
         echo "⚠ Cannot register $name (missing binary: $target)"
@@ -721,7 +724,7 @@ register_bin() {
     chmod +x "$target"
     sudo ln -sf "$target" /usr/local/bin/"$name"
 
-    create_desktop_entry "$name" "$display_name" "" "$category" "$bin_params"
+    create_desktop_entry "$name" "$display_name" "" "$category" "$bin_params" "$wmc"
 }
 
 
@@ -1775,7 +1778,7 @@ execute(){
     }
     
     extract_appimage_icon /opt/gamedev/engines/gdevelop/gdevelop.AppImage
-    register_bin gdevelop /opt/gamedev/engines/gdevelop/gdevelop.AppImage "GDevelop" "" "--no-sandbox"
+    register_bin gdevelop /opt/gamedev/engines/gdevelop/gdevelop.AppImage "GDevelop" "" "--no-sandbox" "GDevelop 5"
     '
     
     run_step "ctjs" "Ct.js" "is_installed ctjs" '
@@ -2054,7 +2057,7 @@ execute(){
     
             register_bin tuesdayjs \
                 "$INSTALL_DIR/TuesdayJS.AppImage" \
-                "TuesdayJS" "" "--no-sandbox"
+                "TuesdayJS" "" "--no-sandbox" "Tuesday JS"
         fi
     '
     
@@ -2141,7 +2144,7 @@ EOF
     
     sudo chmod +x /usr/local/bin/defold
     
-    create_desktop_entry defold "Defold" "/opt/gamedev/engines/Defold"
+    create_desktop_entry defold "Defold" "/opt/gamedev/engines/Defold" "" "" "" "com.defold.editor.Start"
     '
     
     # -----------------------------
@@ -2419,7 +2422,7 @@ EOF
         }
         
         extract_appimage_icon "$BABYLON_PATH"
-        register_bin babylonjs-editor "$BABYLON_PATH" "Babylon.JS Editor" "" "--no-sandbox"
+        register_bin babylonjs-editor "$BABYLON_PATH" "Babylon.JS Editor" "" "--no-sandbox" "Babylon.js Editor"
     '
     
     
@@ -2462,7 +2465,7 @@ EOF
     
         sudo snap install solar2d
 
-        create_desktop_entry "solar2d" "Solar2D" "/snap/solar2d/current/meta/gui"
+        create_desktop_entry "solar2d" "Solar2D" "/snap/solar2d/current/meta/gui" "" "" "" "Solar2DSimulator"
     '
 
     run_step "gamemaker" "GameMaker" "find /opt -maxdepth 2 -type f -path '/opt/GameMaker*/GameMaker'  | grep -q . 2>&1" '
@@ -2804,7 +2807,7 @@ EOF
     
             register_bin freetexturepacker \
                 "$INSTALL_DIR/FreeTexturePacker.AppImage" \
-                "Free texture packer" "Graphics;"
+                "Free texture packer" "Graphics;" "" "" "free-tex-packer"
         fi
     '
 
@@ -3099,7 +3102,7 @@ EOF
     
         RFX_BIN=/opt/gamedev/tools/rFXGen/rfxgen
     
-        register_bin rfxgen "$RFX_BIN" "rFXGen" "AudioVideo;Audio;"
+        register_bin rfxgen "$RFX_BIN" "rFXGen" "AudioVideo;Audio;" "" "rFXGen v5.0 | A simple and easy-to-use fx sounds generator"
     '
 
     run_step "natron" "Natron" "is_installed natron" '
