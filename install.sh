@@ -2051,7 +2051,7 @@ execute(){
             }
     
             sudo mkdir -p "$INSTALL_DIR"
-            sudo mv "$TMP_APPIMAGE" "$INSTALL_DIR/TuesdayJS.AppImage"
+            sudo cp "$TMP_APPIMAGE" "$INSTALL_DIR/TuesdayJS.AppImage"
     
             extract_appimage_icon "$INSTALL_DIR/TuesdayJS.AppImage"
     
@@ -2801,13 +2801,13 @@ EOF
             }
     
             sudo mkdir -p "$INSTALL_DIR"
-            sudo mv "$TMP_APPIMAGE" "$INSTALL_DIR/FreeTexturePacker.AppImage"
+            sudo cp "$TMP_APPIMAGE" "$INSTALL_DIR/FreeTexturePacker.AppImage"
     
             extract_appimage_icon "$INSTALL_DIR/FreeTexturePacker.AppImage"
     
             register_bin freetexturepacker \
                 "$INSTALL_DIR/FreeTexturePacker.AppImage" \
-                "Free texture packer" "Graphics;" "" "" "free-tex-packer"
+                "Free texture packer" "Graphics;" "" "free-tex-packer"
         fi
     '
 
