@@ -81,16 +81,30 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 ~/gamedev-studio.sh --update your-package
 ```
 
+OR
+
+bash
+~/gamedev-studio.sh -u your-package
+```
+```
+
 ##### More usable with -f option
 
 ```bash
-~/gamedev-studio.sh --update your-package -f
+~/gamedev-studio.sh --update your-package --force
 ```
+
+OR
+
+```bash
+~/gamedev-studio.sh -u your-package -f
+```
+
 
 ##### If package is already downloaded in tmp folder and you just need to trigger re-installation
 
 ```bash
-~/gamedev-studio.sh --update your-package -f --skip-downloads
+~/gamedev-studio.sh --update your-package --force --skip-downloads
 ```
 
 OR
@@ -103,14 +117,25 @@ OR
 #### Example
 
 ```bash
-~/gamedev-studio.sh --update godot -f
+~/gamedev-studio.sh -f -u godot
 ```
+
+```bash
+~/gamedev-studio.sh -f -sd -u defold
+```
+
 ---
 
 ### 📦 List available packages
 
 ```bash
 ~/gamedev-studio.sh --list
+```
+
+OR
+
+```bash
+~/gamedev-studio.sh -l
 ```
 
 ---
@@ -120,10 +145,23 @@ OR
 ```bash
 ~/gamedev-studio.sh --skip package1,package2
 ```
+OR
+
+```bash
+~/gamedev-studio.sh -s package1,package2
+```
+
+
 #### Example
 
 ```bash
 ~/gamedev-studio.sh --skip code,gideros,solar2d
+```
+
+OR
+
+```bash
+~/gamedev-studio.sh -s code,gideros,solar2d
 ```
 
 ---
