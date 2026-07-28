@@ -503,7 +503,7 @@ extract_appimage_icon() {
 
     dir=$(dirname "$appimage")
     icon_path="$dir/icon.png"
-    tmpdir="/tmp/appimage_extract_$$"
+    tmpdir="$TMP_DIR/appimage_extract_$$"
 
     # skip if already exists
     if [ -f "$icon_path" ]; then
@@ -1985,8 +1985,8 @@ execute(){
     '
 
     run_step "tuesdayjs" "TuesdayJS" "is_installed tuesdayjs" '
-        TMP_DEB="/tmp/TuesdayJS.deb"
-        TMP_APPIMAGE="/tmp/TuesdayJS.AppImage"
+        TMP_DEB="$TMP_DIR/TuesdayJS.deb"
+        TMP_APPIMAGE="$TMP_DIR/TuesdayJS.AppImage"
         INSTALL_DIR="/opt/gamedev/engines/TuesdayJS"
     
         API="https://api.github.com/repos/Kirilllive/tuesday-js/releases/latest"
@@ -2438,7 +2438,7 @@ EOF
                 echo "Standard snapd install failed, attempting Linux Mint workaround..."
     
                 NOSNAP="/etc/apt/preferences.d/nosnap.pref"
-                BACKUP="/tmp/nosnap.pref.bak"
+                BACKUP="$TMP_DIR/nosnap.pref.bak"
     
                 if [ -f "$NOSNAP" ]; then
                     sudo mv "$NOSNAP" "$BACKUP"
@@ -2469,7 +2469,7 @@ EOF
     '
 
     run_step "gamemaker" "GameMaker" "find /opt -maxdepth 2 -type f -path '/opt/GameMaker*/GameMaker'  | grep -q . 2>&1" '
-        TMP_DEB="/tmp/GameMaker.deb"
+        TMP_DEB="$TMP_DIR/GameMaker.deb"
     
         curl -fL "https://gamemaker.io/en/download/ubuntu/lts/GameMaker.zip" -o "$TMP_DEB"
         sudo apt install -y "$TMP_DEB"
