@@ -724,7 +724,7 @@ register_bin() {
     chmod +x "$target"
     sudo ln -sf "$target" /usr/local/bin/"$name"
 
-    create_desktop_entry "$name" "$display_name" "" "$category" "$bin_params" "$wmc"
+    create_desktop_entry "$name" "$display_name" "" "$category" "$bin_params" "" "$wmc"
 }
 
 
