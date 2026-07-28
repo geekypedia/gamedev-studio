@@ -37,13 +37,19 @@ Built for speed, reproducibility, and zero manual setup.
 ### 🟢 Standard Install (Recommended)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh && sudo ~/gamedev-studio.sh
+curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh && ~/gamedev-studio.sh
 ```
 
 You can re-run the command if it breaks in between.
 
 ```bash
 ~/gamedev-studio.sh
+```
+
+If you just want to download and run it later
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh
 ```
 
 ---
