@@ -2763,8 +2763,8 @@ EOF
     '
 
     run_step "freetexturepacker" "FreeTexturePacker" "is_installed freetexturepacker" '
-        TMP_DEB="/tmp/FreeTexturePacker-amd64.deb"
-        TMP_APPIMAGE="/tmp/FreeTexturePacker-x86_64.AppImage"
+        TMP_DEB="$TMP_DIR/FreeTexturePacker-amd64.deb"
+        TMP_APPIMAGE="$TMP_DIR/FreeTexturePacker-x86_64.AppImage"
         INSTALL_DIR="/opt/gamedev/tools/FreeTexturePacker"
     
         USE_APPIMAGE=0
