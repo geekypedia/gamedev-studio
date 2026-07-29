@@ -615,6 +615,14 @@ create_desktop_entry() {
     local terminal="$6"
     local wmc="$7"
 
+    # How to know StartupWMClass
+    # Run the following command
+    # xprop WM_CLASS 
+    # Select an open window. The output will be something like
+    # WM_CLASS(STRING) = "code", "Code"
+    # use the Code
+    # StartupWMClass=Code
+
     local bin
     bin=$(command -v "$app" 2>/dev/null)
 
