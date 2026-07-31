@@ -54,26 +54,28 @@ You can run the command whenever you want. You can re-run the command if it brea
 ~/gamedev-studio.sh
 ```
 
+Make sure not to run this as sudo because it already uses sudo at appropriate times.
+
 ---
 
 ### 🔁 Install + System Upgrade
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh && sudo ~/gamedev-studio.sh --upgrade
+curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh && ~/gamedev-studio.sh --upgrade
 ```
 ---
 
 ### 💥 Force Reinstall (Overwrite Everything)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh && sudo ~/gamedev-studio.sh --force
+curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh && ~/gamedev-studio.sh --force
 ```
 ---
 
 ### ⚡ Force + Upgrade (Full System Refresh)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh && sudo ~/gamedev-studio.sh --force --upgrade
+curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh && ~/gamedev-studio.sh --force --upgrade
 ```
 ---
 
