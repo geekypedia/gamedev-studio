@@ -823,6 +823,16 @@ is_nvm_usable() {
     export NVM_DIR="$(eval echo ~${SUDO_USER:-$USER})/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 }
 
+reload_nvm() {
+    export NVM_DIR="$(eval echo ~${SUDO_USER:-$USER})/.nvm"
+
+    if [ -s "$NVM_DIR/nvm.sh" ]; then
+        . "$NVM_DIR/nvm.sh"
+        nvm use --lts >/dev/null 2>&1 || true
+        hash -r
+    fi
+}
+
 # -----------------------------
 # INSTALLER ENGINE
 # -----------------------------
@@ -1187,6 +1197,8 @@ execute(){
     echo ".bashrc and .zshrc updated"
     
     '
+
+    reload_nvm
 
     run_step "node-fallback" "Node.js LTS using NVM (fallback method)" "is_nvm_usable" '
     INSTALL_USER="${SUDO_USER:-$USER}"
