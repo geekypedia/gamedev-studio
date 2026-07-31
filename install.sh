@@ -116,6 +116,17 @@ ownership(){
 
 }
 
+ownership_nvm(){
+
+    REAL_USER="${SUDO_USER:-$USER}"
+    
+    echo "Taking ownership of npm and nvm"
+    
+    sudo chown -R "$REAL_USER:$REAL_USER" ~/.npm
+    sudo chown -R "$REAL_USER:$REAL_USER" ~/.nvm
+
+}
+
 safe_exists(){
     local out="$1"
 
@@ -1199,6 +1210,8 @@ execute(){
     '
 
     reload_nvm
+
+    ownership_nvm
 
     run_step "node-fallback" "Node.js LTS using NVM (fallback method)" "is_nvm_usable" '
     INSTALL_USER="${SUDO_USER:-$USER}"
