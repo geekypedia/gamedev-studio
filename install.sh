@@ -432,6 +432,21 @@ get_timestamp() {
     date +"%Y-%m-%d-%H-%M-%S"
 }
 
+add_path_entry() {
+    local path_entry="$1"
+    local profile_file="$2"
+
+    grep -qxF "export PATH=\"$path_entry:\$PATH\"" "$profile_file" || \
+        echo "export PATH=\"$path_entry:\$PATH\"" >> "$profile_file"
+}
+
+add_path_entry_all() {
+    local path_entry="$1"
+
+    add_path_entry "$path_entry" "$HOME/.profile"
+    add_path_entry "$path_entry" "$HOME/.bashrc"
+}
+
 # -----------------------------
 # BINARY REGISTRY (FIX)
 # -----------------------------
@@ -2651,10 +2666,19 @@ EOF
     '
 
     # Add python libraries in path
-    grep -qxF 'export PATH="/opt/gamedev/python-env/bin:$PATH"' ~/.profile || \
-        echo 'export PATH="/opt/gamedev/python-env/bin:$PATH"' >> ~/.profile
+    # grep -qxF 'export PATH="/opt/gamedev/python-env/bin:$PATH"' ~/.profile || \
+    #     echo 'export PATH="/opt/gamedev/python-env/bin:$PATH"' >> ~/.profile
     
-    source ~/.profile
+    # source ~/.profile
+
+    # grep -qxF 'export PATH="/opt/gamedev/python-env/bin:$PATH"' ~/.bashrc || \
+    #     echo 'export PATH="/opt/gamedev/python-env/bin:$PATH"' >> ~/.bashrc
+
+    # source ~/.bashrc
+
+    add_path_entry_all "/opt/gamedev/python-env/bin"
+
+    export PATH="/opt/gamedev/python-env/bin:$PATH"
     
     # -----------------------------
     # CREATIVE TOOLS
