@@ -2886,19 +2886,31 @@ EOF
     '
 
     run_step "makehuman" "MakeHuman" "is_installed makehuman" '
-        sudo add-apt-repository ppa:makehuman-official/makehuman-community
+        sudo add-apt-repository -y ppa:makehuman-official/makehuman-community
         sudo apt update
+    
+        # Main application
         sudo apt install -y makehuman-community
-        sudo apt install -y makehuman-community-plugins-assetdownloader
-        sudo apt install -y makehuman-community-plugins-socket
-        sudo apt install -y mhx2-makehuman-exchange
-        sudo apt install -y makehuman-blendertools
-        sudo apt install -y makehuman-targets-dev
-        sudo apt install -y makehuman-clothes-dev
-        sudo apt install -y makehuman-hair-dev
-        sudo apt install -y makehuman-bodyparts-dev
-    '
+    
+        # Included automatically with makehuman-community or no longer packaged separately
+        # sudo apt install -y makehuman-community-plugins-assetdownloader
+        # sudo apt install -y makehuman-community-plugins-socket
+        # sudo apt install -y mhx2-makehuman-exchange
+        # sudo apt install -y makehuman-blendertools
 
+        # These are from documentation but their package names have been changed
+        # sudo apt install -y makehuman-targets-dev
+        # sudo apt install -y makehuman-clothes-dev
+        # sudo apt install -y makehuman-hair-dev
+        # sudo apt install -y makehuman-bodyparts-dev
+
+    
+        # Development assets
+        sudo apt install -y makehuman-community-targets-dev
+        sudo apt install -y makehuman-community-clothes-dev
+        sudo apt install -y makehuman-community-hair-dev
+        sudo apt install -y makehuman-community-bodyparts-dev
+    '
 
     run_step "armorpaint" "ArmorPaint" "is_installed armorpaint" '
         ARMORPAINT_DIR="$BASE/tools/armorpaint"
