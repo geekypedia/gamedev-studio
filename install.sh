@@ -438,6 +438,8 @@ add_path_entry() {
 
     grep -qxF "export PATH=\"$path_entry:\$PATH\"" "$profile_file" || \
         echo "export PATH=\"$path_entry:\$PATH\"" >> "$profile_file"
+
+    source "$profile_file"
 }
 
 add_path_entry_all() {
@@ -445,6 +447,7 @@ add_path_entry_all() {
 
     add_path_entry "$path_entry" "$HOME/.profile"
     add_path_entry "$path_entry" "$HOME/.bashrc"
+
 }
 
 # -----------------------------
