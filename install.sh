@@ -2885,6 +2885,21 @@ EOF
         fi
     '
 
+    run_step "makehuman" "MakeHuman" "is_installed makehuman" '
+        sudo add-apt-repository ppa:makehuman-official/makehuman-community
+        sudo apt update
+        sudo apt install -y makehuman-community
+        sudo apt install -y makehuman-community-plugins-assetdownloader
+        sudo apt install -y makehuman-community-plugins-socket
+        sudo apt install -y mhx2-makehuman-exchange
+        sudo apt install -y makehuman-blendertools
+        sudo apt install -y makehuman-targets-dev
+        sudo apt install -y makehuman-clothes-dev
+        sudo apt install -y makehuman-hair-dev
+        sudo apt install -y makehuman-bodyparts-dev
+    '
+
+
     run_step "armorpaint" "ArmorPaint" "is_installed armorpaint" '
         ARMORPAINT_DIR="$BASE/tools/armorpaint"
     
