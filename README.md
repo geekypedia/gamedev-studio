@@ -40,16 +40,18 @@ Built for speed, reproducibility, and zero manual setup.
 curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh && ~/gamedev-studio.sh
 ```
 
-You can re-run the command if it breaks in between.
-
-```bash
-~/gamedev-studio.sh
-```
+### 🟢 Only Download Script (To run it later)
 
 If you just want to download and run it later
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh
+```
+
+You can run the command whenever you want. You can re-run the command if it breaks in between. You can run it with different options mentioned below in the CLI Options section.
+
+```bash
+~/gamedev-studio.sh
 ```
 
 ---
@@ -239,6 +241,7 @@ OR
 - Pencil2D
 - OpenToonz
 - ArmorPaint
+- MakeHuman
 
 ---
 
