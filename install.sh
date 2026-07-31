@@ -2585,7 +2585,44 @@ EOF
         create_desktop_entry intersect-client "Intersect Client" "/opt/gamedev/engines/Intersect"
         create_desktop_entry intersect-server "Intersect Server" "/opt/gamedev/engines/Intersect" "" "" "true"
     '
+
+    run_step "tic80" "TIC-80" "is_installed tic80" '
+        API="https://api.github.com/repos/nesbox/TIC-80/releases/latest"
+        FALLBACK_URL="https://github.com/nesbox/TIC-80/releases/download/v1.1.2837/tic80-v1.1-linux.deb"
     
+        echo "🌐 Fetching TIC-80 latest release..."
+    
+        DEB_URL=$(curl -fsSL "$API" 2>/dev/null | jq -r "
+          .assets[]
+          | select(.name != null)
+          | select(.name | contains(\"linux\") and endswith(\".deb\"))
+          | .browser_download_url
+        " | head -n 1)
+    
+        if [ -z "$DEB_URL" ] || [ "$DEB_URL" = "null" ]; then
+            echo "⚠️ TIC-80 latest DEB not found, using fallback"
+            DEB_URL="$FALLBACK_URL"
+        fi
+    
+        echo "⬇️ Downloading: $DEB_URL"
+    
+        safe_wget "$DEB_URL" "$TMP_DIR/tic80.deb" || {
+            echo "⚠️ Download failed"
+            return 0
+        }
+    
+        echo "📦 Installing TIC-80..."
+    
+        sudo dpkg -i "$TMP_DIR/tic80.deb" || {
+            echo "⚠️ dpkg failed, fixing dependencies..."
+            sudo apt install -f -y || {
+                echo "⚠️ dependency fix failed"
+                return 0
+            }
+        }
+    
+        echo "✅ TIC-80 installed successfully"
+    '
     
     # -----------------------------
     # Python Libraries TOOLS
@@ -2612,6 +2649,12 @@ EOF
         done
         pipx ensurepath
     '
+
+    # Add python libraries in path
+    grep -qxF 'export PATH="/opt/gamedev/python-env/bin:$PATH"' ~/.profile || \
+        echo 'export PATH="/opt/gamedev/python-env/bin:$PATH"' >> ~/.profile
+    
+    source ~/.profile
     
     # -----------------------------
     # CREATIVE TOOLS
