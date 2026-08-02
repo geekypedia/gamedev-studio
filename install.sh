@@ -3123,8 +3123,92 @@ EOF
     run_step "dexed" "dexed" "is_installed dexed" '
     sudo apt install -y dexed || echo "⚠️ dexed install failed"
     '
+    
     run_step "surge-xt" "surge-xt" "is_installed surge-xt" '
     sudo apt install -y surge-xt || echo "⚠️ surge-xt install failed"
+    '
+    
+    run_step "helm" "Helm" "is_installed helm" '
+        API="https://api.github.com/repos/mtytel/helm/releases/latest"
+    
+        echo "🌐 Fetching Helm latest release..."
+    
+        DEB_URL=$(curl -s "$API" | jq -r "
+          .assets[]
+          | select(.name | endswith(\".deb\"))
+          | .browser_download_url
+        " | head -n1)
+    
+        if [ -z "$DEB_URL" ]; then
+            echo "⚠️ Helm Linux DEB not found"
+            return 0
+        fi
+    
+        echo "⬇️ Downloading: $DEB_URL"
+    
+        safe_wget "$DEB_URL" "$TMP_DIR/helm.deb" || {
+            echo "⚠️ Download failed"
+            return 0
+        }
+    
+        echo "📦 Installing Helm..."
+    
+        sudo dpkg -i "$TMP_DIR/helm.deb" || {
+            echo "⚠️ Fixing dependencies..."
+            sudo apt install -f -y || {
+                echo "⚠️ Dependency fix failed"
+                return 0
+            }
+        }
+    
+        echo "✅ Helm installed successfully"
+    '
+    
+    run_step "tal-noisemaker" "TAL-NoiseMaker" "is_installed tal-noisemaker" '
+        URL="https://tal-software.com/downloads/plugins/TAL-NoiseMaker_64_linux.zip"
+    
+        echo "⬇️ Downloading TAL-NoiseMaker..."
+    
+        safe_wget "$URL" "$TMP_DIR/tal-noisemaker.zip" || {
+            echo "⚠️ Download failed"
+            return 0
+        }
+    
+        mkdir -p "$TMP_DIR/tal"
+    
+        unzip -q "$TMP_DIR/tal-noisemaker.zip" -d "$TMP_DIR/tal" || {
+            echo "⚠️ Extraction failed"
+            return 0
+        }
+    
+        sudo mkdir -p /usr/lib/vst3
+    
+        find "$TMP_DIR/tal" -name "*.vst3" -exec cp -r {} /usr/lib/vst3/ \;
+    
+        echo "✅ TAL-NoiseMaker installed"
+    '
+    
+    run_step "sitala" "Sitala" "is_installed sitala" '
+        URL="https://decomposer.de/sitala/releases/sitala-1.0_amd64.deb"
+    
+        echo "⬇️ Downloading Sitala..."
+    
+        safe_wget "$URL" "$TMP_DIR/sitala.deb" || {
+            echo "⚠️ Download failed"
+            return 0
+        }
+    
+        echo "📦 Installing Sitala..."
+    
+        sudo dpkg -i "$TMP_DIR/sitala.deb" || {
+            echo "⚠️ Fixing dependencies..."
+            sudo apt install -f -y || {
+                echo "⚠️ Dependency fix failed"
+                return 0
+            }
+        }
+    
+        echo "✅ Sitala installed"
     '
 
 
