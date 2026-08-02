@@ -459,7 +459,49 @@ ensure_vst_dir(){
     mkdir -p ~/.clap
 }
 
-register_vst_bin(){
+register_vst_bin() {
+    local APP_NAME="$1"
+    local APP_BINS="${2:-$APP_NAME}"
+
+    local APP_TMP_DIR="$TMP_DIR/$APP_NAME"
+    ensure_vst_dir
+
+    sudo find "$APP_TMP_DIR" -name "*.vst3" -exec cp -a {} /usr/lib/vst3/ \;
+    sudo find "$APP_TMP_DIR" -name "*.clap" -exec cp -a {} /usr/lib/clap/ \;
+    find "$APP_TMP_DIR" -name "*.vst3" -exec cp -a {} ~/.vst3/ \;
+    find "$APP_TMP_DIR" -name "*.clap" -exec cp -a {} ~/.clap/ \;
+
+    local APP_BASE_DIR="$BASE/tools/$APP_NAME"
+
+    sudo rm -rf "$APP_BASE_DIR"
+    sudo mkdir -p "$(dirname "$APP_BASE_DIR")"
+    sudo mv "$APP_TMP_DIR" "$APP_BASE_DIR"
+
+    IFS=',' read -ra BIN_LIST <<< "$APP_BINS"
+
+    local FIRST=1
+
+    for REL_PATH in "${BIN_LIST[@]}"; do
+        REL_PATH="${REL_PATH#"${REL_PATH%%[![:space:]]*}"}"
+        REL_PATH="${REL_PATH%"${REL_PATH##*[![:space:]]}"}"
+
+        local APP_BIN="$APP_BASE_DIR/$REL_PATH"
+        local APP_TITLE
+        APP_TITLE="$(basename "$REL_PATH")"
+
+        local BIN_NAME
+        if [ $FIRST -eq 1 ]; then
+            BIN_NAME="$APP_NAME"
+            FIRST=0
+        else
+            BIN_NAME="$(echo "$APP_TITLE" | tr '[:upper:]' '[:lower:]')"
+        fi
+
+        register_bin "$BIN_NAME" "$APP_BIN" "$APP_TITLE" "AudioVideo;Audio;"
+    done
+}
+
+register_vst_bin_deprecated(){
         local APP_NAME="$1"
         local APP_NAME_TITLE="${2:-$APP_NAME}"
         
