@@ -3335,6 +3335,29 @@ EOF
     
         echo "✅ Sitala installed"
     '
+
+    run_step "odin2" "Odin 2" "command -v Odin2 || test -d /usr/lib/vst3/Odin2.vst3 || test -d /usr/lib/lv2/Odin2.lv2" '
+        URL="https://github.com/TheWaveWarden/odin2/releases/download/NightlyDevel/Odin2-synth_2.4-1.deb"
+
+        echo "⬇️ Downloading Odin 2..."
+
+        safe_wget "$URL" "$TMP_DIR/odin2.deb" || {
+            echo "⚠️ Odin 2 download failed"
+            return 0
+        }
+
+        echo "📦 Installing Odin 2..."
+
+        sudo dpkg -i "$TMP_DIR/odin2.deb" || {
+            echo "⚠️ Fixing dependencies..."
+            sudo apt install -f -y || {
+                echo "⚠️ Dependency fix failed"
+                return 0
+            }
+        }
+
+        echo "✅ Odin 2 installed successfully"
+    '
     
 
     run_step "zynaddsubfx" "zynaddsubfx" "is_installed zynaddsubfx" '
