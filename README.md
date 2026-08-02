@@ -257,7 +257,6 @@ OR
 - Ardour
 - Fami Studio
 - yadaw
-- n-Track Studio
 - Hydrogen Drum Machine
 - Revisto Drum Machine
 - Geonkick
