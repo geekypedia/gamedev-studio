@@ -3292,11 +3292,11 @@ EOF
         register_bin rfxgen "$RFX_BIN" "rFXGen" "AudioVideo;Audio;" "" "rFXGen v5.0 | A simple and easy-to-use fx sounds generator"
     '
 
-    run_step "ntrack" "n-Track" "is_ok n-trackstudio" '
-        echo "deb [arch=amd64] https://ntrack.com/apt stable main" | sudo tee /etc/apt/sources.list.d/n-Track.list
-        wget -qO - https://ntrack.com/apt/public.key | sudo tee /etc/apt/trusted.gpg.d/ntrack.asc
-        sudo apt update && sudo apt install n-trackstudio
-    '
+    # run_step "ntrack" "n-Track" "is_ok n-trackstudio" '
+    #     echo "deb [arch=amd64] https://ntrack.com/apt stable main" | sudo tee /etc/apt/sources.list.d/n-Track.list
+    #     wget -qO - https://ntrack.com/apt/public.key | sudo tee /etc/apt/trusted.gpg.d/ntrack.asc
+    #     sudo apt update && sudo apt install n-trackstudio
+    # '
 
 
     run_step "natron" "Natron" "is_installed natron" '
