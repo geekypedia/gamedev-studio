@@ -253,9 +253,10 @@ OR
 - Kdenlive
 - OBS Studio
 - LMMS
-- Fami Studio
 - Audacity
 - Ardour
+- Fami Studio
+- yadaw
 - Hydrogen Drum Machine
 - Revisto Drum Machine
 - Geonkick
