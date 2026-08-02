@@ -969,7 +969,7 @@ init() {
     ownership
     
     # Now create subfolders as normal user (no sudo needed)
-    mkdir -p "$BASE"/{engines,tools}
+    mkdir -p "$BASE"/{engines,tools,daw}
     
 }
 
@@ -3144,7 +3144,15 @@ EOF
     
         sudo mkdir -p /usr/lib/vst3
     
-        find "$TMP_DIR/dexed" -name "*.vst3" -exec cp -r {} /usr/lib/vst3/ \;
+        sudo find "$TMP_DIR/dexed" -name "*.vst3" -exec cp -r {} /usr/lib/vst3/ \;
+         
+        DEXED_BASE_DIR = /opt/gamedev/daw/dexed
+        
+        mv "$TMP_DIR/dexed" "$DEXED_BASE_DIR"
+        
+        DEXED_BIN="$DEXED_BASE_DIR"/Dexed
+        
+        register_bin dexed "$DEXED_BIN" "Dexed" "AudioVideo;Audio;"        
     
         echo "✅ Dexed installed successfully"
     '
