@@ -3127,6 +3127,34 @@ EOF
     run_step "surge-xt" "surge-xt" "is_installed surge-xt" '
     sudo apt install -y surge-xt || echo "⚠️ surge-xt install failed"
     '
+
+    run_step "fluidsynth" "FluidSynth" "is_installed fluidsynth" '
+        sudo apt install -y fluidsynth || echo "⚠️ FluidSynth install failed"
+    '
+
+    run_step "qsynth" "QSynth" "is_installed qsynth" '
+        sudo apt install -y qsynth || echo "⚠️ QSynth install failed"
+    '    
+
+    run_step "fluid-soundfont-gm" "Fluid GM SoundFont" "is_installed fluid-soundfont-gm" '
+        sudo apt install -y fluid-soundfont-gm || echo "⚠️ Fluid GM SoundFont install failed"
+    '
+
+    run_step "drumgizmo" "DrumGizmo" "is_installed drumgizmo" '
+        sudo apt install -y drumgizmo || echo "⚠️ DrumGizmo install failed"
+    '
+    
+    run_step "zynaddsubfx "zynaddsubfx" "is_installed zynaddsubfx" '
+        sudo apt install -y zynaddsubfx || echo "⚠️ zynaddsubfx install failed"
+    '
+    
+    run_step "yoshimi" "Yoshimi" "is_installed yoshimi" '
+        sudo apt install -y yoshimi || echo "⚠️ Yoshimi install failed"
+    '
+
+    run_step "calf-plugins" "Calf Plugins" "is_installed calfjackhost" '
+        sudo apt install -y calf-plugins || echo "⚠️ Calf Plugins install failed"
+    '
     
     run_step "helm" "Helm" "is_installed helm" '
         API="https://api.github.com/repos/mtytel/helm/releases/latest"
