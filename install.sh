@@ -450,6 +450,14 @@ add_path_entry_all() {
 
 }
 
+ensure_vst_dir(){
+    sudo mkdir -p /usr/lib/vst
+    sudo mkdir -p /usr/lib/vst3
+    mkdir -p ~/.vst
+    mkdir -p ~/.vst3
+    mkdir -p ~/.clap
+}
+
 # -----------------------------
 # BINARY REGISTRY (FIX)
 # -----------------------------
@@ -969,7 +977,7 @@ init() {
     ownership
     
     # Now create subfolders as normal user (no sudo needed)
-    mkdir -p "$BASE"/{engines,tools,daw}
+    mkdir -p "$BASE"/{engines,tools}
     
 }
 
@@ -3141,18 +3149,24 @@ EOF
             echo "⚠️ Dexed extraction failed"
             return 0
         }
-    
-        sudo mkdir -p /usr/lib/vst3
-    
-        sudo find "$TMP_DIR/dexed" -name "*.vst3" -exec cp -r {} /usr/lib/vst3/ \;
+
+        local APP_NAME="dexed"
+        local APP_NAME_TITLE="Dexed"
+        
+        local APP_TMP_DIR="$TMP_DIR/$APP_NAME"
+        ensure_vst_dir
+            
+        sudo find "$APP_TMP_DIR" -name "*.vst3" -exec cp -r {} /usr/lib/vst3/ \;
+        find "$APP_TMP_DIR" -name "*.vst3" -exec cp -r {} ~/.vst3/ \;
+        find "$APP_TMP_DIR" -name "*.clap" -exec cp -r {} ~/.clap/ \;
          
-        DEXED_BASE_DIR="$BASE_DIR"/daw/dexed
+        local APP_BASE_DIR="$BASE_DIR"/tools/"$APP_NAME"
         
-        sudo mv "$TMP_DIR/dexed" "$DEXED_BASE_DIR"
+        sudo mv "$APP_TMP_DIR" "$APP_BASE_DIR"
         
-        DEXED_BIN="$DEXED_BASE_DIR"/Dexed
+        local APP_BIN="$APP_BASE_DIR"/"$APP_NAME_TITLE"
         
-        register_bin dexed "$DEXED_BIN" "Dexed" "AudioVideo;Audio;"        
+        register_bin "$APP_NAME" "$APP_BIN" "$APP_NAME_TITLE" "AudioVideo;Audio;"        
     
         echo "✅ Dexed installed successfully"
     '
