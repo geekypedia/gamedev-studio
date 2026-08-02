@@ -3148,7 +3148,7 @@ EOF
          
         DEXED_BASE_DIR = /opt/gamedev/daw/dexed
         
-        mv "$TMP_DIR/dexed" "$DEXED_BASE_DIR"
+        sudo mv "$TMP_DIR/dexed" "$DEXED_BASE_DIR"
         
         DEXED_BIN="$DEXED_BASE_DIR"/Dexed
         
