@@ -471,7 +471,7 @@ register_vst_bin(){
         find "$APP_TMP_DIR" -name "*.vst3" -exec cp -r {} ~/.vst3/ \;
         find "$APP_TMP_DIR" -name "*.clap" -exec cp -r {} ~/.clap/ \;
          
-        local APP_BASE_DIR="$BASE_DIR"/tools/"$APP_NAME"
+        local APP_BASE_DIR="$BASE"/tools/"$APP_NAME"
         
         sudo mv "$APP_TMP_DIR" "$APP_BASE_DIR"
         
