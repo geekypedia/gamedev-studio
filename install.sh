@@ -490,16 +490,25 @@ register_vst_bin() {
         APP_TITLE="$(basename "$REL_PATH")"
 
         local BIN_NAME
-        if [ $FIRST -eq 1 ]; then
-            BIN_NAME="$APP_NAME"
-            FIRST=0
-        else
-            #BIN_NAME="$(echo "$APP_TITLE" | tr '[:upper:]' '[:lower:]')"
-            BIN_NAME="$(basename "$REL_PATH" \
-                | tr '[:upper:]' '[:lower:]' \
-                | sed -E 's/[[:space:]]+/-/g; s/[^a-z0-9._-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+        # if [ $FIRST -eq 1 ]; then
+        #     BIN_NAME="$APP_NAME"
+        #     FIRST=0
+        # else
+        #     #BIN_NAME="$(echo "$APP_TITLE" | tr '[:upper:]' '[:lower:]')"
+        #     BIN_NAME="$(basename "$REL_PATH" \
+        #         | tr '[:upper:]' '[:lower:]' \
+        #         | sed -E 's/[[:space:]]+/-/g; s/[^a-z0-9._-]+/-/g; s/-+/-/g; s/^-|-$//g')"
 
-        fi
+        # fi
+        BIN_NAME="$(echo "$APP_TITLE" \
+            | tr '[:upper:]' '[:lower:]' \
+            | sed -E '
+                s/[[:space:]]+/-/g
+                s/[^a-z0-9._-]+/-/g
+                s/-+/-/g
+                s/^-|-$//g
+            ')"
+
 
         register_bin "$BIN_NAME" "$APP_BIN" "$APP_TITLE" "AudioVideo;Audio;"
     done
