@@ -3170,6 +3170,63 @@ EOF
     register_bin famistudio "$FAMI_BIN" "FamiStudio" "AudioVideo;Audio;"
     '
 
+    run_step "yadaw" "YADAW" "is_installed yadaw" '
+        mkdir -p "$TMP_DIR"
+    
+        YADAW_TAR="$TMP_DIR/yadaw.tar.gz"
+    
+        API="https://api.github.com/repos/mlm-games/yadaw/releases/latest"
+    
+        YADAW_URL=$(
+          curl -s "$API" |
+          jq -r "
+            .assets[]
+            | select(
+                (.name | ascii_downcase | contains(\"linux\")) and
+                (.name | ascii_downcase | contains(\"x86_64\")) and
+                (.name | endswith(\".tar.gz\"))
+              )
+            | .browser_download_url
+          " | head -n1
+        )
+    
+        if [ -z "$YADAW_URL" ]; then
+          echo "⚠️ Could not find YADAW Linux x86_64 build"
+          return 0
+        fi
+    
+        safe_wget \
+            "$YADAW_URL" \
+            "$YADAW_TAR" || {
+            echo "⚠️ YADAW download failed"
+            return 0
+        }
+    
+        rm -rf "$TMP_DIR"/yadaw
+        mkdir -p "$TMP_DIR"/yadaw
+    
+        tar -xzf "$YADAW_TAR" -C "$TMP_DIR"/yadaw || {
+            echo "⚠️ YADAW extraction failed"
+            return 0
+        }
+    
+        YADAW_DIR="$TMP_DIR"/yadaw
+    
+        rm -rf /opt/gamedev/tools/YADAW
+        mkdir -p /opt/gamedev/tools
+    
+        sudo mv "$YADAW_DIR" /opt/gamedev/tools/YADAW
+    
+        YADAW_BIN=$(find /opt/gamedev/tools/YADAW -type f -name yadaw | head -n1)
+    
+        if [ ! -x "$YADAW_BIN" ]; then
+            echo "⚠️ YADAW binary not found"
+            return 0
+        fi
+    
+        register_bin yadaw "$YADAW_BIN" "YADAW" "AudioVideo;Audio;"
+    '
+
     run_step "rfxgen" "rFXGen" "is_installed rfxgen" '
         mkdir -p "$TMP_DIR"
     
