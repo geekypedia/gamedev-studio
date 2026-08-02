@@ -458,6 +458,26 @@ ensure_vst_dir(){
     mkdir -p ~/.clap
 }
 
+register_vst_bin(){
+        local APP_NAME="$1"
+        local APP_NAME_TITLE="${2:-$APP_NAME}"
+        
+        local APP_TMP_DIR="$TMP_DIR/$APP_NAME"
+        ensure_vst_dir
+            
+        sudo find "$APP_TMP_DIR" -name "*.vst3" -exec cp -r {} /usr/lib/vst3/ \;
+        find "$APP_TMP_DIR" -name "*.vst3" -exec cp -r {} ~/.vst3/ \;
+        find "$APP_TMP_DIR" -name "*.clap" -exec cp -r {} ~/.clap/ \;
+         
+        local APP_BASE_DIR="$BASE_DIR"/tools/"$APP_NAME"
+        
+        sudo mv "$APP_TMP_DIR" "$APP_BASE_DIR"
+        
+        local APP_BIN="$APP_BASE_DIR"/"$APP_NAME_TITLE"
+        
+        register_bin "$APP_NAME" "$APP_BIN" "$APP_NAME_TITLE" "AudioVideo;Audio;"     
+}
+
 # -----------------------------
 # BINARY REGISTRY (FIX)
 # -----------------------------
@@ -3150,23 +3170,7 @@ EOF
             return 0
         }
 
-        local APP_NAME="dexed"
-        local APP_NAME_TITLE="Dexed"
-        
-        local APP_TMP_DIR="$TMP_DIR/$APP_NAME"
-        ensure_vst_dir
-            
-        sudo find "$APP_TMP_DIR" -name "*.vst3" -exec cp -r {} /usr/lib/vst3/ \;
-        find "$APP_TMP_DIR" -name "*.vst3" -exec cp -r {} ~/.vst3/ \;
-        find "$APP_TMP_DIR" -name "*.clap" -exec cp -r {} ~/.clap/ \;
-         
-        local APP_BASE_DIR="$BASE_DIR"/tools/"$APP_NAME"
-        
-        sudo mv "$APP_TMP_DIR" "$APP_BASE_DIR"
-        
-        local APP_BIN="$APP_BASE_DIR"/"$APP_NAME_TITLE"
-        
-        register_bin "$APP_NAME" "$APP_BIN" "$APP_NAME_TITLE" "AudioVideo;Audio;"        
+        register_vst_bin dexed Dexed
     
         echo "✅ Dexed installed successfully"
     '
@@ -3197,9 +3201,11 @@ EOF
     
         tar -xzf "$TMP_DIR/surge-xt.tar.gz" -C "$TMP_DIR/surge"
     
-        sudo mkdir -p /usr/lib/vst3
+        # sudo mkdir -p /usr/lib/vst3
     
-        find "$TMP_DIR/surge" -name "*.vst3" -exec cp -r {} /usr/lib/vst3/ \;
+        # find "$TMP_DIR/surge" -name "*.vst3" -exec cp -r {} /usr/lib/vst3/ \;
+
+        register_vst_bin surge
     
         echo "✅ Surge XT installed"
     '
