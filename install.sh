@@ -3120,14 +3120,71 @@ EOF
     sudo apt install -y lsp-plugins* || echo "⚠️ lsp install failed"
     '
 
-    run_step "dexed" "dexed" "dpkg -s dexed >/dev/null 2>&1" '
-    sudo apt install -y dexed || echo "⚠️ dexed install failed"
+    run_step "dexed" "Dexed" "is_installed dexed" '
+        API="https://api.github.com/repos/asb2m10/dexed/releases/latest"
+    
+        echo "🌐 Fetching Dexed latest release..."
+    
+        URL=$(curl -s "$API" | jq -r "
+          .assets[]
+          | select(.name | ascii_downcase | contains(\"linux\"))
+          | select(.name | endswith(\".zip\"))
+          | .browser_download_url
+        " | head -n1)
+    
+        if [ -z "$URL" ]; then
+            echo "⚠️ Dexed Linux build not found"
+            return 0
+        fi
+    
+        safe_wget "$URL" "$TMP_DIR/dexed.zip" || {
+            echo "⚠️ Dexed download failed"
+            return 0
+        }
+    
+        mkdir -p "$TMP_DIR/dexed"
+    
+        unzip -q "$TMP_DIR/dexed.zip" -d "$TMP_DIR/dexed"
+    
+        sudo mkdir -p /usr/lib/vst3
+    
+        find "$TMP_DIR/dexed" -name "*.vst3" -exec cp -r {} /usr/lib/vst3/ \;
+    
+        echo "✅ Dexed installed"
     '
     
-    run_step "surge-xt" "surge-xt" "is_installed surge-xt" '
-    sudo apt install -y surge-xt || echo "⚠️ surge-xt install failed"
+    run_step "surge-xt" "Surge XT" "is_installed surge-xt" '
+        API="https://api.github.com/repos/surge-synthesizer/surge/releases/latest"
+    
+        echo "🌐 Fetching Surge XT latest release..."
+    
+        URL=$(curl -s "$API" | jq -r "
+          .assets[]
+          | select(.name | ascii_downcase | contains(\"linux\"))
+          | select(.name | endswith(\".tar.gz\"))
+          | .browser_download_url
+        " | head -n1)
+    
+        if [ -z "$URL" ]; then
+            echo "⚠️ Surge XT Linux build not found"
+            return 0
+        fi
+    
+        safe_wget "$URL" "$TMP_DIR/surge-xt.tar.gz" || {
+            echo "⚠️ Surge XT download failed"
+            return 0
+        }
+    
+        mkdir -p "$TMP_DIR/surge"
+    
+        tar -xzf "$TMP_DIR/surge-xt.tar.gz" -C "$TMP_DIR/surge"
+    
+        sudo mkdir -p /usr/lib/vst3
+    
+        find "$TMP_DIR/surge" -name "*.vst3" -exec cp -r {} /usr/lib/vst3/ \;
+    
+        echo "✅ Surge XT installed"
     '
-
     run_step "fluidsynth" "FluidSynth" "is_installed fluidsynth" '
         sudo apt install -y fluidsynth || echo "⚠️ FluidSynth install failed"
     '
