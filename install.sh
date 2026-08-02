@@ -3113,6 +3113,21 @@ EOF
     flatpak install -y flathub io.github.revisto.drum-machine || true
     '
 
+    run_step "lsp" "Linux Studio Plugins (LSP)" "is_installed lsp" '
+    # sudo apt install -y lsp-plugins-lv2 || echo "⚠️ lsp install failed"
+    # sudo apt install -y lsp-plugins-vst || echo "⚠️ lsp install failed"
+    # sudo apt install -y lsp-plugins-jack|| echo "⚠️ lsp install failed"
+    sudo apt install -y lsp-plugins* echo "⚠️ lsp install failed"
+    '
+
+    run_step "dexed" "dexed" "is_installed dexed" '
+    sudo apt install -y dexed || echo "⚠️ dexed install failed"
+    '
+    run_step "surge-xt" "surge-xt" "is_installed surge-xt" '
+    sudo apt install -y surge-xt || echo "⚠️ surge-xt install failed"
+    '
+
+
     run_step "famistudio" "FamiStudio" "is_installed famistudio" '
     mkdir -p "$TMP_DIR"
     
