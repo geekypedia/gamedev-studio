@@ -266,6 +266,7 @@ OR
   - SurgeXT
   - Dexed
   - TAL-NoiseMaker
+  - Odin 2
 - rFXGen
 - Natron
 
