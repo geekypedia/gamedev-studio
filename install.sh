@@ -3214,25 +3214,12 @@ EOF
     '
     
     run_step "helm" "Helm" "is_installed helm" '
-        API="https://api.github.com/repos/mtytel/helm/releases/latest"
+        URL="https://tytel.org/static/dist/helm_0.9.0_amd64_r.deb"
     
-        echo "🌐 Fetching Helm latest release..."
+        echo "⬇️ Downloading Helm..."
     
-        DEB_URL=$(curl -s "$API" | jq -r "
-          .assets[]
-          | select(.name | endswith(\".deb\"))
-          | .browser_download_url
-        " | head -n1)
-    
-        if [ -z "$DEB_URL" ]; then
-            echo "⚠️ Helm Linux DEB not found"
-            return 0
-        fi
-    
-        echo "⬇️ Downloading: $DEB_URL"
-    
-        safe_wget "$DEB_URL" "$TMP_DIR/helm.deb" || {
-            echo "⚠️ Download failed"
+        safe_wget "$URL" "$TMP_DIR/helm.deb" || {
+            echo "⚠️ Helm download failed"
             return 0
         }
     
