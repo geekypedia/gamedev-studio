@@ -3117,10 +3117,10 @@ EOF
     # sudo apt install -y lsp-plugins-lv2 || echo "⚠️ lsp install failed"
     # sudo apt install -y lsp-plugins-vst || echo "⚠️ lsp install failed"
     # sudo apt install -y lsp-plugins-jack|| echo "⚠️ lsp install failed"
-    sudo apt install -y lsp-plugins* echo "⚠️ lsp install failed"
+    sudo apt install -y lsp-plugins* || echo "⚠️ lsp install failed"
     '
 
-    run_step "dexed" "dexed" "is_installed dexed" '
+    run_step "dexed" "dexed" "dpkg -s dexed >/dev/null 2>&1" '
     sudo apt install -y dexed || echo "⚠️ dexed install failed"
     '
     
@@ -3136,7 +3136,7 @@ EOF
         sudo apt install -y qsynth || echo "⚠️ QSynth install failed"
     '    
 
-    run_step "fluid-soundfont-gm" "Fluid GM SoundFont" "is_installed fluid-soundfont-gm" '
+    run_step "fluid-soundfont-gm" "Fluid GM SoundFont" "dpkg -s fluid-soundfont-gm >/dev/null 2>&1" '
         sudo apt install -y fluid-soundfont-gm || echo "⚠️ Fluid GM SoundFont install failed"
     '
 
@@ -3144,7 +3144,7 @@ EOF
         sudo apt install -y drumgizmo || echo "⚠️ DrumGizmo install failed"
     '
     
-    run_step "zynaddsubfx "zynaddsubfx" "is_installed zynaddsubfx" '
+    run_step "zynaddsubfx" "zynaddsubfx" "is_installed zynaddsubfx" '
         sudo apt install -y zynaddsubfx || echo "⚠️ zynaddsubfx install failed"
     '
     
