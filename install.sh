@@ -494,7 +494,11 @@ register_vst_bin() {
             BIN_NAME="$APP_NAME"
             FIRST=0
         else
-            BIN_NAME="$(echo "$APP_TITLE" | tr '[:upper:]' '[:lower:]')"
+            #BIN_NAME="$(echo "$APP_TITLE" | tr '[:upper:]' '[:lower:]')"
+            BIN_NAME="$(basename "$REL_PATH" \
+                | tr '[:upper:]' '[:lower:]' \
+                | sed -E 's/[[:space:]]+/-/g; s/[^a-z0-9._-]+/-/g; s/-+/-/g; s/^-|-$//g')"
+
         fi
 
         register_bin "$BIN_NAME" "$APP_BIN" "$APP_TITLE" "AudioVideo;Audio;"
@@ -3249,7 +3253,7 @@ EOF
     
         # find "$TMP_DIR/surge" -name "*.vst3" -exec cp -r {} /usr/lib/vst3/ \;
 
-        register_vst_bin surge
+        register_vst_bin surge "bin/Surge XT,bin/surge-xt-cli,bin/Surge XT Effects"
     
         echo "✅ Surge XT installed"
     '
