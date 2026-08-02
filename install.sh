@@ -3105,52 +3105,48 @@ EOF
     sudo apt install -y hydrogen hydrogen-drumkits || echo "⚠️ Hydrogen install failed"
     '
     
-    run_step "geonkick" "Geonkick" "is_installed geonkick" '
-    sudo apt install -y geonkick || echo "⚠️ Geonkick install failed"
-    '
-
-    run_step "drum-machine" "Revisto Drum Machine" "is_ok drum-machine" '
-    flatpak install -y flathub io.github.revisto.drum-machine || true
-    '
-
-    run_step "lsp" "Linux Studio Plugins (LSP)" "is_installed lsp" '
-    # sudo apt install -y lsp-plugins-lv2 || echo "⚠️ lsp install failed"
-    # sudo apt install -y lsp-plugins-vst || echo "⚠️ lsp install failed"
-    # sudo apt install -y lsp-plugins-jack|| echo "⚠️ lsp install failed"
-    sudo apt install -y lsp-plugins* || echo "⚠️ lsp install failed"
-    '
-
     run_step "dexed" "Dexed" "is_installed dexed" '
         API="https://api.github.com/repos/asb2m10/dexed/releases/latest"
     
         echo "🌐 Fetching Dexed latest release..."
     
-        URL=$(curl -s "$API" | jq -r "
+        DEXED_URL=$(curl -s "$API" | jq -r "
           .assets[]
-          | select(.name | ascii_downcase | contains(\"linux\"))
-          | select(.name | endswith(\".zip\"))
+          | select(.name != null)
+          | select(
+              (.name | ascii_downcase | contains(\"lnx\")) and
+              (.name | endswith(\".zip\"))
+            )
           | .browser_download_url
         " | head -n1)
     
-        if [ -z "$URL" ]; then
+        if [ -z "$DEXED_URL" ]; then
             echo "⚠️ Dexed Linux build not found"
+            echo "Available assets:"
+            curl -s "$API" | jq -r ".assets[].name"
             return 0
         fi
     
-        safe_wget "$URL" "$TMP_DIR/dexed.zip" || {
+        echo "⬇️ Downloading: $DEXED_URL"
+    
+        safe_wget "$DEXED_URL" "$TMP_DIR/dexed.zip" || {
             echo "⚠️ Dexed download failed"
             return 0
         }
     
+        rm -rf "$TMP_DIR/dexed"
         mkdir -p "$TMP_DIR/dexed"
     
-        unzip -q "$TMP_DIR/dexed.zip" -d "$TMP_DIR/dexed"
+        unzip -q "$TMP_DIR/dexed.zip" -d "$TMP_DIR/dexed" || {
+            echo "⚠️ Dexed extraction failed"
+            return 0
+        }
     
         sudo mkdir -p /usr/lib/vst3
     
         find "$TMP_DIR/dexed" -name "*.vst3" -exec cp -r {} /usr/lib/vst3/ \;
     
-        echo "✅ Dexed installed"
+        echo "✅ Dexed installed successfully"
     '
     
     run_step "surge-xt" "Surge XT" "is_installed surge-xt" '
@@ -3185,34 +3181,7 @@ EOF
     
         echo "✅ Surge XT installed"
     '
-    run_step "fluidsynth" "FluidSynth" "is_installed fluidsynth" '
-        sudo apt install -y fluidsynth || echo "⚠️ FluidSynth install failed"
-    '
 
-    run_step "qsynth" "QSynth" "is_installed qsynth" '
-        sudo apt install -y qsynth || echo "⚠️ QSynth install failed"
-    '    
-
-    run_step "fluid-soundfont-gm" "Fluid GM SoundFont" "dpkg -s fluid-soundfont-gm >/dev/null 2>&1" '
-        sudo apt install -y fluid-soundfont-gm || echo "⚠️ Fluid GM SoundFont install failed"
-    '
-
-    run_step "drumgizmo" "DrumGizmo" "is_installed drumgizmo" '
-        sudo apt install -y drumgizmo || echo "⚠️ DrumGizmo install failed"
-    '
-    
-    run_step "zynaddsubfx" "zynaddsubfx" "is_installed zynaddsubfx" '
-        sudo apt install -y zynaddsubfx || echo "⚠️ zynaddsubfx install failed"
-    '
-    
-    run_step "yoshimi" "Yoshimi" "is_installed yoshimi" '
-        sudo apt install -y yoshimi || echo "⚠️ Yoshimi install failed"
-    '
-
-    run_step "calf-plugins" "Calf Plugins" "is_installed calfjackhost" '
-        sudo apt install -y calf-plugins || echo "⚠️ Calf Plugins install failed"
-    '
-    
     run_step "helm" "Helm" "is_installed helm" '
         URL="https://tytel.org/static/dist/helm_0.9.0_amd64_r.deb"
     
@@ -3282,6 +3251,51 @@ EOF
     
         echo "✅ Sitala installed"
     '
+    
+
+    run_step "zynaddsubfx" "zynaddsubfx" "is_installed zynaddsubfx" '
+        sudo apt install -y zynaddsubfx || echo "⚠️ zynaddsubfx install failed"
+    '
+    
+    run_step "drumgizmo" "DrumGizmo" "is_installed drumgizmo" '
+        sudo apt install -y drumgizmo || echo "⚠️ DrumGizmo install failed"
+    '
+    
+    run_step "geonkick" "Geonkick" "is_installed geonkick" '
+        sudo apt install -y geonkick || echo "⚠️ Geonkick install failed"
+    '
+
+    run_step "calf-plugins" "Calf Plugins" "is_installed calfjackhost" '
+        sudo apt install -y calf-plugins || echo "⚠️ Calf Plugins install failed"
+    '
+
+    run_step "drum-machine" "Revisto Drum Machine" "is_ok drum-machine" '
+    flatpak install -y flathub io.github.revisto.drum-machine || true
+    '
+
+    run_step "lsp" "Linux Studio Plugins (LSP)" "is_installed lsp" '
+    # sudo apt install -y lsp-plugins-lv2 || echo "⚠️ lsp install failed"
+    # sudo apt install -y lsp-plugins-vst || echo "⚠️ lsp install failed"
+    # sudo apt install -y lsp-plugins-jack|| echo "⚠️ lsp install failed"
+    sudo apt install -y lsp-plugins* || echo "⚠️ lsp install failed"
+    '
+    
+    run_step "fluidsynth" "FluidSynth" "is_installed fluidsynth" '
+        sudo apt install -y fluidsynth || echo "⚠️ FluidSynth install failed"
+    '
+
+    run_step "qsynth" "QSynth" "is_installed qsynth" '
+        sudo apt install -y qsynth || echo "⚠️ QSynth install failed"
+    '    
+
+    run_step "fluid-soundfont-gm" "Fluid GM SoundFont" "dpkg -s fluid-soundfont-gm >/dev/null 2>&1" '
+        sudo apt install -y fluid-soundfont-gm || echo "⚠️ Fluid GM SoundFont install failed"
+    '
+
+    run_step "yoshimi" "Yoshimi" "is_installed yoshimi" '
+        sudo apt install -y yoshimi || echo "⚠️ Yoshimi install failed"
+    '
+    
 
 
     run_step "famistudio" "FamiStudio" "is_installed famistudio" '
