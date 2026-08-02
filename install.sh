@@ -3146,7 +3146,7 @@ EOF
     
         sudo find "$TMP_DIR/dexed" -name "*.vst3" -exec cp -r {} /usr/lib/vst3/ \;
          
-        DEXED_BASE_DIR = /opt/gamedev/daw/dexed
+        DEXED_BASE_DIR="$BASE_DIR"/daw/dexed
         
         sudo mv "$TMP_DIR/dexed" "$DEXED_BASE_DIR"
         
