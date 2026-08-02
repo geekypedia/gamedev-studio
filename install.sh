@@ -3317,7 +3317,7 @@ EOF
     
         # find "$TMP_DIR/tal" -name "*.vst3" -exec cp -r {} /usr/lib/vst3/ \;
 
-        register_vst "$TMP_DIR/TAL-NoiseMaker
+        register_vst "$TMP_DIR"/TAL-NoiseMaker
         
         echo "✅ TAL-NoiseMaker installed"
     '
