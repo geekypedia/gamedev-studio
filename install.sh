@@ -459,18 +459,24 @@ ensure_vst_dir(){
     mkdir -p ~/.clap
 }
 
+register_vst(){
+    local APP_TMP_DIR="$1"
+    sudo find "$APP_TMP_DIR" -name "*.vst3" -exec cp -a {} /usr/lib/vst3/ \;
+    sudo find "$APP_TMP_DIR" -name "*.clap" -exec cp -a {} /usr/lib/clap/ \;
+    sudo find "$APP_TMP_DIR" -name "*.so" -exec cp -a {} /usr/lib/vst/ \;
+    find "$APP_TMP_DIR" -name "*.vst3" -exec cp -a {} ~/.vst3/ \;
+    find "$APP_TMP_DIR" -name "*.clap" -exec cp -a {} ~/.clap/ \;
+    find "$APP_TMP_DIR" -name "*.so" -exec cp -a {} ~/.vst/ \;    
+}
+
 register_vst_bin() {
     local APP_NAME="$1"
     local APP_BINS="${2:-$APP_NAME}"
 
     local APP_TMP_DIR="$TMP_DIR/$APP_NAME"
     ensure_vst_dir
-
-    sudo find "$APP_TMP_DIR" -name "*.vst3" -exec cp -a {} /usr/lib/vst3/ \;
-    sudo find "$APP_TMP_DIR" -name "*.clap" -exec cp -a {} /usr/lib/clap/ \;
-    find "$APP_TMP_DIR" -name "*.vst3" -exec cp -a {} ~/.vst3/ \;
-    find "$APP_TMP_DIR" -name "*.clap" -exec cp -a {} ~/.clap/ \;
-
+    register_vst "$APP_TMP_DIR"
+    
     local APP_BASE_DIR="$BASE/tools/$APP_NAME"
 
     sudo rm -rf "$APP_BASE_DIR"
@@ -3300,17 +3306,19 @@ EOF
             return 0
         }
     
-        mkdir -p "$TMP_DIR/tal"
+        mkdir -p "$TMP_DIR/"
     
-        unzip -q "$TMP_DIR/tal-noisemaker.zip" -d "$TMP_DIR/tal" || {
+        unzip -q "$TMP_DIR/tal-noisemaker.zip" -d "$TMP_DIR/" || {
             echo "⚠️ Extraction failed"
             return 0
         }
     
-        sudo mkdir -p /usr/lib/vst3
+        # sudo mkdir -p /usr/lib/vst3
     
-        find "$TMP_DIR/tal" -name "*.vst3" -exec cp -r {} /usr/lib/vst3/ \;
-    
+        # find "$TMP_DIR/tal" -name "*.vst3" -exec cp -r {} /usr/lib/vst3/ \;
+
+        register_vst "$TMP_DIR/TAL-NoiseMaker
+        
         echo "✅ TAL-NoiseMaker installed"
     '
     
