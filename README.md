@@ -257,9 +257,14 @@ OR
 - Ardour
 - Fami Studio
 - yadaw
-- Hydrogen Drum Machine
-- Revisto Drum Machine
-- Geonkick
+- Plugins
+  - Hydrogen Drum Machine
+  - Revisto Drum Machine
+  - Geonkick
+  - Helm
+  - Sitala
+  - SurgeXT
+  - Dexed
 - rFXGen
 - Natron
 
