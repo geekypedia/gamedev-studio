@@ -3238,37 +3238,28 @@ EOF
         echo "✅ Dexed installed successfully"
     '
     
-    run_step "surge-xt" "Surge XT" "is_installed surge-xt" '
-        API="https://api.github.com/repos/surge-synthesizer/surge/releases/latest"
+   run_step "surge-xt" "Surge XT" "is_installed surge-xt" '
+        API="https://api.github.com/repos/surge-synthesizer/releases-xt/releases/latest"
     
         echo "🌐 Fetching Surge XT latest release..."
     
         URL=$(curl -s "$API" | jq -r "
           .assets[]
-          | select(.name | ascii_downcase | contains(\"linux\"))
-          | select(.name | endswith(\".tar.gz\"))
+          | select(.name | test(\"^surge-xt-linux-x64-.*\\\\.deb$\"))
           | .browser_download_url
         " | head -n1)
     
         if [ -z "$URL" ]; then
-            echo "⚠️ Surge XT Linux build not found"
+            echo "⚠️ Surge XT Linux package not found"
             return 0
         fi
     
-        safe_wget "$URL" "$TMP_DIR/surge-xt.tar.gz" || {
+        safe_wget "$URL" "$TMP_DIR/surge-xt.deb" || {
             echo "⚠️ Surge XT download failed"
             return 0
         }
     
-        mkdir -p "$TMP_DIR/surge"
-    
-        tar -xzf "$TMP_DIR/surge-xt.tar.gz" -C "$TMP_DIR/surge"
-    
-        # sudo mkdir -p /usr/lib/vst3
-    
-        # find "$TMP_DIR/surge" -name "*.vst3" -exec cp -r {} /usr/lib/vst3/ \;
-
-        register_vst_bin surge "bin/Surge XT,bin/surge-xt-cli,bin/Surge XT Effects"
+        sudo apt install -y "$TMP_DIR/surge-xt.deb"
     
         echo "✅ Surge XT installed"
     '
