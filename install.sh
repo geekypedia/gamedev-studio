@@ -453,6 +453,7 @@ add_path_entry_all() {
 ensure_vst_dir(){
     sudo mkdir -p /usr/lib/vst
     sudo mkdir -p /usr/lib/vst3
+    sudo mkdir -p /usr/lib/clap
     mkdir -p ~/.vst
     mkdir -p ~/.vst3
     mkdir -p ~/.clap
@@ -466,6 +467,7 @@ register_vst_bin(){
         ensure_vst_dir
             
         sudo find "$APP_TMP_DIR" -name "*.vst3" -exec cp -r {} /usr/lib/vst3/ \;
+        sudo find "$APP_TMP_DIR" -name "*.clap" -exec cp -r {} /usr/lib/clap/ \;
         find "$APP_TMP_DIR" -name "*.vst3" -exec cp -r {} ~/.vst3/ \;
         find "$APP_TMP_DIR" -name "*.clap" -exec cp -r {} ~/.clap/ \;
          
