@@ -265,6 +265,7 @@ OR
   - Sitala
   - SurgeXT
   - Dexed
+  - TAL-NoiseMaker
 - rFXGen
 - Natron
 
