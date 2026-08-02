@@ -3381,7 +3381,6 @@ EOF
     '
     
 
-
     run_step "famistudio" "FamiStudio" "is_installed famistudio" '
     mkdir -p "$TMP_DIR"
     
@@ -3494,6 +3493,43 @@ EOF
         fi
     
         register_bin yadaw "$YADAW_BIN" "YADAW" "AudioVideo;Audio;"
+    '
+
+    run_step "reaper" "REAPER" "is_installed reaper" '
+        URL="https://www.reaper.fm/files/7.x/reaper778_linux_x86_64.tar.xz"
+    
+        echo "🌐 Downloading REAPER..."
+    
+        safe_wget "$URL" "$TMP_DIR/reaper.tar.xz" || {
+            echo "⚠️ REAPER download failed"
+            return 0
+        }
+    
+        rm -rf "$TMP_DIR/reaper-extract"
+        mkdir -p "$TMP_DIR/reaper-extract"
+    
+        tar -xJf "$TMP_DIR/reaper.tar.xz" -C "$TMP_DIR/reaper-extract"
+    
+        SRC=$(find "$TMP_DIR/reaper-extract" -maxdepth 1 -type d -name "reaper_linux_x86_64*" | head -n1)
+    
+        if [ -z "$SRC" ]; then
+            echo "⚠️ Could not locate extracted REAPER directory"
+            return 0
+        fi
+    
+        rm -rf "$BASE/tools/reaper"
+        mkdir -p "$BASE/tools"
+    
+        mv "$SRC" "$BASE/tools/reaper"
+    
+        chmod +x "$BASE/tools/reaper/install-reaper.sh"
+    
+        (
+            cd "$BASE/tools/reaper"
+            ./install-reaper.sh
+        )
+    
+        echo "✅ REAPER installed"
     '
 
     run_step "rfxgen" "rFXGen" "is_installed rfxgen" '
