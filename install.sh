@@ -1097,6 +1097,7 @@ prep(){
     sudo apt install -y libfuse2
     sudo apt install -y libsdl2-dev
     sudo apt install -y libsdl2-image-dev
+    sudo apt install -y ntfs-3g
     
     # 4. Python Environment (Best to build on top of core compilers)
     sudo apt install -y python3
