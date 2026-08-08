@@ -99,8 +99,8 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 OR
 
 bash
-~/gamedev-studio.sh -u your-package
 ```
+~/gamedev-studio.sh -u your-package
 ```
 
 ##### More usable with -f option
@@ -137,6 +137,10 @@ OR
 
 ```bash
 ~/gamedev-studio.sh -f -sd -u defold
+```
+
+```bash
+~/gamedev-studio.sh -f -sd -u godot,gdevelop
 ```
 
 ---
