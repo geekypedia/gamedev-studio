@@ -52,27 +52,25 @@ for arg in "$@"; do
         --force|-f)
             FORCE_UPDATE=1
             ;;
-
         --skip-downloads|-sd)
             SKIP_DOWNLOADS=1
             ;;
-
         --upgrade)
             RUN_UPGRADE_STEP=1
             ;;
-
         --update|-u)
             EXPECT_UPDATE_VALUE=1
             ;;
-
         --skip|-s)
             EXPECT_SKIP_VALUE=1
             ;;
-
         --list|-l)
             LIST_STEPS=1
             ;;
-
+        --help|-h)
+            echo "Usage: $0 [--force|-f] [--skip-downloads|-sd] [--upgrade] [--update|-u <step>] [--skip|-s <step>] [--list|-l]"
+            exit 0
+            ;;
         *)
             if [[ "$EXPECT_UPDATE_VALUE" -eq 1 ]]; then
                 UPDATE_ONLY="$arg"
@@ -82,12 +80,18 @@ for arg in "$@"; do
                 EXPECT_SKIP_VALUE=0
             else
                 echo "Unknown option: $arg"
-                echo "Usage: $0 [--force|-f] [--upgrade] [--update|-u step_name] [--list|-l]"
+                echo "Usage: $0 [--force|-f] [--skip-downloads|-sd] [--upgrade] [--update|-u <step>] [--skip|-s <step>] [--list|-l]"
                 exit 1
             fi
             ;;
     esac
 done
+
+# Catch dangling flags missing their required arguments
+if [[ "$EXPECT_UPDATE_VALUE" -eq 1 ]] || [[ "$EXPECT_SKIP_VALUE" -eq 1 ]]; then
+    echo "Error: Missing value for --update or --skip option."
+    exit 1
+fi
 
 # -----------------------------
 # GLOBAL VARIABLES
@@ -319,12 +323,34 @@ run_step() {
     fi
     
     # Skip if --update filter is active and doesn't match
+    # if [[ -n "$UPDATE_ONLY" ]]; then
+    #     if ! should_run_step "$NAME"; then
+    #         # echo "⏭ Skipping $NAME (filtered by --update $UPDATE_ONLY)"
+    #         return 0
+    #     fi
+    # fi
+
+    # Skip if --update filter is active and doesn't match
     if [[ -n "$UPDATE_ONLY" ]]; then
-        if ! should_run_step "$NAME"; then
-            # echo "⏭ Skipping $NAME (filtered by --update $UPDATE_ONLY)"
+        IFS=',' read -ra UPDATE_ITEMS <<< "$UPDATE_ONLY"
+    
+        MATCHED=0
+        for item in "${UPDATE_ITEMS[@]}"; do
+            # Trim optional whitespace
+            item="${item#"${item%%[![:space:]]*}"}"
+            item="${item%"${item##*[![:space:]]}"}"
+    
+            if should_run_step "$item" && [[ "$item" == "$NAME" ]]; then
+                MATCHED=1
+                break
+            fi
+        done
+    
+        if [[ "$MATCHED" -eq 0 ]]; then
             return 0
         fi
     fi
+
 
     # Skip if in --skip list
     if [[ -n "$SKIP_LIST" ]]; then
