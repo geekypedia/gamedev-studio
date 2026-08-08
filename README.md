@@ -323,7 +323,7 @@ OR
 | `--force` / `-f` | Reinstall and overwrite all tools |
 | `--skip-downloads` / `-sd` | Skip downloading zip files to temp directory if it already exists (useful in combination with --force/-f |
 | `--upgrade` | Runs system upgrade (`apt upgrade`) before installation |
-| `--update <package>` / `-u <package>` | Runs only a specific installation package (e.g. `godot`, `electron`) |
+| `--update <package>` / `-u <package>` | Runs specific installation package(s) (e.g. `godot,electron`) |
 | `--skip <package(s)>` / `-s <package(s)>` | Skips specific installation package(s) (e.g. `gideros,solar2d`) |
 | `--list` / `-l` | Lists available packages |
 | *(none)* | Safe mode (skip existing installs) |
