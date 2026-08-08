@@ -139,7 +139,7 @@ OR
 ```
 
 
-#### Example
+#### Examples
 
 ```bash
 ~/gamedev-studio.sh -f -u godot
