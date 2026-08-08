@@ -35,6 +35,11 @@ Built for speed, reproducibility, and zero manual setup.
 ## ⚡ One-Line Install
 
 ### 🟢 Standard Install (Recommended)
+```bash
+wget -qO ~/gamedev-studio.sh https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh && chmod +x ~/gamedev-studio.sh && ~/gamedev-studio.sh
+```
+
+OR
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh && ~/gamedev-studio.sh
@@ -43,6 +48,12 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 ### 🟢 Only Download Script (To run it later)
 
 If you just want to download and run it later
+
+```bash
+wget -qO ~/gamedev-studio.sh https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh && chmod +x ~/gamedev-studio.sh
+```
+
+OR
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh
