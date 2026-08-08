@@ -1,3 +1,5 @@
+<a id="top"></a>
+
 # 🎮 Game Dev Studio Installer (Ubuntu)
 
 ![Ubuntu](https://img.shields.io/badge/Ubuntu-24.04%2B-orange)
@@ -14,27 +16,71 @@
 
 ---
 
+## 📑 Table of Contents
+
+- [🚀 Overview](#-overview)
+- [⚡ One-Line Install](#-one-line-install)
+  - [🟢 Standard Install (Recommended)](#-standard-install-recommended)
+  - [🟢 Only Download Script (To run it later)](#-only-download-script-to-run-it-later)
+  - [🔁 Install + System Upgrade](#-install--system-upgrade)
+  - [💥 Force Reinstall (Overwrite Everything)](#-force-reinstall-overwrite-everything)
+  - [⚡ Force + Upgrade (Full System Refresh)](#-force--upgrade-full-system-refresh)
+  - [⬆️ Update a single package](#️-update-a-single-package)
+    - [Examples](#examples)
+  - [📦 List available packages](#-list-available-packages)
+  - [⏭️ Skip packages](#️-skip-packages)
+    - [Example](#example)
+- [🧱 What Gets Installed](#-what-gets-installed)
+  - [🎮 Game Engines](#-game-engines)
+    - [Python / Python-like](#python--python-like)
+    - [Lua](#lua)
+    - [No-Code / Low-Code / Multi-Language / Custom](#no-code--low-code--multi-language--custom)
+    - [.NET/C#/Mono](#netcmono)
+    - [JavaScript / TypeScript](#javascript--typescript)
+    - [Clients/Modding/Console](#clientsmoddingconsole)
+  - [🌐 Web App Stack](#-web-app-stack)
+  - [🎨 Art & Design Tools](#-art--design-tools)
+  - [🎧 Audio / Video Suite](#-audio--video-suite)
+    - [Plugins](#plugins)
+  - [💻 Development Tools](#-development-tools)
+  - [🧩 Level Design Tools](#-level-design-tools)
+  - [🔧 Environment Tools](#-environment-tools)
+  - [🧠 Productivity Tools](#-productivity-tools)
+  - [📦 Publishing Tools](#-publishing-tools)
+- [⚙️ CLI OPTIONS](#️-cli-options)
+- [🧠 Behavior Modes](#-behavior-modes)
+  - [🟢 Safe Mode (Default)](#-safe-mode-default)
+  - [🔁 Upgrade Mode](#-upgrade-mode)
+  - [💥 Force Mode](#-force-mode)
+- [🧪 Recommended Usage](#-recommended-usage)
+- [🧠 Design Philosophy](#-design-philosophy)
+
+---
+
 ## 🚀 Overview
 
 Game Dev Studio Installer is a one-command setup script that transforms a fresh Ubuntu system into a complete **indie game development and creative production workstation**.
 
 It installs a full ecosystem of:
 
-- 🎮 Game engines  
-- 🌐 Web game development stack  
-- 🎨 Art & design tools  
-- 🎧 Audio / video production suite  
-- 💻 Development environment  
-- 📦 Publishing tools  
+- 🎮 Game engines
+- 🌐 Web game development stack
+- 🎨 Art & design tools
+- 🎧 Audio / video production suite
+- 💻 Development environment
+- 📦 Publishing tools
 - 🧩 Game dev pipeline utilities and environment/runtime/build tools
 
 Built for speed, reproducibility, and zero manual setup.
+
+[↑ Back to top](#top)
 
 ---
 
 ## ⚡ One-Line Install
 
 ### 🟢 Standard Install (Recommended)
+
 ```bash
 wget -qO ~/gamedev-studio.sh https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh && chmod +x ~/gamedev-studio.sh && ~/gamedev-studio.sh
 ```
@@ -44,6 +90,8 @@ OR
 ```bash
 curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh && ~/gamedev-studio.sh
 ```
+
+[↑ Back to top](#top)
 
 ### 🟢 Only Download Script (To run it later)
 
@@ -67,6 +115,8 @@ You can run the command whenever you want. You can re-run the command if it brea
 
 Make sure not to run this as sudo because it already uses sudo at appropriate times.
 
+[↑ Back to top](#top)
+
 ---
 
 ### 🔁 Install + System Upgrade
@@ -74,6 +124,9 @@ Make sure not to run this as sudo because it already uses sudo at appropriate ti
 ```bash
 curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh && ~/gamedev-studio.sh --upgrade
 ```
+
+[↑ Back to top](#top)
+
 ---
 
 ### 💥 Force Reinstall (Overwrite Everything)
@@ -81,6 +134,9 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 ```bash
 curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh && ~/gamedev-studio.sh --force
 ```
+
+[↑ Back to top](#top)
+
 ---
 
 ### ⚡ Force + Upgrade (Full System Refresh)
@@ -88,6 +144,9 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 ```bash
 curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh && ~/gamedev-studio.sh --force --upgrade
 ```
+
+[↑ Back to top](#top)
+
 ---
 
 ### ⬆️ Update a single package
@@ -138,7 +197,6 @@ OR
 ~/gamedev-studio.sh -u your-package -f -sd
 ```
 
-
 #### Examples
 
 ```bash
@@ -157,6 +215,7 @@ OR
 ~/gamedev-studio.sh -f -u godot -lk
 ```
 
+[↑ Back to top](#top)
 
 ---
 
@@ -172,6 +231,8 @@ OR
 ~/gamedev-studio.sh -l
 ```
 
+[↑ Back to top](#top)
+
 ---
 
 ### ⏭️ Skip packages
@@ -179,12 +240,12 @@ OR
 ```bash
 ~/gamedev-studio.sh --skip package1,package2
 ```
+
 OR
 
 ```bash
 ~/gamedev-studio.sh -s package1,package2
 ```
-
 
 #### Example
 
@@ -198,14 +259,16 @@ OR
 ~/gamedev-studio.sh -s code,gideros,solar2d
 ```
 
----
+[↑ Back to top](#top)
 
+---
 
 ## 🧱 What Gets Installed
 
 ### 🎮 Game Engines
 
 #### Python / Python-like
+
 - Godot Engine (Python-like GDScript)
 - Ren’Py (Python)
 - Pygame (Python)
@@ -216,6 +279,7 @@ OR
 - Eldiron (Python)
 
 #### Lua
+
 - LÖVE2D (Lua)
 - Defold (Lua)
 - Solarus (Lua)
@@ -223,6 +287,7 @@ OR
 - Gideros Studio (Lua)
 
 #### No-Code / Low-Code / Multi-Language / Custom
+
 - GDevelop (No-code, JavaScript supported)
 - Ct.js (Block-based, JavaScript, CoffeeScript)
 - microStudio (Lua, JavaScript, Python)
@@ -233,21 +298,27 @@ OR
 - GameMaker (GML/JavaScript/TypeScript)
 
 #### .NET/C#/Mono
+
 - Godot Engine .NET (C#)
 
 #### JavaScript / TypeScript
+
 - Phaser
 - ExcaliburJS
 - Babylon.JS
 
 #### Clients/Modding/Console
+
 - Flare
 - Intersect Engine Client and Server (Free MMO RPG Maker)
 - TIC-80
 
+[↑ Back to top](#top)
+
 ---
 
-### 🌐 Web App Stack 
+### 🌐 Web App Stack
+
 - Node.js (via NVM LTS)
 - Vite
 - React
@@ -258,9 +329,12 @@ OR
 - serve
 - SQLite Browser
 
+[↑ Back to top](#top)
+
 ---
 
 ### 🎨 Art & Design Tools
+
 - Blender
 - GIMP
 - Krita
@@ -276,9 +350,12 @@ OR
 - ArmorPaint
 - MakeHuman
 
+[↑ Back to top](#top)
+
 ---
 
 ### 🎧 Audio / Video Suite
+
 - VLC Media Player
 - Kdenlive
 - OBS Studio
@@ -300,38 +377,55 @@ OR
 - rFXGen
 - Natron
 
+[↑ Back to top](#top)
+
 ---
 
 ### 💻 Development Tools
+
 - Git
 - Curl / Wget / jq / unzip
 - VS Code
 - code-server
 - Chromium/Chrome
 
+[↑ Back to top](#top)
+
 ---
 
 ### 🧩 Level Design Tools
+
 - Tiled Map Editor
 - LDtk
+
+[↑ Back to top](#top)
 
 ---
 
 ### 🔧 Environment Tools
+
 - LDtk Sync Tool
 - Godot Export Templates for iOS, Android and Desktop
 - Adventure Game Studio Runtime
 - love.js
 
+[↑ Back to top](#top)
+
 ---
 
 ### 🧠 Productivity Tools
+
 - Obsidian
+
+[↑ Back to top](#top)
 
 ---
 
 ### 📦 Publishing Tools
+
 - itch.io Butler
+
+[↑ Back to top](#top)
 
 ---
 
@@ -348,29 +442,42 @@ OR
 | `--list` / `-l` | Lists available packages |
 | *(none)* | Safe mode (skip existing installs) |
 
+[↑ Back to top](#top)
+
 ---
 
 ## 🧠 Behavior Modes
 
 ### 🟢 Safe Mode (Default)
+
 - Skips already installed tools
 - Installs missing components only
 - No overwriting
 
+[↑ Back to top](#top)
+
 ---
 
 ### 🔁 Upgrade Mode
+
+```bash
 sudo apt upgrade -y
+```
 
 - System-level upgrade only
 - No tool reinstall
 
+[↑ Back to top](#top)
+
 ---
 
 ### 💥 Force Mode
+
 - Reinstalls everything
 - Overwrites binaries and AppImages
 - Useful for broken setups or full resets
+
+[↑ Back to top](#top)
 
 ---
 
@@ -382,6 +489,8 @@ sudo apt upgrade -y
 | Weekly maintenance | `--upgrade` |
 | Broken system | `--force` |
 | Fresh rebuild | `--force --upgrade` |
+
+[↑ Back to top](#top)
 
 ---
 
@@ -395,3 +504,4 @@ This project follows a Workstation-as-Code approach:
 - Minimal user input required
 - Optimized for indie game developers
 
+[↑ Back to top](#top)
