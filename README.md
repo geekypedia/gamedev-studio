@@ -98,8 +98,7 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 
 OR
 
-bash
-```
+```bash
 ~/gamedev-studio.sh -u your-package
 ```
 
