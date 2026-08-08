@@ -1654,14 +1654,14 @@ execute(){
     
     if [ -z "$GODOT_URL" ]; then
         echo "⚠️ Godot download URL not found"
-        return 0
+        return 1
     fi
     
     GODOT_ZIP="$TMP_DIR/godot.zip"
     
     safe_wget "$GODOT_URL" "$GODOT_ZIP" || {
         echo "⚠️ Godot download failed"
-        return 0
+        return 1
     }
     
     rm -rf "$TMP_DIR/godot"
@@ -1669,14 +1669,14 @@ execute(){
     
     unzip -o "$GODOT_ZIP" -d "$TMP_DIR/godot" || {
         echo "⚠️ Godot unzip failed"
-        return 0
+        return 1
     }
     
     GODOT_BIN=$(find "$TMP_DIR/godot" -type f -executable -name "*x86_64*" | head -n 1)
     
     if [ -z "$GODOT_BIN" ]; then
         echo "⚠️ Godot binary not found"
-        return 0
+        return 1
     fi
 
     GODOT_DIR=$(dirname "$GODOT_BIN")
@@ -1702,14 +1702,14 @@ execute(){
     
     if [ -z "$GODOTNET_URL" ]; then
         echo "⚠️ Godot .NET download URL not found"
-        return 0
+        return 1
     fi
     
     GODOTNET_ZIP="$TMP_DIR/godotnet.zip"
     
     safe_wget "$GODOTNET_URL" "$GODOTNET_ZIP" || {
         echo "⚠️ Godot .NET download failed"
-        return 0
+        return 1
     }
     
     rm -rf "$TMP_DIR/godotnet"
@@ -1717,14 +1717,14 @@ execute(){
     
     unzip -o "$GODOTNET_ZIP" -d "$TMP_DIR/godotnet" || {
         echo "⚠️ Godot .NET unzip failed"
-        return 0
+        return 1
     }
     
     GODOTNET_BIN=$(find "$TMP_DIR/godotnet" -type f -executable -name "*x86_64*" | head -n 1)
     
     if [ -z "$GODOTNET_BIN" ]; then
         echo "⚠️ Godot .NET binary not found"
-        return 0
+        return 1
     fi
 
     GODOTNET_DIR=$(dirname "$GODOTNET_BIN")
@@ -1754,14 +1754,14 @@ execute(){
     
     if [ -z "$GODOT3_URL" ]; then
         echo "⚠️ Godot3 download URL not found"
-        return 0
+        return 1
     fi
     
     GODOT3_ZIP="$TMP_DIR/godot3.zip"
     
     safe_wget "$GODOT3_URL" "$GODOT3_ZIP" || {
         echo "⚠️ Godot3 download failed"
-        return 0
+        return 1
     }
     
     rm -rf "$TMP_DIR/godot3"
@@ -1769,14 +1769,14 @@ execute(){
     
     unzip -o "$GODOT3_ZIP" -d "$TMP_DIR/godot3" || {
         echo "⚠️ Godot3 unzip failed"
-        return 0
+        return 1
     }
     
     GODOT3_BIN=$(find "$TMP_DIR/godot3" -type f -executable -name "*x11.64*" | head -n 1)
     
     if [ -z "$GODOT3_BIN" ]; then
         echo "⚠️ Godot3 binary not found"
-        return 0
+        return 1
     fi
 
     GODOT3_DIR=$(dirname "$GODOT3_BIN")
@@ -1869,7 +1869,7 @@ execute(){
         echo "⚠️ No export templates found in GitHub releases"
         echo "📦 Available assets (first release):"
         echo "$RELEASE_JSON" | jq -r ".[0].assets[].name? // empty"
-        return 0
+        return 1
     fi
     
     echo "⬇️ Downloading: $TEMPLATE_URL"
@@ -1878,14 +1878,14 @@ execute(){
     
     safe_wget "$TEMPLATE_URL" "$TEMPLATE_FILE" || {
         echo "⚠️ Download failed"
-        return 0
+        return 1
     }
     
     mkdir -p "$TEMPLATE_DIR"
     
     unzip -o "$TEMPLATE_FILE" -d "$TEMPLATE_DIR" || {
         echo "⚠️ Unzip failed"
-        return 0
+        return 1
     }
     
     echo "✅ Installed Godot templates for $VERSION"
@@ -1904,7 +1904,7 @@ execute(){
     
     if [ -z "$GDEV_URL" ]; then
         echo "⚠️ Could not find x86_64 AppImage"
-        return 0
+        return 1
     fi
 
     GDEV_BASE="/opt/gamedev/engines/gdevelop"
@@ -1917,7 +1917,7 @@ execute(){
     
     safe_wget "$GDEV_URL" "$GDEV_PATH" || {
         echo "⚠️ GDevelop download failed"
-        return 0
+        return 1
     }
     
     extract_appimage_icon /opt/gamedev/engines/gdevelop/gdevelop.AppImage
@@ -1938,7 +1938,7 @@ execute(){
     
     if [ -z "$CT_URL" ]; then
       echo "⚠️ Could not find ct.js Linux x64 ZIP"
-      return 0
+      return 1
     fi
     
     CT_ZIP="$TMP_DIR/ctjs.zip"
@@ -1947,7 +1947,7 @@ execute(){
     
     safe_wget "$CT_URL" "$CT_ZIP" || {
       echo "⚠️ ct.js download failed"
-      return 0
+      return 1
     }
     
     rm -rf "$CT_TMP"
@@ -1955,7 +1955,7 @@ execute(){
     
     unzip -o "$CT_ZIP" -d "$CT_TMP" || {
       echo "⚠️ Failed to extract ct.js"
-      return 0
+      return 1
     }
     
     # Find binary in temp
@@ -1963,7 +1963,7 @@ execute(){
     
     if [ -z "$CT_BIN" ]; then
       echo "⚠️ ct.js executable not found"
-      return 0
+      return 1
     fi
     
     # Move full extracted folder into /opt
@@ -1975,7 +1975,7 @@ execute(){
     
     if [ -z "$CT_BIN_FINAL" ]; then
       echo "⚠️ ct.js binary missing after install move"
-      return 0
+      return 1
     fi
     
     copy_ctjs_icon "$CT_INSTALL"
@@ -2012,7 +2012,7 @@ execute(){
     
     if [ -z "$RENPY_URL" ]; then
         echo "⚠️ Could not find RenPy SDK"
-        return 0
+        return 1
     fi
     
     echo "⬇️ RenPy URL: $RENPY_URL"
@@ -2021,7 +2021,7 @@ execute(){
     
     safe_wget "$RENPY_URL" "$OUT" || {
         echo "⚠️ RenPy download failed"
-        return 0
+        return 1
     }
     
     rm -rf /opt/gamedev/engines/renpy
@@ -2030,12 +2030,12 @@ execute(){
     if [ "$EXT" = "tar.bz2" ]; then
         tar -xvjf "$OUT" -C /opt/gamedev/engines/renpy || {
             echo "⚠️ Extraction failed (tar.bz2)"
-            return 0
+            return 1
         }
     else
         unzip -o "$OUT" -d /opt/gamedev/engines/renpy || {
             echo "⚠️ Extraction failed (zip)"
-            return 0
+            return 1
         }
     fi
     
@@ -2043,7 +2043,7 @@ execute(){
     
     if [ -z "$RENPY_LAUNCHER" ]; then
         echo "⚠️ renpy.sh not found"
-        return 0
+        return 1
     fi
     
     register_bin renpy "$RENPY_LAUNCHER" "RenPy"
@@ -2075,7 +2075,7 @@ execute(){
     
             sudo snap install twinejs || {
                 echo "⚠️ Twine Snap install failed"
-                return 0
+                return 1
             }
     
             echo "✅ Twine installed via Snap"
@@ -2091,7 +2091,7 @@ execute(){
             "https://github.com/inkle/inky/releases/latest/download/Inky_linux.zip" \
             "$INKY_ZIP" || {
             echo "⚠️ Inky download failed"
-            return 0
+            return 1
         }
     
         rm -rf "$TMP_DIR"/Inky
@@ -2099,14 +2099,14 @@ execute(){
     
         unzip -o "$INKY_ZIP" -d "$TMP_DIR"/Inky || {
             echo "⚠️ Inky unzip failed"
-            return 0
+            return 1
         }
     
         INKY_DIR="$TMP_DIR"/Inky
     
         if [ ! -d "$INKY_DIR" ]; then
             echo "⚠️ Inky directory not found"
-            return 0
+            return 1
         fi
     
         rm -rf /opt/gamedev/engines/Inky
@@ -2185,12 +2185,12 @@ execute(){
     
             if [ -z "$APPIMAGE_URL" ]; then
                 echo "⚠️ No AppImage found in latest release of TuesdayJS"
-                return 0
+                return 1
             fi
     
             safe_wget "$APPIMAGE_URL" "$TMP_APPIMAGE" || {
                 echo "⚠️ TuesdayJS AppImage download failed"
-                return 0
+                return 1
             }
     
             sudo mkdir -p "$INSTALL_DIR"
@@ -2223,14 +2223,14 @@ execute(){
     if [ -z "$DEB_URL" ]; then
         echo "⚠️ microStudio Linux DEB not found"
         curl -s "$API" | jq -r ".assets[].name"
-        return 0
+        return 1
     fi
     
     echo "⬇️ Downloading: $DEB_URL"
     
     safe_wget "$DEB_URL" "$TMP_DIR/microstudio.deb" || {
         echo "⚠️ Download failed"
-        return 0
+        return 1
     }
     
     echo "📦 Installing microStudio..."
@@ -2239,7 +2239,7 @@ execute(){
         echo "⚠️ dpkg failed, fixing dependencies..."
         sudo apt install -f -y || {
             echo "⚠️ dependency fix failed"
-            return 0
+            return 1
         }
     }
     
@@ -2255,7 +2255,7 @@ execute(){
         "https://github.com/defold/defold/releases/latest/download/Defold-x86_64-linux.zip" \
         "$DEFOLD_ZIP" || {
         echo "⚠️ Defold download failed"
-        return 0
+        return 1
     }
     
     rm -rf "$TMP_DIR/defold"
@@ -2263,14 +2263,14 @@ execute(){
     
     unzip -o "$DEFOLD_ZIP" -d "$TMP_DIR/defold" || {
         echo "⚠️ Defold unzip failed"
-        return 0
+        return 1
     }
     
     DEFOLD_DIR=$(find "$TMP_DIR/defold" -maxdepth 1 -type d -name "Defold" | head -n 1)
     
     if [ -z "$DEFOLD_DIR" ]; then
         echo "⚠️ Defold directory not found"
-        return 0
+        return 1
     fi
     
     rm -rf /opt/gamedev/engines/Defold
@@ -2303,7 +2303,7 @@ EOF
         "https://github.com/gideros/gideros/releases/latest/download/Gideros.tar.xz" \
         "$GIDEROS_ARCHIVE" || {
         echo "⚠️ Gideros download failed"
-        return 0
+        return 1
     }
     
     rm -rf "$TMP_DIR/gideros"
@@ -2311,14 +2311,14 @@ EOF
     
     tar -xvJf "$GIDEROS_ARCHIVE" -C "$TMP_DIR/gideros" || {
         echo "⚠️ Gideros extraction failed"
-        return 0
+        return 1
     }
     
     GIDEROS_DIR=$(find "$TMP_DIR/gideros" -maxdepth 1 -type d -name "Gideros Studio" | head -n 1)
     
     if [ -z "$GIDEROS_DIR" ]; then
         echo "⚠️ Gideros Studio directory not found"
-        return 0
+        return 1
     fi
     
     rm -rf /opt/gamedev/engines/Gideros
@@ -2375,12 +2375,12 @@ EOF
     
     safe_wget "$EDITOR_URL" "$EDITOR_TAR" || {
       echo "⚠️ Solarus Editor download failed"
-      return 0
+      return 1
     }
     
     safe_wget "$LAUNCHER_URL" "$LAUNCHER_TAR" || {
       echo "⚠️ Solarus Launcher download failed"
-      return 0
+      return 1
     }
     
     rm -rf "$APP_DIR"
@@ -2388,12 +2388,12 @@ EOF
     
     tar -xzf "$EDITOR_TAR" -C "$APP_DIR/editor" || {
       echo "⚠️ Solarus Editor extraction failed"
-      return 0
+      return 1
     }
     
     tar -xzf "$LAUNCHER_TAR" -C "$APP_DIR/launcher" || {
       echo "⚠️ Solarus Launcher extraction failed"
-      return 0
+      return 1
     }
     
     EDITOR_BIN=$(find "$APP_DIR/editor" -type f -name "*.AppImage" | head -n1)
@@ -2402,13 +2402,13 @@ EOF
     if [ -z "$EDITOR_BIN" ]; then
       echo "⚠️ Could not locate Solarus Editor AppImage"
       find "$APP_DIR/editor" -type f | head -50
-      return 0
+      return 1
     fi
     
     if [ -z "$LAUNCHER_BIN" ]; then
       echo "⚠️ Could not locate Solarus Launcher AppImage"
       find "$APP_DIR/launcher" -type f | head -50
-      return 0
+      return 1
     fi
     
     chmod +x "$EDITOR_BIN" "$LAUNCHER_BIN"
@@ -2438,14 +2438,14 @@ EOF
     
     if [ -z "$DEB_URL" ]; then
         echo "⚠️ No Eldiron .deb found in releases"
-        return 0
+        return 1
     fi
     
     echo "⬇️ Downloading: $DEB_URL"
     
     safe_wget "$DEB_URL" "$TMP_DIR/eldiron.deb" || {
         echo "⚠️ Download failed"
-        return 0
+        return 1
     }
     
     echo "📦 Installing Eldiron..."
@@ -2454,12 +2454,12 @@ EOF
         echo "⚠️ dpkg failed, fixing dependencies..."
         sudo apt install -f -y || {
             echo "⚠️ dependency fix failed"
-            return 0
+            return 1
         }
     
         sudo dpkg -i "$TMP_DIR/eldiron.deb" || {
             echo "⚠️ installation failed"
-            return 0
+            return 1
         }
     }
     '
@@ -2480,14 +2480,14 @@ EOF
     if [ -z "$DEB_URL" ]; then
         echo "⚠️ GB Studio Linux DEB not found"
         curl -s "$API" | jq -r ".assets[].name"
-        return 0
+        return 1
     fi
     
     echo "⬇️ Downloading: $DEB_URL"
     
     safe_wget "$DEB_URL" "$TMP_DIR/gbstudio.deb" || {
         echo "⚠️ Download failed"
-        return 0
+        return 1
     }
     
     echo "📦 Installing GB Studio..."
@@ -2496,12 +2496,12 @@ EOF
         echo "⚠️ dpkg failed, fixing dependencies..."
         sudo apt install -f -y || {
             echo "⚠️ dependency fix failed"
-            return 0
+            return 1
         }
     
         sudo dpkg -i "$TMP_DIR/gbstudio.deb" || {
             echo "⚠️ installation failed"
-            return 0
+            return 1
         }
     }
     '
@@ -2521,14 +2521,14 @@ EOF
         if [ -z "$DEB_URL" ]; then
             echo "⚠️ Adventure Game Studio Runtime AMD64 DEB not found"
             curl -s "$API" | jq -r ".assets[].name"
-            return 0
+            return 1
         fi
         
         echo "⬇️ Downloading: $DEB_URL"
         
         safe_wget "$DEB_URL" "$TMP_DIR/ags.deb" || {
             echo "⚠️ Download failed"
-            return 0
+            return 1
         }
         
         echo "📦 Installing Adventure Game Studio Runtime..."
@@ -2537,7 +2537,7 @@ EOF
             echo "⚠️ dpkg failed, fixing dependencies..."
             sudo apt install -f -y || {
                 echo "⚠️ dependency fix failed"
-                return 0
+                return 1
             }
         }
         
@@ -2551,7 +2551,7 @@ EOF
         
         if [ -z "$BABYLON_URL" ]; then
             echo "⚠️ Could not find x86_64 AppImage"
-            return 0
+            return 1
         fi
     
         safe_exists "$BABYLON_PATH" || {
@@ -2561,7 +2561,7 @@ EOF
         
         safe_wget "$BABYLON_URL" "$BABYLON_PATH" || {
             echo "⚠️ Download failed"
-            return 0
+            return 1
         }
         
         extract_appimage_icon "$BABYLON_PATH"
@@ -2621,7 +2621,7 @@ EOF
     '
 
     run_step "flare" "Flare RPG Game Engine" "command -v flare >/dev/null 2>&1"'
-        sudo apt install flare flare-game flare-engine
+        sudo apt install -y flare flare-game flare-engine
     '
 
     run_step "intersect" "Intersect Engine" "is_installed intersect-client intersect-server" '
@@ -2651,7 +2651,7 @@ EOF
     
         safe_wget "$ZIP_URL" "$INTERSECT_ZIP" || {
             echo "⚠️ Intersect Engine download failed"
-            return 0
+            return 1
         }
     
         rm -rf "$TMP_DIR/intersect"
@@ -2659,7 +2659,7 @@ EOF
     
         unzip -o "$INTERSECT_ZIP" -d "$TMP_DIR/intersect" || {
             echo "⚠️ Intersect Engine unzip failed"
-            return 0
+            return 1
         }
     
         rm -rf /opt/gamedev/engines/Intersect
@@ -2718,7 +2718,7 @@ EOF
     
         safe_wget "$DEB_URL" "$TMP_DIR/tic80.deb" || {
             echo "⚠️ Download failed"
-            return 0
+            return 1
         }
     
         echo "📦 Installing TIC-80..."
@@ -2727,7 +2727,7 @@ EOF
             echo "⚠️ dpkg failed, fixing dependencies..."
             sudo apt install -f -y || {
                 echo "⚠️ dependency fix failed"
-                return 0
+                return 1
             }
         }
     
@@ -2815,7 +2815,7 @@ EOF
     
     if [ -z "$PIXEL_URL" ]; then
         echo "⚠️ Could not find Pixelorama Linux 64bit tar.gz"
-        return 0
+        return 1
     fi
     
     echo "⬇️ Pixelorama URL: $PIXEL_URL"
@@ -2825,7 +2825,7 @@ EOF
     
     safe_wget "$PIXEL_URL" "$PIXEL_ARCHIVE" || {
         echo "⚠️ Pixelorama download failed"
-        return 0
+        return 1
     }
     
     rm -rf "$PIXEL_DIR"
@@ -2833,14 +2833,14 @@ EOF
     
     tar -xzf "$PIXEL_ARCHIVE" -C "$PIXEL_DIR" || {
         echo "⚠️ Extraction failed"
-        return 0
+        return 1
     }
     
     PIXEL_BIN=$(find "$PIXEL_DIR" -type f -name "Pixelorama*" -executable | head -n1)
     
     if [ -z "$PIXEL_BIN" ]; then
         echo "⚠️ Pixelorama binary not found"
-        return 0
+        return 1
     fi
     
     register_bin pixelorama "$PIXEL_BIN" "Pixelorama" "Graphics;"
@@ -2870,7 +2870,7 @@ EOF
     
     safe_wget "$ZIP_URL" "$LIBRE_ZIP" || {
         echo "⚠️ LibreSprite download failed"
-        return 0
+        return 1
     }
     
     rm -rf "$LIBRE_DIR"
@@ -2878,7 +2878,7 @@ EOF
     
     unzip -o "$LIBRE_ZIP" -d "$LIBRE_DIR" || {
         echo "⚠️ Extraction failed"
-        return 0
+        return 1
     }
     
     # Find actual AppImage inside extracted folder
@@ -2886,7 +2886,7 @@ EOF
     
     if [ -z "$LS_BIN" ]; then
         echo "⚠️ LibreSprite AppImage not found after extraction"
-        return 0
+        return 1
     fi
     
     register_bin libresprite "$LS_BIN" "LibreSprite" "Graphics;"
@@ -2913,14 +2913,14 @@ EOF
     
         if [ -z "$EFK_URL" ]; then
           echo "⚠️ Could not find Effekseer Linux build"
-          return 0
+          return 1
         fi
     
         safe_wget \
             "$EFK_URL" \
             "$EFK_ZIP" || {
             echo "⚠️ Effekseer download failed"
-            return 0
+            return 1
         }
     
         rm -rf "$TMP_DIR"/Effekseer
@@ -2928,7 +2928,7 @@ EOF
     
         unzip -o "$EFK_ZIP" -d "$TMP_DIR"/Effekseer || {
             echo "⚠️ Effekseer unzip failed"
-            return 0
+            return 1
         }
     
         EFK_BASE_DIR="$TMP_DIR"/Effekseer
@@ -2936,7 +2936,7 @@ EOF
     
         if [ ! -d "$EFK_DIR" ]; then
             echo "⚠️ Effekseer directory not found"
-            return 0
+            return 1
         fi
     
         rm -rf /opt/gamedev/tools/Effekseer
@@ -2992,7 +2992,7 @@ EOF
                 "https://github.com/odrick/free-tex-packer/releases/download/v0.6.7/FreeTexturePacker-x86_64.AppImage" \
                 "$TMP_APPIMAGE" || {
                 echo "⚠️ AppImage download failed"
-                return 0
+                return 1
             }
     
             sudo mkdir -p "$INSTALL_DIR"
@@ -3023,7 +3023,7 @@ EOF
     
             flatpak install -y flathub org.synfig.SynfigStudio || {
                 echo "⚠️ Synfig Studio Flatpak install failed"
-                return 0
+                return 1
             }
     
             echo "✅ Synfig Studio installed via Flathub"
@@ -3064,7 +3064,7 @@ EOF
     
                 sudo snap install opentoonz || {
                     echo "⚠️ OpenToonz Snap install failed"
-                    return 0
+                    return 1
                 }
     
                 echo "✅ OpenToonz installed via Snap"
@@ -3134,7 +3134,7 @@ EOF
             ARMORPAINT_BIN="$ARMORPAINT_BIN_BASE"/ArmorPaint
             if [[ -z "$ARMORPAINT_BIN" ]]; then
                 echo "❌ ArmorPaint binary not found at all"
-                return 0
+                return 1
             fi
             
         fi
@@ -3216,14 +3216,14 @@ EOF
             echo "⚠️ Dexed Linux build not found"
             echo "Available assets:"
             curl -s "$API" | jq -r ".assets[].name"
-            return 0
+            return 1
         fi
     
         echo "⬇️ Downloading: $DEXED_URL"
     
         safe_wget "$DEXED_URL" "$TMP_DIR/dexed.zip" || {
             echo "⚠️ Dexed download failed"
-            return 0
+            return 1
         }
     
         rm -rf "$TMP_DIR/dexed"
@@ -3231,7 +3231,7 @@ EOF
     
         unzip -q "$TMP_DIR/dexed.zip" -d "$TMP_DIR/dexed" || {
             echo "⚠️ Dexed extraction failed"
-            return 0
+            return 1
         }
 
         register_vst_bin dexed Dexed
@@ -3252,12 +3252,12 @@ EOF
     
         if [ -z "$URL" ]; then
             echo "⚠️ Surge XT Linux package not found"
-            return 0
+            return 1
         fi
     
         safe_wget "$URL" "$TMP_DIR/surge-xt.deb" || {
             echo "⚠️ Surge XT download failed"
-            return 0
+            return 1
         }
     
         sudo apt install -y "$TMP_DIR/surge-xt.deb"
@@ -3272,7 +3272,7 @@ EOF
     
         safe_wget "$URL" "$TMP_DIR/helm.deb" || {
             echo "⚠️ Helm download failed"
-            return 0
+            return 1
         }
     
         echo "📦 Installing Helm..."
@@ -3295,14 +3295,14 @@ EOF
     
         safe_wget "$URL" "$TMP_DIR/tal-noisemaker.zip" || {
             echo "⚠️ Download failed"
-            return 0
+            return 1
         }
     
         mkdir -p "$TMP_DIR/"
     
         unzip -q "$TMP_DIR/tal-noisemaker.zip" -d "$TMP_DIR/" || {
             echo "⚠️ Extraction failed"
-            return 0
+            return 1
         }
     
         # sudo mkdir -p /usr/lib/vst3
@@ -3321,7 +3321,7 @@ EOF
     
         safe_wget "$URL" "$TMP_DIR/sitala.deb" || {
             echo "⚠️ Download failed"
-            return 0
+            return 1
         }
     
         echo "📦 Installing Sitala..."
@@ -3344,7 +3344,7 @@ EOF
 
         safe_wget "$URL" "$TMP_DIR/odin2.deb" || {
             echo "⚠️ Odin 2 download failed"
-            return 0
+            return 1
         }
 
         echo "📦 Installing Odin 2..."
@@ -3362,23 +3362,35 @@ EOF
     
 
     run_step "zynaddsubfx" "zynaddsubfx" "is_installed zynaddsubfx" '
-        sudo apt install -y zynaddsubfx || echo "⚠️ zynaddsubfx install failed"
+        sudo apt install -y zynaddsubfx || {
+            echo "⚠️ zynaddsubfx install failed"
+            return 1
+        }
     '
     
     run_step "drumgizmo" "DrumGizmo" "is_installed drumgizmo" '
-        sudo apt install -y drumgizmo || echo "⚠️ DrumGizmo install failed"
+        sudo apt install -y drumgizmo || {
+            echo "⚠️ DrumGizmo install failed"
+            return 1
+        }
     '
     
     run_step "geonkick" "Geonkick" "is_installed geonkick" '
-        sudo apt install -y geonkick || echo "⚠️ Geonkick install failed"
+        sudo apt install -y geonkick || {
+            echo "⚠️ Geonkick install failed"
+            return 1
+        }            
     '
 
     run_step "calf-plugins" "Calf Plugins" "is_installed calfjackhost" '
-        sudo apt install -y calf-plugins || echo "⚠️ Calf Plugins install failed"
+        sudo apt install -y calf-plugins || {
+            echo "⚠️ Calf Plugins install failed"
+            return 1
+        }
     '
 
     run_step "drum-machine" "Revisto Drum Machine" "is_ok drum-machine" '
-    flatpak install -y flathub io.github.revisto.drum-machine || true
+        flatpak install -y flathub io.github.revisto.drum-machine || true
     '
 
     run_step "lsp" "Linux Studio Plugins (LSP)" "is_installed lsp" '
@@ -3389,19 +3401,31 @@ EOF
     '
     
     run_step "fluidsynth" "FluidSynth" "is_installed fluidsynth" '
-        sudo apt install -y fluidsynth || echo "⚠️ FluidSynth install failed"
+        sudo apt install -y fluidsynth || {
+            echo "⚠️ FluidSynth install failed"
+            return 1
+        }
     '
 
     run_step "qsynth" "QSynth" "is_installed qsynth" '
-        sudo apt install -y qsynth || echo "⚠️ QSynth install failed"
+        sudo apt install -y qsynth || {
+            echo "⚠️ QSynth install failed"
+            return 1
+        }
     '    
 
     run_step "fluid-soundfont-gm" "Fluid GM SoundFont" "dpkg -s fluid-soundfont-gm >/dev/null 2>&1" '
-        sudo apt install -y fluid-soundfont-gm || echo "⚠️ Fluid GM SoundFont install failed"
-    '
+        sudo apt install -y fluid-soundfont-gm || {
+            echo "⚠️ Fluid GM SoundFont install failed"
+            return 1
+        }
+'
 
     run_step "yoshimi" "Yoshimi" "is_installed yoshimi" '
-        sudo apt install -y yoshimi || echo "⚠️ Yoshimi install failed"
+        sudo apt install -y yoshimi || {
+            echo "⚠️ Yoshimi install failed"
+            return 1
+        }
     '
     
 
@@ -3427,14 +3451,14 @@ EOF
     
     if [ -z "$FAMI_URL" ]; then
       echo "⚠️ Could not find FamiStudio Linux build"
-      return 0
+      return 1
     fi
     
     safe_wget \
         "$FAMI_URL" \
         "$FAMI_ZIP" || {
         echo "⚠️ FamiStudio download failed"
-        return 0
+        return 1
     }
     
     rm -rf "$TMP_DIR"/FamiStudio
@@ -3442,14 +3466,14 @@ EOF
     
     unzip -o "$FAMI_ZIP" -d "$TMP_DIR"/FamiStudio || {
         echo "⚠️ FamiStudio unzip failed"
-        return 0
+        return 1
     }
     
     FAMI_DIR="$TMP_DIR"/FamiStudio
     
     if [ ! -d "$FAMI_DIR" ]; then
         echo "⚠️ FamiStudio directory not found"
-        return 0
+        return 1
     fi
     
     rm -rf /opt/gamedev/tools/FamiStudio
@@ -3484,14 +3508,14 @@ EOF
     
         if [ -z "$YADAW_URL" ]; then
           echo "⚠️ Could not find YADAW Linux x86_64 build"
-          return 0
+          return 1
         fi
     
         safe_wget \
             "$YADAW_URL" \
             "$YADAW_TAR" || {
             echo "⚠️ YADAW download failed"
-            return 0
+            return 1
         }
     
         rm -rf "$TMP_DIR"/yadaw
@@ -3499,7 +3523,7 @@ EOF
     
         tar -xzf "$YADAW_TAR" -C "$TMP_DIR"/yadaw || {
             echo "⚠️ YADAW extraction failed"
-            return 0
+            return 1
         }
     
         YADAW_DIR="$TMP_DIR"/yadaw
@@ -3513,7 +3537,7 @@ EOF
     
         if [ ! -x "$YADAW_BIN" ]; then
             echo "⚠️ YADAW binary not found"
-            return 0
+            return 1
         fi
     
         register_bin yadaw "$YADAW_BIN" "YADAW" "AudioVideo;Audio;"
@@ -3526,7 +3550,7 @@ EOF
     
         safe_wget "$URL" "$TMP_DIR/reaper.tar.xz" || {
             echo "⚠️ REAPER download failed"
-            return 0
+            return 1
         }
     
         rm -rf "$TMP_DIR/reaper-extract"
@@ -3538,7 +3562,7 @@ EOF
     
         if [ -z "$SRC" ]; then
             echo "⚠️ Could not locate extracted REAPER directory"
-            return 0
+            return 1
         fi
     
         rm -rf "$BASE/tools/reaper"
@@ -3578,14 +3602,14 @@ EOF
     
         if [ -z "$RFX_URL" ]; then
           echo "⚠️ Could not find rFXGen Linux build"
-          return 0
+          return 1
         fi
     
         safe_wget \
             "$RFX_URL" \
             "$RFX_ZIP" || {
             echo "⚠️ rFXGen download failed"
-            return 0
+            return 1
         }
     
         rm -rf "$TMP_DIR"/rFXGen
@@ -3593,7 +3617,7 @@ EOF
     
         unzip -o "$RFX_ZIP" -d "$TMP_DIR"/rFXGen || {
             echo "⚠️ rFXGen unzip failed"
-            return 0
+            return 1
         }
     
         RFX_BASE_DIR="$TMP_DIR"/rFXGen
@@ -3601,7 +3625,7 @@ EOF
     
         if [ ! -d "$RFX_DIR" ]; then
             echo "⚠️ rFXGen directory not found"
-            return 0
+            return 1
         fi
     
         rm -rf /opt/gamedev/tools/rFXGen
@@ -3645,7 +3669,7 @@ EOF
     
             flatpak install -y flathub fr.natron.Natron || {
                 echo "⚠️ Natron Flatpak install failed"
-                return 0
+                return 1
             }
     
             echo "✅ Natron installed via Flathub"
@@ -3662,7 +3686,7 @@ EOF
     
     sudo apt install -y tiled || {
         echo "⚠️ Failed to install Tiled via apt"
-        return 0
+        return 1
     }
     
     echo "🧭 Verifying installation..."
@@ -3670,6 +3694,7 @@ EOF
         echo "✅ Tiled installed successfully"
     else
         echo "⚠️ Tiled installed but binary not found"
+        return 1
     fi
     '
     
@@ -3687,7 +3712,7 @@ EOF
     
     if [ -z "$LDTK_URL" ]; then
       echo "⚠️ Could not find LDtk Linux build"
-      return 0
+      return 1
     fi
     
     echo "⬇️ LDtk URL: $LDTK_URL"
@@ -3697,7 +3722,7 @@ EOF
     
     safe_wget "$LDTK_URL" "$LDTK_ZIP" || {
       echo "⚠️ LDtk download failed"
-      return 0
+      return 1
     }
     
     rm -rf "$LDTK_DIR"
@@ -3705,7 +3730,7 @@ EOF
     
     unzip -o "$LDTK_ZIP" -d "$LDTK_DIR" || {
       echo "⚠️ LDtk unzip failed"
-      return 0
+      return 1
     }
     
     # First try obvious executable names
@@ -3725,7 +3750,7 @@ EOF
       echo "⚠️ Could not locate LDtk executable"
       echo "Contents of extracted folder:"
       find "$LDTK_DIR" -type f | head -50
-      return 0
+      return 1
     fi
     
     extract_appimage_icon "$LDTK_BIN" 
@@ -3772,14 +3797,14 @@ EOF
     
     if [ -z "$OBSIDIAN_URL" ]; then
       echo "⚠️ Could not find Obsidian AppImage"
-      return 0
+      return 1
     fi
     
     mkdir -p /opt/gamedev/tools/obsidian
     
     safe_wget "$OBSIDIAN_URL" /opt/gamedev/tools/obsidian/obsidian.AppImage || {
       echo "⚠️ Obsidian download failed"
-      return 0
+      return 1
     }
     
     register_bin obsidian /opt/gamedev/tools/obsidian/obsidian.AppImage "Obsidian" "Office;"
@@ -3813,7 +3838,7 @@ EOF
     
     if [ -z "$BUTLER_SOURCE" ]; then
       echo "⚠️ Failed to download Butler from all mirrors"
-      return 0
+      return 1
     fi
     
     rm -rf "$BUTLER_TMP"
@@ -3821,14 +3846,14 @@ EOF
     
     unzip -o "$BUTLER_ZIP" -d "$BUTLER_TMP" || {
       echo "⚠️ Failed to extract Butler"
-      return 0
+      return 1
     }
     
     BUTLER_BIN=$(find "$BUTLER_TMP" -type f -name "butler" -executable | head -n1)
     
     if [ -z "$BUTLER_BIN" ]; then
       echo "⚠️ Could not locate Butler executable"
-      return 0
+      return 1
     fi
     
     mkdir -p "$INSTALL_DIR"
