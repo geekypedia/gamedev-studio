@@ -334,19 +334,18 @@ run_step() {
     if [[ -n "$UPDATE_ONLY" ]]; then
         IFS=',' read -ra UPDATE_ITEMS <<< "$UPDATE_ONLY"
     
-        MATCHED=0
-        for item in "${UPDATE_ITEMS[@]}"; do
-            # Trim optional whitespace
-            item="${item#"${item%%[![:space:]]*}"}"
-            item="${item%"${item##*[![:space:]]}"}"
+        UPDATE_MATCH=0
     
-            if should_run_step "$item" && [[ "$item" == "$NAME" ]]; then
-                MATCHED=1
-                break
+        for item in "${UPDATE_ITEMS[@]}"; do
+            if ( UPDATE_ONLY="$item"; ! should_run_step "$NAME" ); then
+                continue
             fi
+    
+            UPDATE_MATCH=1
+            break
         done
     
-        if [[ "$MATCHED" -eq 0 ]]; then
+        if [[ "$UPDATE_MATCH" -eq 0 ]]; then
             return 0
         fi
     fi
