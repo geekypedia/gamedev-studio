@@ -64,11 +64,14 @@ for arg in "$@"; do
         --skip|-s)
             EXPECT_SKIP_VALUE=1
             ;;
+        --like|-lk)
+            LIKE_SEARCH=1
+            ;;
         --list|-l)
             LIST_STEPS=1
             ;;
         --help|-h)
-            echo "Usage: $0 [--force|-f] [--skip-downloads|-sd] [--upgrade] [--update|-u <step>] [--skip|-s <step>] [--list|-l]"
+            echo "Usage: $0 [--force|-f] [--skip-downloads|-sd] [--upgrade] [--update|-u <step>] [--skip|-s <step>] [--like|-lk] [--list|-l]"
             exit 0
             ;;
         *)
@@ -80,7 +83,7 @@ for arg in "$@"; do
                 EXPECT_SKIP_VALUE=0
             else
                 echo "Unknown option: $arg"
-                echo "Usage: $0 [--force|-f] [--skip-downloads|-sd] [--upgrade] [--update|-u <step>] [--skip|-s <step>] [--list|-l]"
+                echo "Usage: $0 [--force|-f] [--skip-downloads|-sd] [--upgrade] [--update|-u <step>] [--skip|-s <step>] [--like|-lk] [--list|-l]"
                 exit 1
             fi
             ;;
@@ -305,9 +308,14 @@ should_run_step() {
 
     # if no filter → run everything
     [[ -z "$UPDATE_ONLY" ]] && return 0
-
-    # match step name (case-insensitive, partial match safe)
-    echo "$STEP_NAME" | grep -qi "$UPDATE_ONLY"
+    
+    if [[ -n "$LIKE_SEARCH" ]]; then
+        # match step name (case-insensitive, partial match)
+        echo "$STEP_NAME" | grep -qi "$UPDATE_ONLY"
+    else
+        # exact step name match, case-insensitive
+        [[ "${STEP_NAME,,}" == "${UPDATE_ONLY,,}" ]]
+    fi
 }
 
 run_step() {
