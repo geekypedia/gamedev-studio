@@ -114,6 +114,17 @@ OR
 ~/gamedev-studio.sh -u your-package -f
 ```
 
+##### If you want to update all packages with the name partially matching the one you supplied
+
+```bash
+~/gamedev-studio.sh --update your-package --like
+```
+
+OR
+
+```bash
+~/gamedev-studio.sh -u your-package -lk
+```
 
 ##### If package is already downloaded in tmp folder and you just need to trigger re-installation
 
@@ -141,6 +152,11 @@ OR
 ```bash
 ~/gamedev-studio.sh -f -sd -u godot,gdevelop
 ```
+
+```bash
+~/gamedev-studio.sh -f -u godot -lk
+```
+
 
 ---
 
@@ -328,6 +344,7 @@ OR
 | `--upgrade` | Runs system upgrade (`apt upgrade`) before installation |
 | `--update <package>` / `-u <package>` | Runs specific installation package(s) (e.g. `godot,electron`) |
 | `--skip <package(s)>` / `-s <package(s)>` | Skips specific installation package(s) (e.g. `gideros,solar2d`) |
+| `--like` / `-lk` | While updating targeted packages, it matches partial keyword. for example `godot` matches godot, godot3, godot.net |
 | `--list` / `-l` | Lists available packages |
 | *(none)* | Safe mode (skip existing installs) |
 
