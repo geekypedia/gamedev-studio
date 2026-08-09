@@ -1923,6 +1923,76 @@ execute(){
     
     echo "✅ Installed Godot templates for $VERSION"
     '
+
+    run_step "redot" "Redot" "is_installed redot" '
+        mkdir -p "$TMP_DIR"
+    
+        REDOT_URL=$(
+          curl -fsSL https://api.github.com/repos/Redot-Engine/redot-engine/releases/latest |
+          jq -r ".assets[]
+            | select(
+                (.name | test(\"linux\"; \"i\")) and
+                (.name | test(\"x64\"; \"i\")) and
+                (.name | test(\"mono\"; \"i\") | not) and
+                (.name | test(\"arm\"; \"i\") | not) and
+                (.name | endswith(\".zip\"))
+              )
+            | .browser_download_url" |
+          head -n 1
+        )
+    
+        if [ -z "$REDOT_URL" ]; then
+            echo "⚠️ Redot download URL not found"
+            return 1
+        fi
+    
+        REDOT_ZIP="$TMP_DIR/redot.zip"
+    
+        safe_wget "$REDOT_URL" "$REDOT_ZIP" || {
+            echo "⚠️ Redot download failed"
+            return 1
+        }
+    
+        rm -rf "$TMP_DIR/redot"
+        mkdir -p "$TMP_DIR/redot"
+    
+        unzip -o "$REDOT_ZIP" -d "$TMP_DIR/redot" || {
+            echo "⚠️ Redot unzip failed"
+            return 1
+        }
+    
+        REDOT_BIN=$(
+            find "$TMP_DIR/redot" \
+                -type f \
+                -executable \
+                -print -quit
+        )
+    
+        if [ -z "$REDOT_BIN" ]; then
+            echo "⚠️ Redot binary not found"
+            return 1
+        fi
+    
+        REDOT_DIR=$(dirname "$REDOT_BIN")
+    
+        rm -rf /opt/gamedev/engines/redot
+        mkdir -p /opt/gamedev/engines
+    
+        cp -a "$REDOT_DIR" /opt/gamedev/engines/redot
+    
+        sudo install -Dm755 "$REDOT_BIN" /opt/gamedev/engines/redot/redot
+
+        # Install Redot icon
+        REDOT_ICON_DATA="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIAFwAXAMBEQACEQEDEQH/..."
+    
+        echo "$REDOT_ICON_DATA" |
+            sed "s|^data:image/png;base64,||" |
+            base64 -d > /opt/gamedev/engines/redot/icon.png || {
+            echo "⚠️ Failed to save Redot icon"
+        }
+    
+        register_bin redot /opt/gamedev/engines/redot/redot "Redot"
+    '    
     
     run_step "gdevelop" "GDevelop" "is_installed gdevelop" '
     GDEV_URL=$(
