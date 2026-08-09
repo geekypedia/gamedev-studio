@@ -22,6 +22,7 @@
 - [⚡ One-Line Install](#-one-line-install)
   - [🟢 Standard Install (Recommended)](#-standard-install-recommended)
   - [🟢 Only Download Script (To run it later)](#-only-download-script-to-run-it-later)
+  - [🟢 Clone from git](#-clone-from-git)
   - [🔁 Install + System Upgrade](#-install--system-upgrade)
   - [💥 Force Reinstall (Overwrite Everything)](#-force-reinstall-overwrite-everything)
   - [⚡ Force + Upgrade (Full System Refresh)](#-force--upgrade-full-system-refresh)
@@ -114,6 +115,16 @@ You can run the command whenever you want. You can re-run the command if it brea
 ```
 
 Make sure not to run this as sudo because it already uses sudo at appropriate times.
+
+[↑ Back to top](#top)
+
+### 🟢 Clone from git
+
+If you just want to clone it from github
+
+```bash
+git clone https://github.com/geekypedia/gamedev-studio.git && cd gamedev-studio && chmod +x install.sh && ./install.sh
+```
 
 [↑ Back to top](#top)
 
