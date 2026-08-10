@@ -1233,7 +1233,7 @@ godot_export_templates(){
     
     echo "⬇️ Downloading: $TEMPLATE_URL"
     
-    TEMPLATE_FILE="$TMP_DIR/godot_templates.tpz"
+    TEMPLATE_FILE="$TMP_DIR/$APP_templates.tpz"
     
     safe_wget "$TEMPLATE_URL" "$TEMPLATE_FILE" || {
         echo "⚠️ Download failed"
