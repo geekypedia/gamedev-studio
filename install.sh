@@ -1176,6 +1176,7 @@ godot_export_templates(){
 
     local APP="$1"
     local API="$2"
+    local VER="$3"
     
     echo "🌐 Fetching Godot export templates..."
     
@@ -1196,7 +1197,7 @@ godot_export_templates(){
     
     # decide version
     if [ "$FORCE_UPDATE" -eq 1 ]; then
-        VERSION="$LATEST_VERSION"
+        VERSION=$(echo "$LATEST_VERSION" | sed 's/\.official.*//')
     else
         VERSION="$INSTALLED_VERSION"
     fi
