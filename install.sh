@@ -1993,6 +1993,74 @@ execute(){
     
         register_bin redot /opt/gamedev/engines/redot/redot "Redot"
     '    
+
+    run_step "blazium" "Blazium" "is_installed blazium" '
+        mkdir -p "$TMP_DIR"
+    
+        BLAZIUM_URL=$(
+          curl -fsSL https://api.github.com/repos/blazium-games/blazium/releases/latest |
+          jq -r ".assets[]
+            | select(
+                (.name | test(\"linux\"; \"i\")) and
+                (.name | test(\"x64\"; \"i\")) and
+                (.name | test(\"mono\"; \"i\") | not) and
+                (.name | test(\"arm\"; \"i\") | not) and
+                (.name | endswith(\".zip\"))
+              )
+            | .browser_download_url" |
+          head -n 1
+        )
+    
+        if [ -z "$BLAZIUM_URL" ]; then
+            echo "⚠️ Blazium download URL not found"
+            return 1
+        fi
+    
+        BLAZIUM_ZIP="$TMP_DIR/blazium.zip"
+    
+        safe_wget "$BLAZIUM_URL" "$BLAZIUM_ZIP" || {
+            echo "⚠️ Blazium download failed"
+            return 1
+        }
+    
+        rm -rf "$TMP_DIR/blazium"
+        mkdir -p "$TMP_DIR/blazium"
+    
+        unzip -o "$BLAZIUM_ZIP" -d "$TMP_DIR/blazium" || {
+            echo "⚠️ Blazium unzip failed"
+            return 1
+        }
+    
+        BLAZIUM_BIN=$(
+            find "$TMP_DIR/blazium" \
+                -type f \
+                -executable \
+                -print -quit
+        )
+    
+        if [ -z "$BLAZIUM_BIN" ]; then
+            echo "⚠️ Blazium binary not found"
+            return 1
+        fi
+    
+        BLAZIUM_DIR=$(dirname "$BLAZIUM_BIN")
+    
+        rm -rf /opt/gamedev/engines/blazium
+        mkdir -p /opt/gamedev/engines
+    
+        cp -a "$BLAZIUM_DIR" /opt/gamedev/engines/blazium
+    
+        sudo install -Dm755 "$BLAZIUM_BIN" /opt/gamedev/engines/blazium/blazium
+
+        # Install Blazium icon
+        safe_wget \
+            "https://raw.githubusercontent.com/blazium-games/blazium.app-v2/refs/heads/master/public/images/Brand%20Kit/Logo/PNG/Blazium_Logo.png" \
+            "/opt/gamedev/engines/blazium/icon.png" || {
+            echo "⚠️ Failed to download Blazium icon"
+        }
+    
+        register_bin blazium /opt/gamedev/engines/blazium/blazium "Blazium"
+    '        
     
     run_step "gdevelop" "GDevelop" "is_installed gdevelop" '
     GDEV_URL=$(
