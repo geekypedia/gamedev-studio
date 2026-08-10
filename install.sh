@@ -1070,6 +1070,25 @@ install_engine() {
 
 # -------------------------------------------------------------------------------------------------------------------------------------------------
 
+get_godot_export_template_url() {
+    local JSON="$1"
+    local VER="$2"
+    local MONO="$3"
+
+    echo "$JSON" | jq -r --arg ver "$VER" --arg mono "$MONO" "
+        (if type == \"array\" then . else [.] end)
+        | [
+            .[]
+            | select(\$ver == \"\" or (.tag_name | contains(\$ver)))
+            | .assets[]?
+            | select(.name? != null)
+            | select(.name | test(\"export_templates\"))
+            | select(\$mono == \"\" or (.name | test(\"mono\"; \"i\")))
+            | .browser_download_url
+        ]
+        | first // empty
+    "
+}
 
 godot_export_templates(){
     mkdir -p "$TMP_DIR"
@@ -1088,39 +1107,42 @@ godot_export_templates(){
     RELEASE_JSON_LATEST=$(curl -fsSL "$API_LATEST")
     LATEST_VERSION=$(echo "$RELEASE_JSON_LATEST" | jq -r ".tag_name // empty")
     
-    LATEST_DOWNLOAD_URL=$(echo "$RELEASE_JSON_LATEST" | jq -r "
-      [.assets[]?
-       | select(.name? != null)
-       | select(.name | test(\"export_templates\"))
-       | .browser_download_url]
-      | first // empty
-    ")
+    # LATEST_DOWNLOAD_URL=$(echo "$RELEASE_JSON_LATEST" | jq -r "
+    #   [.assets[]?
+    #    | select(.name? != null)
+    #    | select(.name | test(\"export_templates\"))
+    #    | .browser_download_url]
+    #   | first // empty
+    # ")
+    LATEST_DOWNLOAD_URL=$(get_godot_export_template_url "$RELEASE_JSON_LATEST" "" "$MONO")
     
     # First release returned by the releases API
     RELEASE_JSON=$(curl -fsSL "$API")
     FIRST_VERSION=$(echo "$RELEASE_JSON" | jq -r ".[0].tag_name // empty")
-    FIRST_DOWNLOAD_URL=$(echo "$RELEASE_JSON" | jq -r "
-      .[]
-      | .assets[]?
-      | select(.name? != null)
-      | select(.name | test(\"export_templates\"))
-      | .browser_download_url
-      | first
-    ")
+    # FIRST_DOWNLOAD_URL=$(echo "$RELEASE_JSON" | jq -r "
+    #   .[]
+    #   | .assets[]?
+    #   | select(.name? != null)
+    #   | select(.name | test(\"export_templates\"))
+    #   | .browser_download_url
+    #   | first
+    # ")
+    FIRST_DOWNLOAD_URL=$(get_godot_export_template_url "$RELEASE_JSON" "" "$MONO")
     
     # Release matching the version passed in $VER
     FIXED_VERSION=$(echo "$RELEASE_JSON" | jq -r --arg ver "$VER" '
         [.[] | select(.tag_name | contains($ver))] | first | .tag_name // empty
     ')
-    FIXED_DOWNLOAD_URL=$(echo "$RELEASE_JSON" | jq -r --arg ver "$VER" "
-      [.[] 
-       | select(.tag_name | contains(\$ver))
-       | .assets[]?
-       | select(.name? != null)
-       | select(.name | test(\"export_templates\"))
-       | .browser_download_url]
-      | first // empty
-    ")
+    # FIXED_DOWNLOAD_URL=$(echo "$RELEASE_JSON" | jq -r --arg ver "$VER" "
+    #   [.[] 
+    #    | select(.tag_name | contains(\$ver))
+    #    | .assets[]?
+    #    | select(.name? != null)
+    #    | select(.name | test(\"export_templates\"))
+    #    | .browser_download_url]
+    #   | first // empty
+    # ")
+    FIXED_DOWNLOAD_URL=$(get_godot_export_template_url "$RELEASE_JSON" "$VER" "$MONO")
     
     #Additional stripping logic
     LATEST_VERSION=$(echo "$LATEST_VERSION" | sed -E 's/^[^0-9]*//; s/-/./g')
@@ -1138,16 +1160,16 @@ godot_export_templates(){
         INSTALLED_VERSION=""
     fi
 
-    INSTALLED_DOWNLOAD_URL=$(echo "$RELEASE_JSON" | jq -r --arg ver "$INSTALLED_VERSION" "
-      [.[] 
-       | select(.tag_name | contains(\$ver))
-       | .assets[]?
-       | select(.name? != null)
-       | select(.name | test(\"export_templates\"))
-       | .browser_download_url]
-      | first // empty
-    ")
-    
+    # INSTALLED_DOWNLOAD_URL=$(echo "$RELEASE_JSON" | jq -r --arg ver "$INSTALLED_VERSION" "
+    #   [.[] 
+    #    | select(.tag_name | contains(\$ver))
+    #    | .assets[]?
+    #    | select(.name? != null)
+    #    | select(.name | test(\"export_templates\"))
+    #    | .browser_download_url]
+    #   | first // empty
+    # ")
+    INSTALLED_DOWNLOAD_URL=$(get_godot_export_template_url "$RELEASE_JSON" "$INSTALLED_VERSION" "$MONO")
     
     # decide version
     if [ "$FORCE_UPDATE" -eq 1 ]; then
@@ -1236,7 +1258,6 @@ godot_export_templates_v3(){
 godot_export_templates_mono(){
     godot_export_templates godotnet "godotengine/godot" "" "mono"
 }
-
 
 redot_export_templates_latest(){
     godot_export_templates redot "redot-engine/redot-engine"
