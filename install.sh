@@ -1085,16 +1085,19 @@ godot_export_templates(){
 
     # GitHub's actual "latest release"
     RELEASE_JSON_LATEST=$(curl -fsSL "$API_LATEST")
-    LATEST_VERSION=$(echo "$RELEASE_JSON_LATEST" | jq -r '.tag_name // empty')
+    LATEST_VERSION=$(echo "$RELEASE_JSON_LATEST" | jq -r ".tag_name // empty")
+    LATEST_DOWNLOAD_URL=$(echo "$RELEASE_JSON_LATEST" | jq -r ".browser_download_url // empty")
 
     # First release returned by the releases API
     RELEASE_JSON=$(curl -fsSL "$API")
-    FIRST_VERSION=$(echo "$RELEASE_JSON" | jq -r '.[0].tag_name // empty')
+    FIRST_VERSION=$(echo "$RELEASE_JSON" | jq -r ".[0].tag_name // empty")
+    FIRST_DOWNLOAD_URL=$(echo "$RELEASE_JSON" | jq -r ".browser_download_url // empty")
     
     # Release matching the version passed in $VER
     FIXED_VERSION=$(echo "$RELEASE_JSON" | jq -r --arg ver "$VER" '
         [.[] | select(.tag_name | contains($ver))] | first | .tag_name // empty
     ')
+    FIXED_DOWNLOAD_URL=$(echo "$RELEASE_JSON" | jq -r ".browser_download_url // empty")
     
     #Additional stripping logic
     LATEST_VERSION=$(echo "$LATEST_VERSION" | sed -E 's/^[^0-9]*//; s/-/./g')
@@ -1103,6 +1106,9 @@ godot_export_templates(){
     
     # detect installed Godot version
     INSTALLED_VERSION_RAW=$($APP --version 2>/dev/null || true)
+    INSTALLED_DOWNLOAD_URL=$(echo "$RELEASE_JSON" | jq -r --arg ver "$VER" '
+        [.[] | select(.tag_name | contains($ver))] | first | .browser_download_url // empty
+    ')
     
     # normalize: 4.7.stable.official.xxxxx → 4.7.stable
     if [ -n "$INSTALLED_VERSION_RAW" ]; then
@@ -1114,6 +1120,7 @@ godot_export_templates(){
     # decide version
     if [ "$FORCE_UPDATE" -eq 1 ]; then
         VERSION="${LATEST_VERSION:-$FIRST_VERSION}"
+        TEMPLATE_URL="${LATEST_DOWNLOAD_URL:-$FIRST_DOWNLOAD_URL}"
     else
         VERSION="$INSTALLED_VERSION"
     fi
@@ -1121,6 +1128,7 @@ godot_export_templates(){
     # fallback
     if [ -z "$VERSION" ] || [ "$VERSION" = "-" ]; then
         VERSION="${FIXED_VERSION:-${LATEST_VERSION:-${FIRST_VERSION:-$INSTALLED_VERSION}}}"
+        TEMPLATE_URL="${FIXED_DOWNLOAD_URL:-${LATEST_DOWNLOAD_URL:-${FIRST_DOWNLOAD_URL:-$INSTALLED_DOWNLOAD_URL}}}"
     fi
     
     #if VER is passed use it
@@ -1138,13 +1146,13 @@ godot_export_templates(){
     
     echo "⬇️ Searching $APP export templates for $VERSION"
     
-    TEMPLATE_URL=$(echo "$RELEASE_JSON" | jq -r "
-      .[]
-      | .assets[]?
-      | select(.name? != null)
-      | select(.name | test(\"export_templates\"))
-      | .browser_download_url
-    " | head -n 1)
+    # TEMPLATE_URL=$(echo "$RELEASE_JSON" | jq -r "
+    #   .[]
+    #   | .assets[]?
+    #   | select(.name? != null)
+    #   | select(.name | test(\"export_templates\"))
+    #   | .browser_download_url
+    # " | head -n 1)
     
     if [ -z "$TEMPLATE_URL" ]; then
         echo "⚠️ No export templates found in GitHub releases"
