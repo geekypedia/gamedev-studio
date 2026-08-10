@@ -1097,6 +1097,7 @@ godot_export_templates(){
     local PROJECT="$2"
     local VER="$3"
     local MONO="${4:+.mono}"
+    local ALIAS="${5:-$APP}"
 
     local API="https://api.github.com/repos/$PROJECT/releases"
     local API_LATEST="$API"/latest
@@ -1194,7 +1195,7 @@ godot_export_templates(){
         TEMPLATE_URL="$FIXED_DOWNLOAD_URL"
     fi
     
-    TEMPLATE_DIR="$HOME/.local/share/$APP/export_templates/$VERSION"
+    TEMPLATE_DIR="$HOME/.local/share/$ALIAS/export_templates/$VERSION"
     
     # skip if already installed
     if [ "$FORCE_UPDATE" -eq 0 ] && [ -d "$TEMPLATE_DIR" ] && [ "$(ls -A "$TEMPLATE_DIR" 2>/dev/null)" ]; then
@@ -1255,11 +1256,11 @@ godot_export_templates_latest(){
 }
 
 godot_export_templates_v3(){
-    godot_export_templates godot3 "godotengine/godot" "3.6.2"
+    godot_export_templates godot3 "godotengine/godot" "3.6.2" "" "godot"
 }
 
 godot_export_templates_mono(){
-    godot_export_templates godotnet "godotengine/godot" "" "mono"
+    godot_export_templates godotnet "godotengine/godot" "" "mono" "godot"
 }
 
 redot_export_templates_latest(){
