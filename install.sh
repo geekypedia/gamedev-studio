@@ -1160,7 +1160,7 @@ godot_export_templates(){
         TEMPLATE_URL="${FIXED_DOWNLOAD_URL:-${LATEST_DOWNLOAD_URL:-${FIRST_DOWNLOAD_URL:-$INSTALLED_DOWNLOAD_URL}}}"
     fi
     
-    if VER is passed use it
+    #if VER is passed use it
     if [ -n "$VER" ]; then
         VERSION="$FIXED_VERSION"
     fi
