@@ -2002,7 +2002,7 @@ execute(){
           jq -r ".assets[]
             | select(
                 (.name | test(\"linux\"; \"i\")) and
-                (.name | test(\"x64\"; \"i\")) and
+                (.name | test(\"x86_64\"; \"i\")) and
                 (.name | test(\"mono\"; \"i\") | not) and
                 (.name | test(\"arm\"; \"i\") | not) and
                 (.name | endswith(\".zip\"))
