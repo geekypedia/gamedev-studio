@@ -1176,7 +1176,6 @@ godot_export_templates(){
 
     local APP="$1"
     local API="$2"
-    local VER="$3"
     
     echo "🌐 Fetching Godot export templates..."
     
@@ -1184,6 +1183,9 @@ godot_export_templates(){
     
     # get latest version tag (first release in list)
     LATEST_VERSION=$(echo "$RELEASE_JSON" | jq -r ".[0].tag_name // empty")
+
+    #Additional stripping logic
+    LATEST_VERSION=$(echo "$LATEST_VERSION" | sed -E 's/^[^0-9]*//; s/-/./g')
     
     # detect installed Godot version
     INSTALLED_VERSION_RAW=$($APP --version 2>/dev/null || true)
@@ -1197,7 +1199,7 @@ godot_export_templates(){
     
     # decide version
     if [ "$FORCE_UPDATE" -eq 1 ]; then
-        VERSION=$(echo "$LATEST_VERSION" | sed 's/\.official.*//')
+        VERSION="$LATEST_VERSION"
     else
         VERSION="$INSTALLED_VERSION"
     fi
