@@ -1163,6 +1163,7 @@ godot_export_templates(){
     #if VER is passed use it
     if [ -n "$VER" ]; then
         VERSION="$FIXED_VERSION"
+        TEMPLATE_URL="$FIRST_DOWNLOAD_URL"
     fi
     
     TEMPLATE_DIR="$HOME/.local/share/$APP/export_templates/$VERSION"
