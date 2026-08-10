@@ -2217,77 +2217,77 @@ execute(){
         blazium_export_templates_latest
     '
 
-    run_step "faster-godot" "Faster-Godot" "is_installed faster-godot" '
-        mkdir -p "$TMP_DIR"
+    # run_step "faster-godot" "Faster-Godot" "is_installed faster-godot" '
+    #     mkdir -p "$TMP_DIR"
     
-        FASTER_GODOT_URL=$(
-          curl -fsSL https://api.github.com/repos/vorvek/faster-godot/releases/latest |
-          jq -r ".assets[]
-            | select(
-                (.name | test(\"linux\"; \"i\")) and
-                (.name | test(\"x86_64\"; \"i\")) and
-                (.name | test(\"mono\"; \"i\") | not) and
-                (.name | test(\"arm\"; \"i\") | not) and
-                (.name | endswith(\".zip\"))
-              )
-            | .browser_download_url" |
-          head -n 1
-        )
+    #     FASTER_GODOT_URL=$(
+    #       curl -fsSL https://api.github.com/repos/vorvek/faster-godot/releases/latest |
+    #       jq -r ".assets[]
+    #         | select(
+    #             (.name | test(\"linux\"; \"i\")) and
+    #             (.name | test(\"x86_64\"; \"i\")) and
+    #             (.name | test(\"mono\"; \"i\") | not) and
+    #             (.name | test(\"arm\"; \"i\") | not) and
+    #             (.name | endswith(\".zip\"))
+    #           )
+    #         | .browser_download_url" |
+    #       head -n 1
+    #     )
     
-        if [ -z "$FASTER_GODOT_URL" ]; then
-            echo "⚠️ Faster-Godot download URL not found"
-            return 1
-        fi
+    #     if [ -z "$FASTER_GODOT_URL" ]; then
+    #         echo "⚠️ Faster-Godot download URL not found"
+    #         return 1
+    #     fi
     
-        FASTER_GODOT_ZIP="$TMP_DIR/faster-godot.zip"
+    #     FASTER_GODOT_ZIP="$TMP_DIR/faster-godot.zip"
     
-        safe_wget "$FASTER_GODOT_URL" "$FASTER_GODOT_ZIP" || {
-            echo "⚠️ Faster-Godot download failed"
-            return 1
-        }
+    #     safe_wget "$FASTER_GODOT_URL" "$FASTER_GODOT_ZIP" || {
+    #         echo "⚠️ Faster-Godot download failed"
+    #         return 1
+    #     }
     
-        rm -rf "$TMP_DIR/faster-godot"
-        mkdir -p "$TMP_DIR/faster-godot"
+    #     rm -rf "$TMP_DIR/faster-godot"
+    #     mkdir -p "$TMP_DIR/faster-godot"
     
-        unzip -o "$FASTER_GODOT_ZIP" -d "$TMP_DIR/faster-godot" || {
-            echo "⚠️ Faster-Godot unzip failed"
-            return 1
-        }
+    #     unzip -o "$FASTER_GODOT_ZIP" -d "$TMP_DIR/faster-godot" || {
+    #         echo "⚠️ Faster-Godot unzip failed"
+    #         return 1
+    #     }
     
-        FASTER_GODOT_BIN=$(
-            find "$TMP_DIR/faster-godot" \
-                -type f \
-                -executable \
-                -print -quit
-        )
+    #     FASTER_GODOT_BIN=$(
+    #         find "$TMP_DIR/faster-godot" \
+    #             -type f \
+    #             -executable \
+    #             -print -quit
+    #     )
     
-        if [ -z "$FASTER_GODOT_BIN" ]; then
-            echo "⚠️ Faster-Godot binary not found"
-            return 1
-        fi
+    #     if [ -z "$FASTER_GODOT_BIN" ]; then
+    #         echo "⚠️ Faster-Godot binary not found"
+    #         return 1
+    #     fi
     
-        FASTER_GODOT_DIR=$(dirname "$FASTER_GODOT_BIN")
+    #     FASTER_GODOT_DIR=$(dirname "$FASTER_GODOT_BIN")
     
-        rm -rf /opt/gamedev/engines/faster-godot
-        mkdir -p /opt/gamedev/engines
+    #     rm -rf /opt/gamedev/engines/faster-godot
+    #     mkdir -p /opt/gamedev/engines
     
-        cp -a "$FASTER_GODOT_DIR" /opt/gamedev/engines/faster-godot
+    #     cp -a "$FASTER_GODOT_DIR" /opt/gamedev/engines/faster-godot
     
-        sudo install -Dm755 "$FASTER_GODOT_BIN" /opt/gamedev/engines/faster-godot/faster-godot
+    #     sudo install -Dm755 "$FASTER_GODOT_BIN" /opt/gamedev/engines/faster-godot/faster-godot
 
-        # Install Faster-Godot icon
-        safe_wget \
-            "https://raw.githubusercontent.com/vorvek/Faster-Godot/master/fast-godot.svg" \
-            "/opt/gamedev/engines/faster-godot/icon.png" || {
-            echo "⚠️ Failed to download Faster-Godot icon"
-        }
+    #     # Install Faster-Godot icon
+    #     safe_wget \
+    #         "https://raw.githubusercontent.com/vorvek/Faster-Godot/master/fast-godot.svg" \
+    #         "/opt/gamedev/engines/faster-godot/icon.png" || {
+    #         echo "⚠️ Failed to download Faster-Godot icon"
+    #     }
     
-        register_bin faster-godot /opt/gamedev/engines/faster-godot/faster-godot "Faster Godot"
-    '
+    #     register_bin faster-godot /opt/gamedev/engines/faster-godot/faster-godot "Faster Godot"
+    # '
     
-    run_step "faster-godot-templates" "Faster Godot Export Templates" "false" '
-        faster_godot_export_templates_latest
-    '    
+    # run_step "faster-godot-templates" "Faster Godot Export Templates" "false" '
+    #     faster_godot_export_templates_latest
+    # '    
     
     run_step "gdevelop" "GDevelop" "is_installed gdevelop" '
     GDEV_URL=$(
