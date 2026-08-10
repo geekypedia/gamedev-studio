@@ -1084,7 +1084,8 @@ godot_export_templates(){
     
     # get latest version tag (latest OR first release in list)
     # LATEST_VERSION=$(echo "$RELEASE_JSON" | jq -r ".[0].tag_name // empty")
-    LATEST_VERSION=$(echo "$RELEASE_JSON" | jq -r '([.[] | select(.latest == true and .tag_name != null and .tag_name != "")] | first // .[0]).tag_name // empty')
+    # LATEST_VERSION=$(echo "$RELEASE_JSON" | jq -r '([.[] | select(.latest == true and .tag_name != null and .tag_name != "")] | first // .[0]).tag_name // empty')
+    LATEST_VERSION=$(echo "$RELEASE_JSON" | jq -r '((first(.[] | select(.latest == true))) // .[0]).tag_name // empty')
 
     #Additional stripping logic
     LATEST_VERSION=$(echo "$LATEST_VERSION" | sed -E 's/^[^0-9]*//; s/-/./g')
