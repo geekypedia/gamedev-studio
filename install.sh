@@ -1920,6 +1920,18 @@ execute(){
         echo "⚠️ Unzip failed"
         return 1
     }
+
+    # Godot .tpz archives may contain a top-level templates/ directory.
+    # Move its contents directly into TEMPLATE_DIR.
+    if [ -d "$TEMPLATE_DIR/templates" ]; then
+        echo "📂 Flattening templates directory..."
+    
+        mv "$TEMPLATE_DIR/templates/"* "$TEMPLATE_DIR/" 2>/dev/null || true
+        mv "$TEMPLATE_DIR/templates/".[!.]* "$TEMPLATE_DIR/" 2>/dev/null || true
+        mv "$TEMPLATE_DIR/templates/"..?* "$TEMPLATE_DIR/" 2>/dev/null || true
+    
+        rmdir "$TEMPLATE_DIR/templates" 2>/dev/null || true
+    fi    
     
     echo "✅ Installed Godot templates for $VERSION"
     '
