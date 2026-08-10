@@ -293,6 +293,18 @@ is_installed() {
     command -v "$1" >/dev/null 2>&1
 }
 
+is_deb_installed() {
+    dpkg-query -W -f='${Status}' "$1" 2>/dev/null | grep -q "install ok installed"
+}
+
+is_vst3_installed() {
+    find /usr/lib/vst3 /usr/local/lib/vst3 "$HOME/.vst3" \
+        -maxdepth 1 \
+        -type d \
+        -iname "$1.vst3" \
+        -print -quit 2>/dev/null | grep -q .
+}
+
 list_header(){
     # List only
     if [[ "$LIST_STEPS" -eq 1 ]]; then
@@ -2209,7 +2221,7 @@ execute(){
         mkdir -p "$TMP_DIR"
     
         FASTER_GODOT_URL=$(
-          curl -fsSL https://api.github.com/repos/faster-godot-games/faster-godot/releases/latest |
+          curl -fsSL https://api.github.com/repos/vorvek/faster-godot/releases/latest |
           jq -r ".assets[]
             | select(
                 (.name | test(\"linux\"; \"i\")) and
@@ -3458,7 +3470,7 @@ EOF
         fi
     '
 
-    run_step "makehuman" "MakeHuman" "is_installed makehuman" '
+    run_step "makehuman" "MakeHuman" "is_installed makehuman-community" '
         sudo add-apt-repository -y ppa:makehuman-official/makehuman-community
         sudo apt update
     
@@ -3625,7 +3637,7 @@ EOF
         echo "✅ Dexed installed successfully"
     '
     
-   run_step "surge-xt" "Surge XT" "is_installed surge-xt" '
+   run_step "surge-xt" "Surge XT" "is_deb_installed surge-xt" '
         API="https://api.github.com/repos/surge-synthesizer/releases-xt/releases/latest"
     
         echo "🌐 Fetching Surge XT latest release..."
@@ -3674,7 +3686,7 @@ EOF
         echo "✅ Helm installed successfully"
     '
     
-    run_step "tal-noisemaker" "TAL-NoiseMaker" "is_installed tal-noisemaker" '
+    run_step "tal-noisemaker" "TAL-NoiseMaker" "is_vst3_installed TAL-NoiseMaker" '
         URL="https://tal-software.com/downloads/plugins/TAL-NoiseMaker_64_linux.zip"
     
         echo "⬇️ Downloading TAL-NoiseMaker..."
