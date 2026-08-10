@@ -1075,20 +1075,31 @@ godot_export_templates(){
     mkdir -p "$TMP_DIR"
 
     local APP="$1"
-    local API="$2"
+    local PROJECT="$2"
     local VER="$3"
+
+    local API="https://api.github.com/repos/$PROJECT/releases"
+    local API_LATEST="$API"/latest
     
     echo "🌐 Fetching $APP export templates..."
-    
-    RELEASE_JSON=$(curl -s "$API")
-    
-    # get latest version tag (latest OR first release in list)
-    # LATEST_VERSION=$(echo "$RELEASE_JSON" | jq -r ".[0].tag_name // empty")
-    # LATEST_VERSION=$(echo "$RELEASE_JSON" | jq -r '([.[] | select(.latest == true and .tag_name != null and .tag_name != "")] | first // .[0]).tag_name // empty')
-    LATEST_VERSION=$(echo "$RELEASE_JSON" | jq -r '((first(.[] | select(.latest == true))) // .[0]).tag_name // empty')
 
+    # GitHub's actual "latest release"
+    RELEASE_JSON_LATEST=$(curl -fsSL "$API_LATEST")
+    LATEST_VERSION=$(echo "$RELEASE_JSON_LATEST" | jq -r '.tag_name // empty')
+
+    # First release returned by the releases API
+    RELEASE_JSON=$(curl -fsSL "$API")
+    FIRST_VERSION=$(echo "$RELEASE_JSON" | jq -r '.[0].tag_name // empty')
+    
+    # Release matching the version passed in $VER
+    FIXED_VERSION=$(echo "$RELEASE_JSON" | jq -r --arg ver "$VER" '
+        [.[] | select(.tag_name | contains($ver))] | first | .tag_name // empty
+    ')
+    
     #Additional stripping logic
     LATEST_VERSION=$(echo "$LATEST_VERSION" | sed -E 's/^[^0-9]*//; s/-/./g')
+    FIRST_VERSION=$(echo "$FIRST_VERSION" | sed -E 's/^[^0-9]*//; s/-/./g')
+    FIXED_VERSION=$(echo "$FIXED_VERSION" | sed -E 's/^[^0-9]*//; s/-/./g')
     
     # detect installed Godot version
     INSTALLED_VERSION_RAW=$($APP --version 2>/dev/null || true)
@@ -1102,20 +1113,20 @@ godot_export_templates(){
     
     # decide version
     if [ "$FORCE_UPDATE" -eq 1 ]; then
-        VERSION="$LATEST_VERSION"
+        VERSION="${LATEST_VERSION:-$FIRST_VERSION}"
     else
         VERSION="$INSTALLED_VERSION"
     fi
 
     # fallback
     if [ -z "$VERSION" ] || [ "$VERSION" = "-" ]; then
-        VERSION="$LATEST_VERSION"
+        VERSION="${FIXED_VERSION:-${LATEST_VERSION:-${FIRST_VERSION:-$INSTALLED_VERSION}}}"
     fi
     
     #if VER is passed use it
-    if [ -n "$VER" ]; then
-        VERSION="$VER"
-    fi
+    # if [ -n "$VER" ]; then
+    #     VERSION="$FIXED_VERSION"
+    # fi
     
     TEMPLATE_DIR="$HOME/.local/share/$APP/export_templates/$VERSION"
     
@@ -1174,23 +1185,23 @@ godot_export_templates(){
 }
 
 godot_export_templates_latest(){
-    godot_export_templates godot "https://api.github.com/repos/godotengine/godot/releases"
+    godot_export_templates godot "godotengine/godot"
 }
 
 godot_export_templates_v3(){
-    godot_export_templates godot3 "https://api.github.com/repos/godotengine/godot/releases" "3.6.2.stable"
+    godot_export_templates godot3 "godotengine/godot" "3.6.2"
 }
 
 redot_export_templates_latest(){
-    godot_export_templates redot "https://api.github.com/repos/redot-engine/redot-engine/releases"
+    godot_export_templates redot "redot-engine/redot-engine"
 }
 
 blazium_export_templates_latest(){
-    godot_export_templates blazium "https://api.github.com/repos/blazium-games/blazium/releases"
+    godot_export_templates blazium "blazium-games/blazium"
 }
 
 faster_godot_export_templates_latest(){
-    godot_export_templates faster-godot "https://api.github.com/repos/vorvek/faster-godot/releases"
+    godot_export_templates faster-godot "vorvek/faster-godot"
 }
 
 
@@ -1963,6 +1974,10 @@ execute(){
         godot_export_templates_latest
     '
 
+    run_step "godot3-templates" "Godot 3.x Export Templates" "false" '
+        godot_export_templates_v3
+    '
+
     run_step "redot" "Redot" "is_installed redot" '
         mkdir -p "$TMP_DIR"
     
@@ -2108,8 +2123,6 @@ execute(){
     run_step "blazium-templates" "Blazium Export Templates" "false" '
         blazium_export_templates_latest
     '
-
-
 
     run_step "faster-godot" "Faster-Godot" "is_installed faster-godot" '
         mkdir -p "$TMP_DIR"
