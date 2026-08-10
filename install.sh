@@ -1077,6 +1077,7 @@ godot_export_templates(){
     local APP="$1"
     local PROJECT="$2"
     local VER="$3"
+    local MONO="${4:+.mono}"
 
     local API="https://api.github.com/repos/$PROJECT/releases"
     local API_LATEST="$API"/latest
@@ -1086,6 +1087,7 @@ godot_export_templates(){
     # GitHub's actual "latest release"
     RELEASE_JSON_LATEST=$(curl -fsSL "$API_LATEST")
     LATEST_VERSION=$(echo "$RELEASE_JSON_LATEST" | jq -r ".tag_name // empty")
+    
     LATEST_DOWNLOAD_URL=$(echo "$RELEASE_JSON_LATEST" | jq -r "
       [.assets[]?
        | select(.name? != null)
@@ -1122,6 +1124,7 @@ godot_export_templates(){
     
     #Additional stripping logic
     LATEST_VERSION=$(echo "$LATEST_VERSION" | sed -E 's/^[^0-9]*//; s/-/./g')
+    LATEST_VERSION="${LATEST_VERSION}${MONO:+$MONO}"
     FIRST_VERSION=$(echo "$FIRST_VERSION" | sed -E 's/^[^0-9]*//; s/-/./g')
     FIXED_VERSION=$(echo "$FIXED_VERSION" | sed -E 's/^[^0-9]*//; s/-/./g')
     
@@ -1229,6 +1232,11 @@ godot_export_templates_latest(){
 godot_export_templates_v3(){
     godot_export_templates godot3 "godotengine/godot" "3.6.2"
 }
+
+godot_export_templates_mono(){
+    godot_export_templates godotnet "godotengine/godot" "" "mono"
+}
+
 
 redot_export_templates_latest(){
     godot_export_templates redot "redot-engine/redot-engine"
@@ -2014,6 +2022,10 @@ execute(){
 
     run_step "godot3-templates" "Godot 3.x Export Templates" "false" '
         godot_export_templates_v3
+    '
+
+    run_step "godotnet-templates" "Godot Mono Export Templates" "false" '
+        godot_export_templates_mono
     '
 
     run_step "redot" "Redot" "is_installed redot" '
