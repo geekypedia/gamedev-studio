@@ -1156,6 +1156,8 @@ godot_export_templates(){
     # normalize: 4.7.stable.official.xxxxx → 4.7.stable
     if [ -n "$INSTALLED_VERSION_RAW" ]; then
         INSTALLED_VERSION=$(echo "$INSTALLED_VERSION_RAW" | sed 's/\.official.*//')
+        INSTALLED_VERSION_TAG="${INSTALLED_VERSION%.mono}"
+        INSTALLED_VERSION_TAG=$(echo "$INSTALLED_VERSION_TAG" | sed -E 's/^([0-9]+(\.[0-9]+)*)\.([^.]+).*/\1-\3/')
     else
         INSTALLED_VERSION=""
     fi
@@ -1169,7 +1171,7 @@ godot_export_templates(){
     #    | .browser_download_url]
     #   | first // empty
     # ")
-    INSTALLED_DOWNLOAD_URL=$(get_godot_export_template_url "$RELEASE_JSON" "$INSTALLED_VERSION" "$MONO")
+    INSTALLED_DOWNLOAD_URL=$(get_godot_export_template_url "$RELEASE_JSON" "$INSTALLED_VERSION_TAG" "$MONO")
     
     # decide version
     if [ "$FORCE_UPDATE" -eq 1 ]; then
