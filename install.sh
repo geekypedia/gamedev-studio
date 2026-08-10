@@ -1098,6 +1098,7 @@ godot_export_templates(){
     local VER="$3"
     local MONO="${4:+.mono}"
     local ALIAS="${5:-$APP}"
+    local VERFIX="$6"
 
     local API="https://api.github.com/repos/$PROJECT/releases"
     local API_LATEST="$API"/latest
@@ -1148,8 +1149,13 @@ godot_export_templates(){
     #Additional stripping logic
     LATEST_VERSION=$(echo "$LATEST_VERSION" | sed -E 's/^[^0-9]*//; s/-/./g')
     LATEST_VERSION="${LATEST_VERSION}${MONO:+$MONO}"
+    LATEST_VERSION="${LATEST_VERSION}${VERFIX:+$VERFIX}"
     FIRST_VERSION=$(echo "$FIRST_VERSION" | sed -E 's/^[^0-9]*//; s/-/./g')
+    FIRST_VERSION="${FIRST_VERSION}${MONO:+$MONO}"
+    FIRST_VERSION="${FIRST_VERSION}${VERFIX:+$VERFIX}"
     FIXED_VERSION=$(echo "$FIXED_VERSION" | sed -E 's/^[^0-9]*//; s/-/./g')
+    FIXED_VERSION="${FIXED_VERSION}${MONO:+$MONO}"
+    FIXED_VERSION="${FIXED_VERSION}${VERFIX:+$VERFIX}"
     
     # detect installed Godot version
     INSTALLED_VERSION_RAW=$($APP --version 2>/dev/null || true)
@@ -1268,7 +1274,7 @@ redot_export_templates_latest(){
 }
 
 blazium_export_templates_latest(){
-    godot_export_templates blazium "blazium-games/blazium"
+    godot_export_templates blazium "blazium-games/blazium" "" "" "" ".release"
 }
 
 faster_godot_export_templates_latest(){
