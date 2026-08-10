@@ -1177,6 +1177,7 @@ godot_export_templates(){
         TEMPLATE_URL="${LATEST_DOWNLOAD_URL:-$FIRST_DOWNLOAD_URL}"
     else
         VERSION="$INSTALLED_VERSION"
+        TEMPLATE_URL="$INSTALLED_DOWNLOAD_URL"
     fi
 
     # fallback
