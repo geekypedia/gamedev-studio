@@ -1076,8 +1076,9 @@ godot_export_templates(){
 
     local APP="$1"
     local API="$2"
+    local VER="$3"
     
-    echo "🌐 Fetching Godot export templates..."
+    echo "🌐 Fetching $APP export templates..."
     
     RELEASE_JSON=$(curl -s "$API")
     
@@ -1103,10 +1104,15 @@ godot_export_templates(){
     else
         VERSION="$INSTALLED_VERSION"
     fi
-    
+
     # fallback
     if [ -z "$VERSION" ] || [ "$VERSION" = "-" ]; then
         VERSION="$LATEST_VERSION"
+    fi
+    
+    #if VER is passed use it
+    if [ -n "$VER" ]; then
+        VERSION="$VER"
     fi
     
     TEMPLATE_DIR="$HOME/.local/share/$APP/export_templates/$VERSION"
@@ -1167,6 +1173,10 @@ godot_export_templates(){
 
 godot_export_templates_latest(){
     godot_export_templates godot "https://api.github.com/repos/godotengine/godot/releases"
+}
+
+godot_export_templates_v3(){
+    godot_export_templates godot3 "https://api.github.com/repos/godotengine/godot/releases" "3.6.2.stable"
 }
 
 redot_export_templates_latest(){
