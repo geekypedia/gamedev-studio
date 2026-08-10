@@ -1068,108 +1068,8 @@ install_engine() {
     esac
 }
 
-godot_export_templates_legacy(){
-    mkdir -p "$TMP_DIR"
-    
-    API="https://api.github.com/repos/godotengine/godot/releases"
-    
-    echo "🌐 Fetching Godot export templates..."
-    
-    RELEASE_JSON=$(curl -s "$API")
-    
-    # get latest version tag (first release in list)
-    LATEST_VERSION=$(echo "$RELEASE_JSON" | jq -r ".[0].tag_name // empty")
-    
-    # detect installed Godot version
-    INSTALLED_VERSION_RAW=$(godot --version 2>/dev/null || true)
-    
-    # normalize: 4.6.3.stable.official.xxxxx → 4.6.3-stable
-    #if [ -n "$INSTALLED_VERSION_RAW" ]; then
-    #    BASE_VERSION=$(echo "$INSTALLED_VERSION_RAW" | cut -d. -f1-3)
-    #
-    #    if echo "$INSTALLED_VERSION_RAW" | grep -q "stable"; then
-    #        INSTALLED_VERSION="${BASE_VERSION}-stable"
-    #    else
-    #        INSTALLED_VERSION="$BASE_VERSION"
-    #    fi
-    #else
-    #    INSTALLED_VERSION=""
-    #fi
+# -------------------------------------------------------------------------------------------------------------------------------------------------
 
-    # normalize: 4.7.stable.official.xxxxx → 4.7.stable
-    if [ -n "$INSTALLED_VERSION_RAW" ]; then
-        INSTALLED_VERSION=$(echo "$INSTALLED_VERSION_RAW" | sed 's/\.official.*//')
-    else
-        INSTALLED_VERSION=""
-    fi
-    
-    # decide version
-    if [ "$FORCE_UPDATE" -eq 1 ]; then
-        VERSION="$LATEST_VERSION"
-    else
-        VERSION="$INSTALLED_VERSION"
-    fi
-    
-    # fallback
-    if [ -z "$VERSION" ] || [ "$VERSION" = "-" ]; then
-        VERSION="$LATEST_VERSION"
-    fi
-    
-    TEMPLATE_DIR="$HOME/.local/share/godot/export_templates/$VERSION"
-    
-    # skip if already installed
-    if [ "$FORCE_UPDATE" -eq 0 ] && [ -d "$TEMPLATE_DIR" ] && [ "$(ls -A "$TEMPLATE_DIR" 2>/dev/null)" ]; then
-        echo "✅ Already installed for $VERSION"
-        return 0
-    fi
-    
-    echo "⬇️ Searching export templates for $VERSION"
-    
-    TEMPLATE_URL=$(echo "$RELEASE_JSON" | jq -r "
-      .[]
-      | .assets[]?
-      | select(.name? != null)
-      | select(.name | test(\"export_templates\"))
-      | .browser_download_url
-    " | head -n 1)
-    
-    if [ -z "$TEMPLATE_URL" ]; then
-        echo "⚠️ No export templates found in GitHub releases"
-        echo "📦 Available assets (first release):"
-        echo "$RELEASE_JSON" | jq -r ".[0].assets[].name? // empty"
-        return 1
-    fi
-    
-    echo "⬇️ Downloading: $TEMPLATE_URL"
-    
-    TEMPLATE_FILE="$TMP_DIR/godot_templates.tpz"
-    
-    safe_wget "$TEMPLATE_URL" "$TEMPLATE_FILE" || {
-        echo "⚠️ Download failed"
-        return 1
-    }
-    
-    mkdir -p "$TEMPLATE_DIR"
-    
-    unzip -o "$TEMPLATE_FILE" -d "$TEMPLATE_DIR" || {
-        echo "⚠️ Unzip failed"
-        return 1
-    }
-
-    # Godot .tpz archives may contain a top-level templates/ directory.
-    # Move its contents directly into TEMPLATE_DIR.
-    if [ -d "$TEMPLATE_DIR/templates" ]; then
-        echo "📂 Flattening templates directory..."
-    
-        mv "$TEMPLATE_DIR/templates/"* "$TEMPLATE_DIR/" 2>/dev/null || true
-        mv "$TEMPLATE_DIR/templates/".[!.]* "$TEMPLATE_DIR/" 2>/dev/null || true
-        mv "$TEMPLATE_DIR/templates/"..?* "$TEMPLATE_DIR/" 2>/dev/null || true
-    
-        rmdir "$TEMPLATE_DIR/templates" 2>/dev/null || true
-    fi    
-    
-    echo "✅ Installed Godot templates for $VERSION"
-}
 
 godot_export_templates(){
     mkdir -p "$TMP_DIR"
@@ -1271,6 +1171,14 @@ godot_export_templates_latest(){
 
 redot_export_templates_latest(){
     godot_export_templates redot "https://api.github.com/repos/redot-engine/redot-engine/releases"
+}
+
+blazium_export_templates_latest(){
+    godot_export_templates blazium "https://api.github.com/repos/blazium-games/blazium/releases"
+}
+
+faster_godot_export_templates_latest(){
+    godot_export_templates faster-godot "https://api.github.com/repos/vorvek/faster-godot/releases"
 }
 
 
@@ -2116,8 +2024,7 @@ execute(){
     run_step "redot-templates" "Redot Export Templates" "false" '
         redot_export_templates_latest
     '
-
-
+    
     run_step "blazium" "Blazium" "is_installed blazium" '
         mkdir -p "$TMP_DIR"
     
@@ -2184,7 +2091,85 @@ execute(){
         }
     
         register_bin blazium /opt/gamedev/engines/blazium/blazium "Blazium"
-    '        
+    '
+
+    run_step "blazium-templates" "Blazium Export Templates" "false" '
+        blazium_export_templates_latest
+    '
+
+
+
+    run_step "faster-godot" "Faster-Godot" "is_installed faster-godot" '
+        mkdir -p "$TMP_DIR"
+    
+        FASTER_GODOT_URL=$(
+          curl -fsSL https://api.github.com/repos/faster-godot-games/faster-godot/releases/latest |
+          jq -r ".assets[]
+            | select(
+                (.name | test(\"linux\"; \"i\")) and
+                (.name | test(\"x86_64\"; \"i\")) and
+                (.name | test(\"mono\"; \"i\") | not) and
+                (.name | test(\"arm\"; \"i\") | not) and
+                (.name | endswith(\".zip\"))
+              )
+            | .browser_download_url" |
+          head -n 1
+        )
+    
+        if [ -z "$FASTER_GODOT_URL" ]; then
+            echo "⚠️ Faster-Godot download URL not found"
+            return 1
+        fi
+    
+        FASTER_GODOT_ZIP="$TMP_DIR/faster-godot.zip"
+    
+        safe_wget "$FASTER_GODOT_URL" "$FASTER_GODOT_ZIP" || {
+            echo "⚠️ Faster-Godot download failed"
+            return 1
+        }
+    
+        rm -rf "$TMP_DIR/faster-godot"
+        mkdir -p "$TMP_DIR/faster-godot"
+    
+        unzip -o "$FASTER_GODOT_ZIP" -d "$TMP_DIR/faster-godot" || {
+            echo "⚠️ Faster-Godot unzip failed"
+            return 1
+        }
+    
+        FASTER_GODOT_BIN=$(
+            find "$TMP_DIR/faster-godot" \
+                -type f \
+                -executable \
+                -print -quit
+        )
+    
+        if [ -z "$FASTER_GODOT_BIN" ]; then
+            echo "⚠️ Faster-Godot binary not found"
+            return 1
+        fi
+    
+        FASTER_GODOT_DIR=$(dirname "$FASTER_GODOT_BIN")
+    
+        rm -rf /opt/gamedev/engines/faster-godot
+        mkdir -p /opt/gamedev/engines
+    
+        cp -a "$FASTER_GODOT_DIR" /opt/gamedev/engines/faster-godot
+    
+        sudo install -Dm755 "$FASTER_GODOT_BIN" /opt/gamedev/engines/faster-godot/faster-godot
+
+        # Install Faster-Godot icon
+        safe_wget \
+            "https://raw.githubusercontent.com/vorvek/Faster-Godot/master/fast-godot.svg" \
+            "/opt/gamedev/engines/faster-godot/icon.png" || {
+            echo "⚠️ Failed to download Faster-Godot icon"
+        }
+    
+        register_bin faster-godot /opt/gamedev/engines/faster-godot/faster-godot "Faster Godot"
+    '
+    
+    run_step "faster-godot-templates" "Faster Godot Export Templates" "false" '
+        faster_godot_export_templates_latest
+    '    
     
     run_step "gdevelop" "GDevelop" "is_installed gdevelop" '
     GDEV_URL=$(
