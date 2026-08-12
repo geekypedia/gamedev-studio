@@ -2684,7 +2684,7 @@ execute(){
     
     sudo tee /usr/local/bin/defold << 'EOF'
 #!/bin/bash
-cd /opt/gamedev/engines/Defold/ && ./Defold "$@"
+cd /opt/gamedev/engines/Defold/ && ./Defold "\$@"
 EOF
     
     sudo chmod +x /usr/local/bin/defold
@@ -2735,22 +2735,22 @@ EOF
     
     sudo tee /usr/local/bin/giderosstudio > /dev/null << "EOF"
 #!/bin/bash
-cd /opt/gamedev/engines/Gideros && LD_LIBRARY_PATH=/opt/gamedev/engines/Gideros ./GiderosStudio "$@"
+cd /opt/gamedev/engines/Gideros && LD_LIBRARY_PATH=/opt/gamedev/engines/Gideros ./GiderosStudio "\$@"
 EOF
     
     sudo tee /usr/local/bin/giderosplayer > /dev/null << "EOF"
 #!/bin/bash
-cd /opt/gamedev/engines/Gideros && LD_LIBRARY_PATH=/opt/gamedev/engines/Gideros ./GiderosPlayer "$@"
+cd /opt/gamedev/engines/Gideros && LD_LIBRARY_PATH=/opt/gamedev/engines/Gideros ./GiderosPlayer "\$@"
 EOF
     
     sudo tee /usr/local/bin/giderosfontcreator > /dev/null << "EOF"
 #!/bin/bash
-cd /opt/gamedev/engines/Gideros && LD_LIBRARY_PATH=/opt/gamedev/engines/Gideros ./GiderosFontCreator "$@"
+cd /opt/gamedev/engines/Gideros && LD_LIBRARY_PATH=/opt/gamedev/engines/Gideros ./GiderosFontCreator "\$@"
 EOF
     
     sudo tee /usr/local/bin/giderostexturepacker > /dev/null << "EOF"
 #!/bin/bash
-cd /opt/gamedev/engines/Gideros && LD_LIBRARY_PATH=/opt/gamedev/engines/Gideros ./GiderosTexturePacker "$@"
+cd /opt/gamedev/engines/Gideros && LD_LIBRARY_PATH=/opt/gamedev/engines/Gideros ./GiderosTexturePacker "\$@"
 EOF
     
     sudo chmod +x /usr/local/bin/giderosstudio
