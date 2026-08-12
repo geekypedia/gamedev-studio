@@ -1351,7 +1351,7 @@ prep(){
     fi
     
     run_step "deps" "System Dependencies Install" \
-    "is_ok git curl wget unzip jq pv flatpak dotnet" '
+    "is_ok git curl wget unzip jq pv flatpak dotnet python3 pipx" '
     # 1. System & Repository Management (Crucial for finding other packages)
     sudo apt install -y software-properties-common
     
@@ -1367,7 +1367,8 @@ prep(){
     sudo apt install -y libsdl2-dev
     sudo apt install -y libsdl2-image-dev
     sudo apt install -y ntfs-3g
-    
+    sudo apt install -y g++ libstdc++-dev
+
     # 4. Python Environment (Best to build on top of core compilers)
     sudo apt install -y python3
     sudo apt install -y python3-pip
