@@ -1212,9 +1212,16 @@ godot_export_templates(){
         VERSION="$FIXED_VERSION"
         TEMPLATE_URL="$FIXED_DOWNLOAD_URL"
     fi
+
+    if [[ "$VERSION" == 3.* ]]; then
+        TMPL_PREFIX=""
+    else
+        TMPL_PREFIX="export_"
+    fi
     
-    TEMPLATE_DIR="$HOME/.local/share/$ALIAS/export_templates/$VERSION"
-    
+    TMPL_DIR="${TMPL_PREFIX}templates"
+    TEMPLATE_DIR="$HOME/.local/share/$ALIAS/$TMPL_DIR/$VERSION"
+
     # skip if already installed
     if [ "$FORCE_UPDATE" -eq 0 ] && [ -d "$TEMPLATE_DIR" ] && [ "$(ls -A "$TEMPLATE_DIR" 2>/dev/null)" ]; then
         echo "✅ Already installed for $VERSION"
