@@ -1316,8 +1316,10 @@ init() {
     # Create tmp
     sudo mkdir -p "$TMP_DIR"
 
-    ownership
-    
+    if [[ "$LIST_STEPS" -ne 1 ]]; then
+        ownership
+    fi
+
     # Now create subfolders as normal user (no sudo needed)
     mkdir -p "$BASE"/{engines,tools}
     
@@ -1578,9 +1580,11 @@ execute(){
     
     '
 
-    reload_nvm
+    if [[ "$LIST_STEPS" -ne 1 ]]; then
+        reload_nvm
+        ownership_nvm
+    fi
 
-    ownership_nvm
 
     run_step "node-fallback" "Node.js LTS using NVM (fallback method)" "is_nvm_usable" '
     INSTALL_USER="${SUDO_USER:-$USER}"
