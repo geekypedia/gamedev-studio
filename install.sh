@@ -1309,14 +1309,15 @@ init() {
     BASE="/opt/gamedev"
     BIN="/usr/local/bin"
     
-    # Create base directories as root
-    sudo mkdir -p "$BASE"
-    sudo mkdir -p "$BIN"
-    
-    # Create tmp
-    sudo mkdir -p "$TMP_DIR"
-
     if [[ "$LIST_STEPS" -ne 1 ]]; then
+        # Create base directories as root
+        sudo mkdir -p "$BASE"
+        sudo mkdir -p "$BIN"
+        
+        # Create tmp
+        sudo mkdir -p "$TMP_DIR"
+
+        # Take ownership
         ownership
     fi
 
