@@ -80,6 +80,25 @@ Built for speed, reproducibility, and zero manual setup.
 
 ## ⚡ One-Line Install
 
+### 🟢 Essential Install
+
+This option only installed a few select essential software from the whole list. Useful for beginners
+
+```bash
+wget -qO ~/gamedev-studio.sh https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh && chmod +x ~/gamedev-studio.sh && ~/gamedev-studio.sh -e
+```
+
+OR
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh -o ~/gamedev-studio.sh && chmod +x ~/gamedev-studio.sh && ~/gamedev-studio.sh -e
+```
+
+It is equivalent to 
+```bash
+~/gamedev-studio.sh -u apt,deps,code-setup,code,godot,godot-templates,gdevelop,ctjs,renpy,microstudio,gb-studio,krita,pixelorama,libresprite,tiled,ldtk,audacity,lmms,kdenlive,obs,famistudio
+```
+
 ### 🟢 Standard Install (Recommended)
 
 ```bash
@@ -444,6 +463,7 @@ OR
 
 | Flag | Description |
 |------|-------------|
+| `--essential` / `-e` | Only install essential tools. This is an exclusive option and doesn't combine with other options below |
 | `--force` / `-f` | Reinstall and overwrite all tools |
 | `--skip-downloads` / `-sd` | Skip downloading zip files to temp directory if it already exists (useful in combination with --force/-f |
 | `--upgrade` | Runs system upgrade (`apt upgrade`) before installation |
