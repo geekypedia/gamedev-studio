@@ -20,6 +20,7 @@
 
 - [🚀 Overview](#-overview)
 - [⚡ One-Line Install](#-one-line-install)
+  - [🟢 Essential Install](#-essential-install)
   - [🟢 Standard Install (Recommended)](#-standard-install-recommended)
   - [🟢 Only Download Script (To run it later)](#-only-download-script-to-run-it-later)
   - [🟢 Clone from git](#-clone-from-git)
@@ -82,7 +83,7 @@ Built for speed, reproducibility, and zero manual setup.
 
 ### 🟢 Essential Install
 
-This option only installed a few select essential software from the whole list. Useful for beginners
+This option only installes a few select essential software from the whole list. Good for beginner to intermediate Game Dev and Sound Engineers, who want tools that work.
 
 ```bash
 wget -qO ~/gamedev-studio.sh https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh && chmod +x ~/gamedev-studio.sh && ~/gamedev-studio.sh -e
@@ -100,6 +101,8 @@ It is equivalent to
 ```
 
 ### 🟢 Standard Install (Recommended)
+
+This option installs everything. Good for Game Dev enthusiasts who would like to explore all the available options.
 
 ```bash
 wget -qO ~/gamedev-studio.sh https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/install.sh && chmod +x ~/gamedev-studio.sh && ~/gamedev-studio.sh
