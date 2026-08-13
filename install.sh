@@ -35,6 +35,7 @@ failure() {
 # FLAGS
 # -----------------------------
 
+ESSENTIAL=0
 FORCE_UPDATE=0
 RUN_UPGRADE_STEP=0
 UPDATE_ONLY=""
@@ -49,6 +50,9 @@ SKIP_DOWNLOADS=0
 
 for arg in "$@"; do
     case "$arg" in
+        --essential|-e)
+            ESSENTIAL=1
+            ;;
         --force|-f)
             FORCE_UPDATE=1
             ;;
@@ -71,7 +75,7 @@ for arg in "$@"; do
             LIST_STEPS=1
             ;;
         --help|-h)
-            echo "Usage: $0 [--force|-f] [--skip-downloads|-sd] [--upgrade] [--update|-u <step>] [--skip|-s <step>] [--like|-lk] [--list|-l]"
+            echo "Usage: $0 [--essential|-e] [--force|-f] [--skip-downloads|-sd] [--upgrade] [--update|-u <step>] [--skip|-s <step>] [--like|-lk] [--list|-l]"
             exit 0
             ;;
         *)
@@ -83,7 +87,7 @@ for arg in "$@"; do
                 EXPECT_SKIP_VALUE=0
             else
                 echo "Unknown option: $arg"
-                echo "Usage: $0 [--force|-f] [--skip-downloads|-sd] [--upgrade] [--update|-u <step>] [--skip|-s <step>] [--like|-lk] [--list|-l]"
+                echo "Usage: $0 [--essential|-e] [--force|-f] [--skip-downloads|-sd] [--upgrade] [--update|-u <step>] [--skip|-s <step>] [--like|-lk] [--list|-l]"
                 exit 1
             fi
             ;;
@@ -93,6 +97,12 @@ done
 # Catch dangling flags missing their required arguments
 if [[ "$EXPECT_UPDATE_VALUE" -eq 1 ]] || [[ "$EXPECT_SKIP_VALUE" -eq 1 ]]; then
     echo "Error: Missing value for --update or --skip option."
+    exit 1
+fi
+
+if [[ "$ESSENTIAL" -eq 1 ]]; then
+    EXEC_SCRIPT_PATH="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/$(basename -- "${BASH_SOURCE[0]}")"
+    "$EXEC_SCRIPT_PATH" -u apt,deps,godot,godot-templates
     exit 1
 fi
 
