@@ -81,7 +81,7 @@ Built for speed, reproducibility, and zero manual setup.
 
 ## ⚡ One-Line Install
 
-### 🟢 Essential Install
+### 🟢 Essential Install (Recommended for Beginners)
 
 This option only installes a few select essential software from the whole list. Good for beginner to intermediate Game Dev and Sound Engineers, who want tools that work.
 
@@ -97,7 +97,7 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 
 It is equivalent to 
 ```bash
-~/gamedev-studio.sh -u apt,deps,code-setup,code,godot,godot-templates,gdevelop,ctjs,renpy,microstudio,gb-studio,krita,pixelorama,libresprite,tiled,ldtk,audacity,lmms,kdenlive,obs,famistudio
+~/gamedev-studio.sh -u apt,deps,code-setup,code,godot,godot-templates,gdevelop,ctjs,renpy,microstudio,gb-studio,gimp,krita,pixelorama,libresprite,tiled,ldtk,audacity,lmms,kdenlive,obs,famistudio
 ```
 
 ### 🟢 Standard Install (Recommended)
