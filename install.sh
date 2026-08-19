@@ -102,7 +102,7 @@ fi
 
 if [[ "$ESSENTIAL" -eq 1 ]]; then
     EXEC_SCRIPT_PATH="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/$(basename -- "${BASH_SOURCE[0]}")"
-    "$EXEC_SCRIPT_PATH" -u apt,deps,code-setup,code,godot,godot-templates,gdevelop,ctjs,renpy,microstudio,gb-studio,krita,pixelorama,libresprite,tiled,ldtk,audacity,lmms,kdenlive,obs,famistudio
+    "$EXEC_SCRIPT_PATH" -u apt,deps,code-setup,code,godot,godot-templates,gdevelop,ctjs,renpy,microstudio,gb-studio,gimp,krita,pixelorama,libresprite,tiled,ldtk,audacity,lmms,kdenlive,obs,famistudio
     exit 1
 fi
 
@@ -1091,6 +1091,8 @@ install_engine() {
 }
 
 # -------------------------------------------------------------------------------------------------------------------------------------------------
+REUSABLE FUNCTIONS
+# -------------------------------------------------------------------------------------------------------------------------------------------------
 
 get_godot_export_template_url() {
     local JSON="$1"
@@ -1308,6 +1310,41 @@ blazium_export_templates_latest(){
 
 faster_godot_export_templates_latest(){
     godot_export_templates faster-godot "vorvek/faster-godot"
+}
+
+# -----------------------------
+
+install_tal_vst_from_url() {
+    local URL="$1"
+    local ZIP_NAME
+    local EXTRACT_DIR
+
+    ZIP_NAME="$(basename "$URL")"
+    EXTRACT_DIR="$TMP_DIR/${ZIP_NAME%.zip}"
+
+    echo "⬇️ Downloading $(basename "$URL" .zip)..."
+
+    safe_wget "$URL" "$TMP_DIR/$ZIP_NAME" || {
+        echo "⚠️ Download failed"
+        return 1
+    }
+
+    mkdir -p "$EXTRACT_DIR"
+
+    unzip -q "$TMP_DIR/$ZIP_NAME" -d "$EXTRACT_DIR" || {
+        echo "⚠️ Extraction failed"
+        return 1
+    }
+
+    register_vst "$EXTRACT_DIR"
+
+    echo "✅ $(basename "$URL" .zip) installed"
+}
+
+install_tal_vst_from_name() {
+    local APP_NAME="$1"
+    local URL="https://tal-software.com/downloads/plugins/${APP_NAME}_64_linux.zip"
+    install_tal_vst_from_url $URL
 }
 
 
@@ -3734,7 +3771,27 @@ EOF
         
         echo "✅ TAL-NoiseMaker installed"
     '
+
+    run_step "tal-bitcrusher" "TAL-Bitcrusher" "is_vst3_installed TAL-Bitcrusher" '
+        install_tal_vst_from_name TAL-Bitcrusher
+    '
     
+    run_step "tal-reverb-4" "TAL-Reverb-4" "is_vst3_installed TAL-Reverb-4" '
+        install_tal_vst_from_name TAL-Reverb-4
+    '
+    
+    run_step "tal-filter-2" "TAL-Filter-2" "is_vst3_installed TAL-Filter-2" '
+        install_tal_vst_from_name TAL-Filter-2
+    '
+    
+    run_step "tal-chorus-lx" "TAL-Chorus-LX" "is_vst3_installed TAL-Chorus-LX" '
+        install_tal_vst_from_name TAL-Chorus-LX
+    '
+    
+    run_step "tal-vocoder-2" "TAL-Vocoder-2" "is_vst3_installed TAL-Vocoder-2" '
+        install_tal_vst_from_name TAL-Vocoder-2
+    '    
+
     run_step "sitala" "Sitala" "is_installed sitala" '
         URL="https://decomposer.de/sitala/releases/sitala-1.0_amd64.deb"
     
