@@ -1712,39 +1712,43 @@ execute(){
     '
     
     run_step "tsc" "TypeScript Compiler" "is_installed tsc" '
-    sudo apt install node-typescript -y || echo "⚠️ TypeScript install failed"
+        sudo apt install node-typescript -y
     '
     
     run_step "typescript" "TypeScript" "is_npm_installed typescript" '
-    npm install -g typescript --progress=true --verbose || echo "⚠️ TypeScript install failed"
+        npm install -g typescript --progress=true --verbose
     '
-    
+
+    run_step "itchio-downloader" "Itch.IO Downloader" "is_npm_installed itchio-downloader" '
+        npm install -g itchio-downloader --progress=true --verbose
+    '
+
     run_step "vite" "Vite" "is_installed vite" '
-    npm install -g vite --progress=true --verbose || echo "⚠️ Vite install failed"
+        npm install -g vite --progress=true --verbose
     '
     
     run_step "create-vite" "Create Vite" "is_installed create-vite" '
-    npm install -g create-vite --progress=true --verbose || echo "⚠️ create-vite install failed"
+        npm install -g create-vite --progress=true --verbose
     '
     
     run_step "create-react-app" "React CLI" "is_installed create-react-app" '
-    npm install -g create-react-app --progress=true --verbose || echo "⚠️ create-react-app install failed"
+        npm install -g create-react-app --progress=true --verbose
     '
     
     run_step "phaser" "Phaser CLI" "is_npm_installed phaser" '
-    npm install -g phaser --progress=true --verbose || echo "⚠️ Phaser install failed"
+        npm install -g phaser --progress=true --verbose
     '
     
     run_step "excalibur" "Excalibur CLI" "is_npm_installed excalibur" '
-    npm install -g excalibur --progress=true --verbose || echo "⚠️ Excalibur install failed"
+        npm install -g excalibur --progress=true --verbose
     '
     
     run_step "nw" "NW.js CLI" "is_npm_installed nw" '
-    npm install -g nw --progress=true --verbose || echo "⚠️ NW.js install failed"
+        npm install -g nw --progress=true --verbose
     '
     
     run_step "electron" "Electron CLI" "is_npm_installed electron" '
-    npm install -g electron --progress=true --verbose || echo "⚠️ Electron install failed"
+        npm install -g electron --progress=true --verbose
     '
 
     run_step "babylonjs" "BabylonJS" "is_npm_installed @babylonjs/core" '
@@ -1756,16 +1760,16 @@ execute(){
         npm install -g @babylonjs/post-processes --progress=true --verbose || echo "⚠️ BabylonJS Post Processes install failed"
         npm install -g @babylonjs/inspector --progress=true --verbose || echo "⚠️ BabylonJS Inspector install failed"
         npm install -g @babylonjs/havok --progress=true --verbose || echo "⚠️ BabylonJS Havok install failed"
-        '
+    '
     
     
     run_step "love.js" "Love.JS" "is_npm_installed love.js" '
-    npm install -g love.js --progress=true --verbose || echo "⚠️ Love.JS install failed"
+        npm install -g love.js --progress=true --verbose || echo "⚠️ Love.JS install failed"
     '
 
     run_step "makelove" "Love2D build tool" "is_installed makelove" '
-    pipx install makelove
-    pipx inject makelove "setuptools<70" --force
+        pipx install makelove
+        pipx inject makelove "setuptools<70" --force
     '
 
     # -----------------------------
