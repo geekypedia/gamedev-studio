@@ -1453,6 +1453,9 @@ prep(){
     sudo apt install -y libxrandr-dev
     sudo apt install -y libxcursor-dev
     sudo apt install -y libasound2-dev
+
+    #10. Other libraries
+    sudo apt install -y libopenal1
     
 '
 
