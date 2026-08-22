@@ -1546,6 +1546,27 @@ EOF
     run_step "bottles" "Bottles (For running Windows Applications)" "is_installed bottles" '
     flatpak install -y flathub com.usebottles.bottles || true
     '
+
+    # -----------------------------
+    # OTHER PREREQ TOOLS
+    # -----------------------------
+    run_step "docklike" "Docklike Taskbar" "dpkg -s xfce4-docklike-plugin >/dev/null 2>&1" '
+    . /etc/os-release
+
+    if [[ "$ID" != "linuxmint" ]]; then
+        echo "Not Linux Mint — skipping."
+        exit 0
+    fi
+
+    desktop="${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-}}"
+
+    if [[ "$desktop" != *XFCE* && "$desktop" != *Xfce* && "$desktop" != *xfce* ]]; then
+        echo "Not Xfce — skipping."
+        exit 0
+    fi
+
+    sudo apt install -y xfce4-docklike-plugin
+    '
 }
 
 execute(){
