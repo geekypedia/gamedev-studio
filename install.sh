@@ -1975,10 +1975,23 @@ download_and_register_app() {
     echo "[download]   $EXTRACTED_DIR"
     echo "[download]   -> $APP_BASE"
 
-    mv "$EXTRACTED_DIR" "$APP_BASE" || {
-        echo "⚠️ Failed to move application to $APP_BASE"
-        return 1
-    }
+    # mv "$EXTRACTED_DIR" "$APP_BASE" || {
+    #     echo "⚠️ Failed to move application to $APP_BASE"
+    #     return 1
+    # }
+    local SUBDIRS=("$EXTRACTED_DIR"/*/)
+    
+    if [[ ${#SUBDIRS[@]} -eq 1 ]]; then
+        mv "${SUBDIRS[0]}" "$APP_BASE" || {
+            echo "⚠️ Failed to move application to $APP_BASE"
+            return 1
+        }
+    else
+        mv "$EXTRACTED_DIR" "$APP_BASE" || {
+            echo "⚠️ Failed to move application to $APP_BASE"
+            return 1
+        }
+    fi    
 
     if [[ -n "$ALT_ICON_PATH" ]]; then
         safe_wget \
@@ -2017,7 +2030,10 @@ download_from_itchio() {
 
     local ALT_ICON_PATH="$6"
 
-
+    local APP_CATEGORY="${7:-Development;GameDev;}"
+    local APP_BIN_PARAMS="$8"
+    local APP_WMC="$9"
+    
     echo >&2
     echo "========== download_from_itchio ==========" >&2
     echo "[download_from_itchio] URL=$URL" >&2
@@ -2050,44 +2066,16 @@ download_from_itchio() {
     local APP_BASE="${BASE}/${APP_TYPE}/${APP_NAME}"
     local APP_PATH="$TMP_APP_BASE/${APP_NAME}.AppImage"
 
- download_and_register_app \
-        "$GET_URL" \
-        "$APP_NAME" \
-        "$APP_TITLE" \
-        "$APP_BASE" \
-        "$APP_PATH" \
-        "$ALT_ICON_PATH"    
-
-    # local TMP_APP_BASE="${BASE}/${APP_TYPE}/${APP_NAME}"
-    # local TMP_APP_PATH="$TMP_APP_BASE/${APP_NAME}.AppImage"
-
-    # safe_exists "$TMP_APP_PATH" || {
-    #     rm -rf "$TMP_APP_BASE"
-    #     mkdir -p "$TMP_APP_BASE"    
-    # }
-    
-    # safe_wget "$GET_URL" "$TMP_APP_PATH" || {
-    #     echo "⚠️ $APP_TITLE download failed"
-    #     return 1
-    # }
-    
-    # extract_appimage_icon "$TMP_APP_PATH" || {
-    #     if [[ -n "$ALT_ICON_PATH" ]]; then
-    #         safe_wget \
-    #             "$ALT_ICON_PATH" \
-    #             "$TMP_APP_BASE/icon.png" || {
-    #             echo "⚠️ Failed to download $APP_TITLE icon"
-    #         }
-    #     fi
-    # }
-
-    # register_bin $APP_NAME $TMP_APP_PATH "$APP_TITLE"
-    
-    # STATUS=$?
-
-    # echo "[download_from_itchio] safe_wget exit status=$STATUS" >&2
-
-    # return "$STATUS"
+     download_and_register_app \
+            "$GET_URL" \
+            "$APP_NAME" \
+            "$APP_TITLE" \
+            "$APP_BASE" \
+            "$APP_PATH" \
+            "$ALT_ICON_PATH" \
+            "$APP_CATEGORY" \
+            "$APP_BIN_PARAMS" \
+            "$APP_WMC"
 }
 
 whimtale_download() {
