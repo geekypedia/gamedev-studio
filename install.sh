@@ -1321,8 +1321,10 @@ godot_export_templates_latest(){
     godot_export_templates godot "godotengine/godot"
 }
 
+GODOT3_VERSION="3.6.3"
+
 godot_export_templates_v3(){
-    godot_export_templates godot3 "godotengine/godot" "3.6.2" "" "godot"
+    godot_export_templates godot3 "godotengine/godot" "$GODOT3_VERSION" "" "godot"
 }
 
 godot_export_templates_mono(){
@@ -3347,9 +3349,9 @@ execute(){
 
     run_step "godot3" "Godot3" "is_installed godot3" '
     mkdir -p "$TMP_DIR"
-    
-    GODOT3_URL=https://github.com/godotengine/godot/releases/download/3.6.2-stable/Godot_v3.6.2-stable_x11.64.zip
-    
+
+    local GODOT3_URL="https://github.com/godotengine/godot/releases/download/${GODOT3_VERSION}-stable/Godot_v${GODOT3_VERSION}-stable_x11.64.zip"
+
     if [ -z "$GODOT3_URL" ]; then
         echo "⚠️ Godot3 download URL not found"
         return 1
