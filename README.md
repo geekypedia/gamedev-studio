@@ -97,7 +97,7 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 
 It is equivalent to 
 ```bash
-~/gamedev-studio.sh -u apt,deps,code-setup,code,godot,godot-templates,gdevelop,ctjs,renpy,microstudio,gb-studio,gimp,krita,pixelorama,libresprite,tiled,ldtk,audacity,lmms,kdenlive,obs,famistudio
+~/gamedev-studio.sh -u apt,deps,code-setup,code,godot,godot-templates,gdevelop,ctjs,renpy,microstudio,whimtale,gimp,krita,pixelorama,libresprite,tiled,ldtk,audacity,lmms,kdenlive,obs,famistudio
 ```
 
 ### 🟢 Standard Install (Recommended)
@@ -324,6 +324,7 @@ OR
 - GDevelop (No-code, JavaScript supported)
 - Ct.js (Block-based, JavaScript, CoffeeScript)
 - microStudio (Lua, JavaScript, Python)
+- Whimtale (No-code)
 - GB Studio (No-code)
 - Twine (No-code)
 - TuesdayJS (No-code, JavaScript)
@@ -375,6 +376,7 @@ OR
 - Piko Pixel
 - Pixelorama
 - LibreSprite
+- Ogmo Editor
 - Effekseer
 - FreeTexturePacker
 - Synfig Studio
