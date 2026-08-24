@@ -1871,7 +1871,7 @@ ogmo_download() {
         "Ogmo Editor (amd64)" \
         "tools" \
         "ogmo-editor" \
-        "Ogmo Editor"
+        "Ogmo Editor" \
         "https://avatars.githubusercontent.com/u/55803837?s=200&v=4"
 }
 
