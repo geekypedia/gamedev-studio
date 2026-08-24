@@ -2116,7 +2116,7 @@ prepare_downloaded_app() {
         echo "[prepare]   $DOWNLOAD_FILE" >&2
         echo "[prepare]   -> $APPIMAGE_FILE" >&2
 
-        mv "$DOWNLOAD_FILE" "$APPIMAGE_FILE" || {
+        cp "$DOWNLOAD_FILE" "$APPIMAGE_FILE" || {
             echo "⚠️ Failed to rename AppImage" >&2
             return 1
         }
@@ -2184,13 +2184,14 @@ prepare_downloaded_app() {
 install_appimage() {
     local FOUND_APPIMAGE="$1"
     local APP_BASE="$2"
-    local APP_PATH="$3"
-    local ALT_ICON_PATH="$4"
-    local APP_NAME="$5"
-    local APP_TITLE="$6"
-    local APP_CATEGORY="$7"
-    local APP_BIN_PARAMS="$8"
-    local APP_WMC="$9"
+    local ALT_ICON_PATH="$3"
+    local APP_NAME="$4"
+    local APP_TITLE="$5"
+    local APP_CATEGORY="$6"
+    local APP_BIN_PARAMS="$7"
+    local APP_WMC="$8"
+
+    local APP_PATH="$APP_BASE/${APP_NAME}.AppImage"
 
     echo "[download] Processing as AppImage"
 
@@ -2320,11 +2321,10 @@ download_and_register_app() {
     local APP_NAME="$2"
     local APP_TITLE="$3"
     local APP_BASE="$4"
-    local APP_PATH="$5"
-    local ALT_ICON_PATH="$6"
-    local APP_CATEGORY="${7:-Development;GameDev;}"
-    local APP_BIN_PARAMS="$8"
-    local APP_WMC="$9"
+    local ALT_ICON_PATH="$5"
+    local APP_CATEGORY="${6:-Development;GameDev;}"
+    local APP_BIN_PARAMS="$7"
+    local APP_WMC="$8"
 
     local DOWNLOAD_DIR="$TMP_DIR/$APP_NAME"
     local DOWNLOAD_FILE="$DOWNLOAD_DIR/download"
@@ -2382,7 +2382,6 @@ download_and_register_app() {
         install_appimage \
             "$APP_CONTENT" \
             "$APP_BASE" \
-            "$APP_PATH" \
             "$ALT_ICON_PATH" \
             "$APP_NAME" \
             "$APP_TITLE" \
@@ -2463,14 +2462,13 @@ download_from_itchio() {
     echo "[download_from_itchio] safe_wget URL=$GET_URL" >&2
 
     local APP_BASE="${BASE}/${APP_TYPE}/${APP_NAME}"
-    local APP_PATH="$TMP_APP_BASE/${APP_NAME}.AppImage"
+    
 
      download_and_register_app \
             "$GET_URL" \
             "$APP_NAME" \
             "$APP_TITLE" \
             "$APP_BASE" \
-            "$APP_PATH" \
             "$ALT_ICON_PATH" \
             "$APP_CATEGORY" \
             "$APP_BIN_PARAMS" \
