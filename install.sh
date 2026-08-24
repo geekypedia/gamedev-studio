@@ -46,6 +46,9 @@ EXPECT_UPDATE_VALUE=0
 SKIP_LIST=""
 EXPECT_SKIP_VALUE=0
 
+REMOVE_LIST=""
+EXPECT_REMOVE_VALUE=0
+
 SKIP_DOWNLOADS=0
 
 for arg in "$@"; do
@@ -68,6 +71,9 @@ for arg in "$@"; do
         --skip|-s)
             EXPECT_SKIP_VALUE=1
             ;;
+        --remove|-rm)
+            EXPECT_REMOVE_VALUE=1
+            ;;
         --like|-lk)
             LIKE_SEARCH=1
             ;;
@@ -85,9 +91,12 @@ for arg in "$@"; do
             elif [[ "$EXPECT_SKIP_VALUE" -eq 1 ]]; then
                 SKIP_LIST="$arg"
                 EXPECT_SKIP_VALUE=0
+            elif [[ "$EXPECT_REMOVE_VALUE" -eq 1 ]]; then
+                REMOVE_LIST="$arg"
+                EXPECT_REMOVE_VALUE=0
             else
                 echo "Unknown option: $arg"
-                echo "Usage: $0 [--essential|-e] [--force|-f] [--skip-downloads|-sd] [--upgrade] [--update|-u <step>] [--skip|-s <step>] [--like|-lk] [--list|-l]"
+                echo "Usage: $0 [--essential|-e] [--force|-f] [--skip-downloads|-sd] [--upgrade] [--update|-u <step>] [--skip|-s <step>] [--like|-lk] [--list|-l] [--remove|-rm]"
                 exit 1
             fi
             ;;
@@ -95,7 +104,7 @@ for arg in "$@"; do
 done
 
 # Catch dangling flags missing their required arguments
-if [[ "$EXPECT_UPDATE_VALUE" -eq 1 ]] || [[ "$EXPECT_SKIP_VALUE" -eq 1 ]]; then
+if [[ "$EXPECT_UPDATE_VALUE" -eq 1 ]] || [[ "$EXPECT_SKIP_VALUE" -eq 1 ]] || [[ "$EXPECT_REMOVE_VALUE" -eq 1 ]]; then
     echo "Error: Missing value for --update or --skip option."
     exit 1
 fi
@@ -396,6 +405,24 @@ run_step() {
             fi
         done
     fi
+
+    # Uninstall if in --remove list
+    if [[ -n "$REMOVE_LIST" ]]; then
+        IFS=',' read -ra REMOVE_ITEMS <<< "$REMOVE_LIST"
+    
+        for item in "${REMOVE_ITEMS[@]}"; do
+            if [[ "$item" == "$NAME" ]]; then
+                echo
+                echo "--------------------------------------------------------------------------------"
+                echo "🗑 Uninstalling $DESCRIPTION ($NAME) (requested via --remove)"
+                echo "--------------------------------------------------------------------------------"
+    
+                uninstall_app "$NAME"
+    
+                return 0
+            fi
+        done
+    fi    
 
     echo
     echo "--------------------------------------------------"
@@ -1349,6 +1376,81 @@ install_tal_vst_from_name() {
 }
 
 
+
+# -----------------------------
+
+uninstall_app() {
+    local APP_NAME="$1"
+
+    echo "[uninstall] APP_NAME=$APP_NAME"
+
+    # --------------------------------------------------------
+    # Remove symlink/binary
+    # --------------------------------------------------------
+
+    echo "[uninstall] Removing /usr/local/bin/$APP_NAME"
+    sudo unlink "/usr/local/bin/$APP_NAME" 2>/dev/null || true
+
+    # --------------------------------------------------------
+    # Remove desktop entry
+    # --------------------------------------------------------
+
+    echo "[uninstall] Removing /usr/share/applications/$APP_NAME.desktop"
+    sudo rm -f "/usr/share/applications/$APP_NAME.desktop" 2>/dev/null || true
+
+    # --------------------------------------------------------
+    # Remove application directory
+    #
+    # Applications may be installed under:
+    #   $BASE/engine/$APP_NAME
+    #   $BASE/tools/$APP_NAME
+    # --------------------------------------------------------
+
+    local APP_DIR
+
+    for APP_DIR in \
+        "$BASE/engine/$APP_NAME" \
+        "$BASE/tools/$APP_NAME"
+    do
+        if [[ -e "$APP_DIR" ]]; then
+            echo "[uninstall] Removing $APP_DIR"
+            rm -rf "$APP_DIR" 2>/dev/null || true
+        fi
+    done
+
+    # --------------------------------------------------------
+    # Try APT
+    # --------------------------------------------------------
+
+    echo "[uninstall] Trying apt..."
+
+    if command -v apt >/dev/null 2>&1; then
+        sudo apt remove -y "$APP_NAME" 2>/dev/null || true
+    fi
+
+    # --------------------------------------------------------
+    # Try Flatpak
+    # --------------------------------------------------------
+
+    echo "[uninstall] Trying flatpak..."
+
+    if command -v flatpak >/dev/null 2>&1; then
+        flatpak uninstall -y "$APP_NAME" 2>/dev/null || true
+    fi
+
+    # --------------------------------------------------------
+    # Try Snap
+    # --------------------------------------------------------
+
+    echo "[uninstall] Trying snap..."
+
+    if command -v snap >/dev/null 2>&1; then
+        sudo snap remove "$APP_NAME" 2>/dev/null || true
+    fi
+
+    echo "[uninstall] Finished"
+    return 0
+}
 
 # -----------------------------
 
