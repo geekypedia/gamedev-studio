@@ -1784,6 +1784,9 @@ download_and_register_app() {
     local APP_BASE="$4"
     local APP_PATH="$5"
     local ALT_ICON_PATH="$6"
+    local APP_CATEGORY="${7:-"Development;GameDev;"}"
+    local APP_BIN_PARAMS="$8"
+    local APP_WMC="$9"
 
     local DOWNLOAD_DIR="$TMP_DIR/$APP_NAME"
     local DOWNLOAD_FILE="$DOWNLOAD_DIR/download"
@@ -1896,13 +1899,13 @@ download_and_register_app() {
             if [[ -n "$ALT_ICON_PATH" ]]; then
                 safe_wget \
                     "$ALT_ICON_PATH" \
-                    "$TMP_APP_BASE/icon.png" || {
+                    "$APP_BASE/icon.png" || {
                     echo "⚠️ Failed to download $APP_TITLE icon"
                 }
             fi
         }
 
-        register_bin "$APP_NAME" "$APP_PATH" "$APP_TITLE"
+        register_bin "$APP_NAME" "$APP_PATH" "$APP_TITLE" "$APP_CATEGORY" "$APP_BIN_PARAMS" "$APP_WMC"
 
         return $?
     fi
@@ -1929,16 +1932,25 @@ download_and_register_app() {
     if [[ -n "$ALT_ICON_PATH" ]]; then
         safe_wget \
             "$ALT_ICON_PATH" \
-            "$TMP_APP_BASE/icon.png" || {
+            "$APP_BASE/icon.png" || {
             echo "⚠️ Failed to download $APP_TITLE icon"
         }
     fi
 
     APP_BIN="$(
-        find "$APP_BASE" \
-            -type f \
-            -perm -111 \
-            -print -quit
+        find "$APP_BASE" -type f -print0 |
+        while IFS= read -r -d '' file_path; do
+            FILE_INFO="$(file -b "$file_path")"
+    
+            echo "[download] Checking: $file_path" >&2
+            echo "[download] Type: $FILE_INFO" >&2
+    
+            if [[ "$FILE_INFO" == ELF* &&
+                  "$FILE_INFO" == *"executable"* ]]; then
+                printf '%s\n' "$file_path"
+                break
+            fi
+        done
     )"
 
     if [[ -z "$APP_BIN" ]]; then
@@ -1948,7 +1960,7 @@ download_and_register_app() {
 
     echo "[download] APP_BIN=$APP_BIN"
 
-    register_bin "$APP_NAME" "$APP_BIN" "$APP_TITLE"
+    register_bin "$APP_NAME" "$APP_BIN" "$APP_TITLE" "$APP_CATEGORY" "$APP_BIN_PARAMS" "$APP_WMC"
 }
 
 # -----------------------------
@@ -2049,7 +2061,7 @@ whimtale_download() {
         "Linux x64" \
         "" \
         "whimtale" \
-        "Whimtale"
+        "Whimtale" \
 }
 
 ogmo_download() {
@@ -2059,7 +2071,8 @@ ogmo_download() {
         "tools" \
         "ogmo-editor" \
         "Ogmo Editor" \
-        "https://avatars.githubusercontent.com/u/55803837?s=200&v=4"
+        "https://avatars.githubusercontent.com/u/55803837?s=200&v=4" \
+        "Graphics;"
 }
 
 
