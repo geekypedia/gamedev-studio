@@ -1217,7 +1217,7 @@ godot_export_templates(){
     if [ -n "$INSTALLED_VERSION_RAW" ]; then
         INSTALLED_VERSION=$(echo "$INSTALLED_VERSION_RAW" | sed 's/\.official.*//')
         INSTALLED_VERSION="${INSTALLED_VERSION%% *}"
-        INSTALLED_VERSION_TAG=$(echo "$INSTALLED_VERSION_TAG" | sed -E 's/^([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+        INSTALLED_VERSION_TAG=$(echo "$INSTALLED_VERSION" | sed -E 's/^([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
     else
         INSTALLED_VERSION=""
     fi
@@ -1289,6 +1289,9 @@ godot_export_templates(){
     echo "⬇️ Downloading: $TEMPLATE_URL"
     
     TEMPLATE_FILE="$TMP_DIR"/"$APP"_templates.tpz
+
+    # Clean Template URL
+    TEMPLATE_URL="$(printf '%s' "$TEMPLATE_URL" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
     
     safe_wget "$TEMPLATE_URL" "$TEMPLATE_FILE" || {
         echo "⚠️ Download failed"
