@@ -1777,6 +1777,57 @@ get_itchio_url() {
 
 # -----------------------------
 
+
+find_linux_executable() {
+    local BASE_DIR="$1"
+    local PREFERRED_NAME="$2"
+
+    local APP_BIN=""
+    local file_path
+    local FILE_INFO
+    local BASENAME
+
+    echo "[find_linux_executable] BASE_DIR=$BASE_DIR" >&2
+    echo "[find_linux_executable] PREFERRED_NAME=$PREFERRED_NAME" >&2
+
+    while IFS= read -r -d '' file_path; do
+        FILE_INFO="$(file -b "$file_path")"
+
+        echo "[find_linux_executable] Checking: $file_path" >&2
+        echo "[find_linux_executable] Type: $FILE_INFO" >&2
+
+        if [[ "$FILE_INFO" == ELF* ]]; then
+            BASENAME="$(basename "$file_path")"
+
+            echo "[find_linux_executable] ELF found: $file_path" >&2
+
+            # Prefer an ELF whose filename matches the application name.
+            if [[ -n "$PREFERRED_NAME" && "$BASENAME" == "$PREFERRED_NAME" ]]; then
+                APP_BIN="$file_path"
+                echo "[find_linux_executable] Preferred executable found: $APP_BIN" >&2
+                break
+            fi
+
+            # Otherwise remember the first ELF we find.
+            if [[ -z "$APP_BIN" ]]; then
+                APP_BIN="$file_path"
+            fi
+        fi
+    done < <(
+        find "$BASE_DIR" -type f -print0
+    )
+
+    if [[ -z "$APP_BIN" ]]; then
+        echo "[find_linux_executable] No ELF executable found" >&2
+        return 1
+    fi
+
+    echo "[find_linux_executable] Returning: $APP_BIN" >&2
+    printf '%s\n' "$APP_BIN"
+}
+
+# -----------------------------
+
 download_and_register_app() {
     local GET_URL="$1"
     local APP_NAME="$2"
@@ -1937,26 +1988,10 @@ download_and_register_app() {
         }
     fi
 
-    APP_BIN="$(
-        find "$APP_BASE" -type f -print0 |
-        while IFS= read -r -d '' file_path; do
-            FILE_INFO="$(file -b "$file_path")"
-    
-            echo "[download] Checking: $file_path" >&2
-            echo "[download] Type: $FILE_INFO" >&2
-    
-            if [[ "$FILE_INFO" == ELF* &&
-                  "$FILE_INFO" == *"executable"* ]]; then
-                printf '%s\n' "$file_path"
-                break
-            fi
-        done
-    )"
-
-    if [[ -z "$APP_BIN" ]]; then
+    APP_BIN="$(find_linux_executable "$APP_BASE" "$APP_NAME")" || {
         echo "⚠️ Could not find executable inside $APP_BASE"
         return 1
-    fi
+    }
 
     echo "[download] APP_BIN=$APP_BIN"
 
@@ -2069,7 +2104,7 @@ ogmo_download() {
         "https://ogmoeditor.itch.io/editor" \
         "Ogmo Editor (amd64)" \
         "tools" \
-        "ogmo-editor" \
+        "ogmoeditor" \
         "Ogmo Editor" \
         "https://avatars.githubusercontent.com/u/55803837?s=200&v=4" \
         "Graphics;"
@@ -5016,7 +5051,7 @@ EOF
     sudo chmod +x /usr/local/bin/ldtk-sync
     '
 
-    run_step "ogmo-editor" "Ogmo Editor" "is_installed ogmo-editor" '
+    run_step "ogmoeditor" "Ogmo Editor" "is_installed ogmoeditor" '
         ogmo_download
     '
     
