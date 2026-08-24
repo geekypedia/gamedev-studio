@@ -1777,6 +1777,182 @@ get_itchio_url() {
 
 # -----------------------------
 
+download_and_register_app() {
+    local GET_URL="$1"
+    local APP_NAME="$2"
+    local APP_TITLE="$3"
+    local APP_BASE="$4"
+    local APP_PATH="$5"
+    local ALT_ICON_PATH="$6"
+
+    local DOWNLOAD_DIR="$TMP_DIR/$APP_NAME"
+    local DOWNLOAD_FILE="$DOWNLOAD_DIR/download"
+    local FOUND_APPIMAGE=""
+    local FILE_TYPE=""
+    local EXTRACTED_DIR="$DOWNLOAD_DIR/extracted"
+    local APP_BIN=""
+
+    echo "[download] APP_NAME=$APP_NAME"
+    echo "[download] APP_TITLE=$APP_TITLE"
+    echo "[download] APP_BASE=$APP_BASE"
+    echo "[download] APP_PATH=$APP_PATH"
+    echo "[download] DOWNLOAD_DIR=$DOWNLOAD_DIR"
+
+    # --------------------------------------------------------
+    # Download
+    # --------------------------------------------------------
+
+    rm -rf "$DOWNLOAD_DIR"
+    mkdir -p "$DOWNLOAD_DIR"
+
+    echo "[download] Downloading..."
+
+    safe_wget "$GET_URL" "$DOWNLOAD_FILE" || {
+        echo "⚠️ $APP_TITLE download failed"
+        return 1
+    }
+
+    echo "[download] Download completed: $DOWNLOAD_FILE"
+
+    # --------------------------------------------------------
+    # Determine downloaded file type
+    # --------------------------------------------------------
+
+    FILE_TYPE="$(file -b "$DOWNLOAD_FILE")"
+
+    echo "[download] FILE_TYPE=$FILE_TYPE"
+
+    if [[ "$FILE_TYPE" == *"AppImage"* ]]; then
+
+        echo "[download] Download is an AppImage"
+
+        FOUND_APPIMAGE="$DOWNLOAD_FILE"
+
+    elif [[ "$FILE_TYPE" == *"Zip archive"* ||
+            "$FILE_TYPE" == *"ZIP archive"* ]] ||
+         unzip -t "$DOWNLOAD_FILE" >/dev/null 2>&1; then
+
+        echo "[download] Download is a ZIP archive"
+
+        rm -rf "$EXTRACTED_DIR"
+        mkdir -p "$EXTRACTED_DIR"
+
+        echo "[download] Extracting to $EXTRACTED_DIR"
+
+        unzip -q "$DOWNLOAD_FILE" -d "$EXTRACTED_DIR" || {
+            echo "⚠️ Failed to extract $APP_TITLE"
+            return 1
+        }
+
+        echo "[download] ZIP extraction completed"
+
+        FOUND_APPIMAGE="$(
+            find "$EXTRACTED_DIR" \
+                -type f \
+                \( -iname "*.AppImage" -o -iname "*.appimage" \) \
+                -print -quit
+        )"
+
+        if [[ -n "$FOUND_APPIMAGE" ]]; then
+            echo "[download] Found AppImage: $FOUND_APPIMAGE"
+        else
+            echo "[download] No AppImage found in ZIP"
+        fi
+
+    else
+
+        echo "⚠️ Unknown downloaded file type: $FILE_TYPE"
+        return 1
+
+    fi
+
+    # --------------------------------------------------------
+    # AppImage route
+    #
+    # Applies to both:
+    #   - directly downloaded AppImage
+    #   - AppImage found inside ZIP
+    # --------------------------------------------------------
+
+    if [[ -n "$FOUND_APPIMAGE" ]]; then
+
+        echo "[download] Processing as AppImage"
+
+        safe_exists "$APP_PATH" || {
+            rm -rf "$APP_BASE"
+            mkdir -p "$APP_BASE"
+        }
+
+        echo "[download] Moving AppImage:"
+        echo "[download]   $FOUND_APPIMAGE"
+        echo "[download]   -> $APP_PATH"
+
+        mv "$FOUND_APPIMAGE" "$APP_PATH" || {
+            echo "⚠️ Failed to move AppImage to $APP_PATH"
+            return 1
+        }
+
+        extract_appimage_icon "$APP_PATH" || {
+            if [[ -n "$ALT_ICON_PATH" ]]; then
+                safe_wget \
+                    "$ALT_ICON_PATH" \
+                    "$TMP_APP_BASE/icon.png" || {
+                    echo "⚠️ Failed to download $APP_TITLE icon"
+                }
+            fi
+        }
+
+        register_bin "$APP_NAME" "$APP_PATH" "$APP_TITLE"
+
+        return $?
+    fi
+
+    # --------------------------------------------------------
+    # Non-AppImage route
+    # --------------------------------------------------------
+
+    echo "[download] Processing as non-AppImage application"
+
+    rm -rf "$APP_BASE"
+
+    mkdir -p "$(dirname "$APP_BASE")"
+
+    echo "[download] Moving extracted application:"
+    echo "[download]   $EXTRACTED_DIR"
+    echo "[download]   -> $APP_BASE"
+
+    mv "$EXTRACTED_DIR" "$APP_BASE" || {
+        echo "⚠️ Failed to move application to $APP_BASE"
+        return 1
+    }
+
+    if [[ -n "$ALT_ICON_PATH" ]]; then
+        safe_wget \
+            "$ALT_ICON_PATH" \
+            "$TMP_APP_BASE/icon.png" || {
+            echo "⚠️ Failed to download $APP_TITLE icon"
+        }
+    fi
+
+    APP_BIN="$(
+        find "$APP_BASE" \
+            -type f \
+            -perm -111 \
+            -print -quit
+    )"
+
+    if [[ -z "$APP_BIN" ]]; then
+        echo "⚠️ Could not find executable inside $APP_BASE"
+        return 1
+    fi
+
+    echo "[download] APP_BIN=$APP_BIN"
+
+    register_bin "$APP_NAME" "$APP_BIN" "$APP_TITLE"
+}
+
+# -----------------------------
+
 download_from_itchio() {
     local URL="$1"
     local DOWNLOAD_TEXT="$2"
@@ -1824,36 +2000,47 @@ download_from_itchio() {
     echo "[download_from_itchio] Calling safe_wget..." >&2
     echo "[download_from_itchio] safe_wget URL=$GET_URL" >&2
 
-    local TMP_APP_BASE="${BASE}/${APP_TYPE}/${APP_NAME}"
-    local TMP_APP_PATH="$TMP_APP_BASE/${APP_NAME}.AppImage"
+    local APP_BASE="${BASE}/${APP_TYPE}/${APP_NAME}"
+    local APP_PATH="$TMP_APP_BASE/${APP_NAME}.AppImage"
 
-    safe_exists "$TMP_APP_PATH" || {
-        rm -rf "$TMP_APP_BASE"
-        mkdir -p "$TMP_APP_BASE"    
-    }
+ download_and_register_app \
+        "$GET_URL" \
+        "$APP_NAME" \
+        "$APP_TITLE" \
+        "$APP_BASE" \
+        "$APP_PATH" \
+        "$ALT_ICON_PATH"    
+
+    # local TMP_APP_BASE="${BASE}/${APP_TYPE}/${APP_NAME}"
+    # local TMP_APP_PATH="$TMP_APP_BASE/${APP_NAME}.AppImage"
+
+    # safe_exists "$TMP_APP_PATH" || {
+    #     rm -rf "$TMP_APP_BASE"
+    #     mkdir -p "$TMP_APP_BASE"    
+    # }
     
-    safe_wget "$GET_URL" "$TMP_APP_PATH" || {
-        echo "⚠️ $APP_TITLE download failed"
-        return 1
-    }
+    # safe_wget "$GET_URL" "$TMP_APP_PATH" || {
+    #     echo "⚠️ $APP_TITLE download failed"
+    #     return 1
+    # }
     
-    extract_appimage_icon "$TMP_APP_PATH" || {
-        if [[ -n "$ALT_ICON_PATH" ]]; then
-            safe_wget \
-                "$ALT_ICON_PATH" \
-                "$TMP_APP_BASE/icon.png" || {
-                echo "⚠️ Failed to download $APP_TITLE icon"
-            }
-        fi
-    }
+    # extract_appimage_icon "$TMP_APP_PATH" || {
+    #     if [[ -n "$ALT_ICON_PATH" ]]; then
+    #         safe_wget \
+    #             "$ALT_ICON_PATH" \
+    #             "$TMP_APP_BASE/icon.png" || {
+    #             echo "⚠️ Failed to download $APP_TITLE icon"
+    #         }
+    #     fi
+    # }
 
-    register_bin $APP_NAME $TMP_APP_PATH "$APP_TITLE"
+    # register_bin $APP_NAME $TMP_APP_PATH "$APP_TITLE"
     
-    STATUS=$?
+    # STATUS=$?
 
-    echo "[download_from_itchio] safe_wget exit status=$STATUS" >&2
+    # echo "[download_from_itchio] safe_wget exit status=$STATUS" >&2
 
-    return "$STATUS"
+    # return "$STATUS"
 }
 
 whimtale_download() {
