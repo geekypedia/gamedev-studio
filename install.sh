@@ -1698,11 +1698,13 @@ get_itchio_url() {
     local URL="$1"
     local DOWNLOAD_TEXT="$2"
 
-    local APP_NAME
-    APP_NAME="${URL%/}"
-    APP_NAME="${APP_NAME##*/}"
-    APP_NAME="${APP_NAME%%\?*}"
-    APP_NAME="${APP_NAME%%\#*}"
+    local APP_NAME="${3:-}"
+    if [[ -z "$APP_NAME" ]]; then
+        APP_NAME="${URL%/}"
+        APP_NAME="${APP_NAME##*/}"
+        APP_NAME="${APP_NAME%%\?*}"
+        APP_NAME="${APP_NAME%%\#*}"
+    fi
 
     local HTML_FILE="${TMP_DIR}/${APP_NAME}.html"
 
@@ -1779,8 +1781,17 @@ download_from_itchio() {
     local URL="$1"
     local DOWNLOAD_TEXT="$2"
     local APP_TYPE="${3:-engines}"
-    local APP_NAME="${URL##*/}"
-    local APP_TITLE="${4:-$1}"
+
+    local APP_NAME="$4"
+    if [[ -z "$APP_NAME" ]]; then
+        APP_NAME="${URL%/}"
+        APP_NAME="${APP_NAME##*/}"
+        APP_NAME="${APP_NAME%%\?*}"
+        APP_NAME="${APP_NAME%%\#*}"
+    fi    
+
+    local APP_TITLE="${5:-${APP_NAME}}"
+
 
     echo >&2
     echo "========== download_from_itchio ==========" >&2
@@ -1791,7 +1802,7 @@ download_from_itchio() {
 
     echo "[download_from_itchio] Calling get_itchio_url..." >&2
 
-    GET_URL="$(get_itchio_url "$URL" "$DOWNLOAD_TEXT")"
+    GET_URL="$(get_itchio_url "$URL" "$DOWNLOAD_TEXT" "$APP_NAME")"
 
     local STATUS=$?
 
@@ -1839,7 +1850,17 @@ whimtale_download() {
         "https://ctjs.itch.io/whimtale" \
         "Linux x64" \
         "" \
+        "whimtale" \
         "Whimtale"
+}
+
+ogmo_download() {
+    download_from_itchio \
+        "https://ogmoeditor.itch.io/editor" \
+        "Ogmo Editor (amd64)" \
+        "tools" \
+        "ogmo-editor" \
+        "Ogmo Editor"
 }
 
 
@@ -4781,6 +4802,10 @@ done
 EOF
     
     sudo chmod +x /usr/local/bin/ldtk-sync
+    '
+
+    run_step "ogmo-editor" "Whimtale" "is_installed ogmo-editor" '
+        ogmo_download
     '
     
     # -----------------------------
