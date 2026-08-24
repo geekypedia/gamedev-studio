@@ -2048,27 +2048,6 @@ find_appimage() {
 
 
 # ============================================================
-# Download a file
-# ============================================================
-
-download_app_file() {
-    local GET_URL="$1"
-    local DOWNLOAD_FILE="$2"
-    local APP_TITLE="$3"
-
-    echo "[download] Downloading..."
-    echo "[download] DOWNLOAD_FILE=$DOWNLOAD_FILE"
-
-    safe_wget "$GET_URL" "$DOWNLOAD_FILE" || {
-        echo "⚠️ $APP_TITLE download failed"
-        return 1
-    }
-
-    echo "[download] Download completed: $DOWNLOAD_FILE"
-}
-
-
-# ============================================================
 # Extract ZIP archive
 # ============================================================
 
@@ -2095,29 +2074,33 @@ extract_app_archive() {
 # ============================================================
 # Prepare downloaded application
 #
-# Returns either:
+# Returns through stdout:
+#   - AppImage path
+#   - extracted directory path
 #
-#   /path/to/AppImage
-#
-# or:
-#
-#   /path/to/extracted/directory
-#
+# All debug output goes to stderr so it does not become part
+# of the returned value when using command substitution.
 # ============================================================
 
 prepare_downloaded_app() {
     local DOWNLOAD_FILE="$1"
     local EXTRACTED_DIR="$2"
-    local APP_NAME="$3"
-    local APP_TITLE="$4"
+    local DOWNLOAD_DIR="$3"
+    local APP_NAME="$4"
+    local APP_TITLE="$5"
 
-    local FILE_TYPE
-    local FOUND_APPIMAGE
-    local APPIMAGE_FILE
+    local FILE_TYPE=""
+    local FOUND_APPIMAGE=""
+    local APPIMAGE_FILE=""
+
+    echo "[prepare] DOWNLOAD_FILE=$DOWNLOAD_FILE" >&2
+    echo "[prepare] EXTRACTED_DIR=$EXTRACTED_DIR" >&2
+    echo "[prepare] DOWNLOAD_DIR=$DOWNLOAD_DIR" >&2
+    echo "[prepare] APP_NAME=$APP_NAME" >&2
 
     FILE_TYPE="$(file -b "$DOWNLOAD_FILE")"
 
-    echo "[download] FILE_TYPE=$FILE_TYPE"
+    echo "[prepare] FILE_TYPE=$FILE_TYPE" >&2
 
     # --------------------------------------------------------
     # Direct AppImage
@@ -2125,20 +2108,22 @@ prepare_downloaded_app() {
 
     if is_appimage "$DOWNLOAD_FILE"; then
 
-        echo "[download] Download is an AppImage"
+        echo "[prepare] Download is an AppImage" >&2
 
         APPIMAGE_FILE="$DOWNLOAD_DIR/${APP_NAME}.AppImage"
 
-        echo "[download] Renaming:"
-        echo "[download]   $DOWNLOAD_FILE"
-        echo "[download]   -> $APPIMAGE_FILE"
+        echo "[prepare] Renaming:" >&2
+        echo "[prepare]   $DOWNLOAD_FILE" >&2
+        echo "[prepare]   -> $APPIMAGE_FILE" >&2
 
         mv "$DOWNLOAD_FILE" "$APPIMAGE_FILE" || {
-            echo "⚠️ Failed to rename AppImage"
+            echo "⚠️ Failed to rename AppImage" >&2
             return 1
         }
 
+        # Return the AppImage path.
         printf '%s\n' "$APPIMAGE_FILE"
+
         return 0
     fi
 
@@ -2150,39 +2135,50 @@ prepare_downloaded_app() {
           "$FILE_TYPE" == *"ZIP archive"* ]] ||
        unzip -t "$DOWNLOAD_FILE" >/dev/null 2>&1; then
 
-        echo "[download] Download is a ZIP archive"
+        echo "[prepare] Download is a ZIP archive" >&2
 
         extract_app_archive \
             "$DOWNLOAD_FILE" \
             "$EXTRACTED_DIR" \
             "$APP_TITLE" || return 1
 
+        # Look for an actual AppImage anywhere inside the
+        # extracted directory, including subdirectories.
         FOUND_APPIMAGE="$(find_appimage "$EXTRACTED_DIR")"
 
         if [[ -n "$FOUND_APPIMAGE" ]]; then
 
-            echo "[download] Found AppImage: $FOUND_APPIMAGE"
+            echo "[prepare] Found AppImage: $FOUND_APPIMAGE" >&2
 
+            # Return the AppImage path.
             printf '%s\n' "$FOUND_APPIMAGE"
 
-        else
-
-            echo "[download] No AppImage found in ZIP"
-
-            printf '%s\n' "$EXTRACTED_DIR"
-
+            return 0
         fi
+
+        echo "[prepare] No AppImage found in ZIP" >&2
+
+        # No AppImage, so return the extracted directory.
+        printf '%s\n' "$EXTRACTED_DIR"
 
         return 0
     fi
 
-    echo "⚠️ Unknown downloaded file type: $FILE_TYPE"
+    # --------------------------------------------------------
+    # Unknown file type
+    # --------------------------------------------------------
+
+    echo "⚠️ Unknown downloaded file type: $FILE_TYPE" >&2
     return 1
 }
 
 
 # ============================================================
 # Install/register AppImage
+#
+# Applies to both:
+#   - directly downloaded AppImage
+#   - AppImage found inside ZIP
 # ============================================================
 
 install_appimage() {
@@ -2198,6 +2194,8 @@ install_appimage() {
 
     echo "[download] Processing as AppImage"
 
+    # Only remove/recreate APP_BASE when APP_PATH does not
+    # already exist.
     safe_exists "$APP_PATH" || {
         rm -rf "$APP_BASE"
         mkdir -p "$APP_BASE"
@@ -2212,6 +2210,8 @@ install_appimage() {
         return 1
     }
 
+    # Try to extract the icon from the AppImage first.
+    # If that fails, use the alternate icon URL.
     extract_appimage_icon "$APP_PATH" || {
         if [[ -n "$ALT_ICON_PATH" ]]; then
             safe_wget \
@@ -2251,6 +2251,7 @@ install_extracted_app() {
 
     echo "[download] Processing as non-AppImage application"
 
+    # Always recreate APP_BASE for the extracted application.
     rm -rf "$APP_BASE"
 
     mkdir -p "$(dirname "$APP_BASE")"
@@ -2259,6 +2260,10 @@ install_extracted_app() {
     echo "[download]   $EXTRACTED_DIR"
     echo "[download]   -> $APP_BASE"
 
+    # If the ZIP contains exactly one top-level directory,
+    # use that directory as APP_BASE.
+    #
+    # Otherwise move the entire extracted directory to APP_BASE.
     SUBDIRS=("$EXTRACTED_DIR"/*/)
 
     if [[ ${#SUBDIRS[@]} -eq 1 ]]; then
@@ -2277,6 +2282,8 @@ install_extracted_app() {
 
     fi
 
+    # There is no AppImage from which to extract an icon,
+    # so use the alternate icon if one was provided.
     if [[ -n "$ALT_ICON_PATH" ]]; then
         safe_wget \
             "$ALT_ICON_PATH" \
@@ -2285,6 +2292,8 @@ install_extracted_app() {
         }
     fi
 
+    # Find the actual Linux ELF executable, including
+    # executables located inside subdirectories.
     APP_BIN="$(find_linux_executable "$APP_BASE" "$APP_NAME")" || {
         echo "⚠️ Could not find executable inside $APP_BASE"
         return 1
@@ -2320,7 +2329,7 @@ download_and_register_app() {
     local DOWNLOAD_DIR="$TMP_DIR/$APP_NAME"
     local DOWNLOAD_FILE="$DOWNLOAD_DIR/download"
     local EXTRACTED_DIR="$DOWNLOAD_DIR/extracted"
-    local APP_CONTENT
+    local APP_CONTENT=""
 
     echo "[download] APP_NAME=$APP_NAME"
     echo "[download] APP_TITLE=$APP_TITLE"
@@ -2328,25 +2337,32 @@ download_and_register_app() {
     echo "[download] APP_PATH=$APP_PATH"
     echo "[download] DOWNLOAD_DIR=$DOWNLOAD_DIR"
 
-    mkdir -p "$DOWNLOAD_DIR"
-
     # --------------------------------------------------------
     # Download
     # --------------------------------------------------------
 
-    download_app_file \
-        "$GET_URL" \
-        "$DOWNLOAD_FILE" \
-        "$APP_TITLE" || return 1
+    mkdir -p "$DOWNLOAD_DIR"
+
+    safe_wget "$GET_URL" "$DOWNLOAD_FILE" || {
+        echo "⚠️ $APP_TITLE download failed"
+        return 1
+    }
+
+    echo "[download] Download completed: $DOWNLOAD_FILE"
 
     # --------------------------------------------------------
-    # Detect and prepare
+    # Determine downloaded content
+    #
+    # prepare_downloaded_app returns the resulting path through
+    # stdout. Its debug output goes to stderr, so it remains
+    # visible while APP_CONTENT receives only the path.
     # --------------------------------------------------------
 
     APP_CONTENT="$(
         prepare_downloaded_app \
             "$DOWNLOAD_FILE" \
             "$EXTRACTED_DIR" \
+            "$DOWNLOAD_DIR" \
             "$APP_NAME" \
             "$APP_TITLE"
     )" || return 1
@@ -2354,7 +2370,11 @@ download_and_register_app() {
     echo "[download] APP_CONTENT=$APP_CONTENT"
 
     # --------------------------------------------------------
-    # AppImage
+    # AppImage route
+    #
+    # Applies to:
+    #   - directly downloaded AppImage
+    #   - AppImage found inside ZIP
     # --------------------------------------------------------
 
     if is_appimage "$APP_CONTENT"; then
@@ -2374,7 +2394,9 @@ download_and_register_app() {
     fi
 
     # --------------------------------------------------------
-    # Non-AppImage
+    # Non-AppImage route
+    #
+    # APP_CONTENT is the extracted directory.
     # --------------------------------------------------------
 
     install_extracted_app \
