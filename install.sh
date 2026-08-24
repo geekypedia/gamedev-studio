@@ -1348,6 +1348,501 @@ install_tal_vst_from_name() {
 }
 
 
+
+# -----------------------------
+
+
+# -------------------------------------------------------------------------------------------------------------------------------------------------
+# ITCH.IO DOWNLOADER
+# -------------------------------------------------------------------------------------------------------------------------------------------------
+
+itchio_parser_py() {
+    cat <<'PY'
+import sys
+from html.parser import HTMLParser
+
+html_file = sys.argv[1]
+download_text = sys.argv[2].replace("**", "").strip()
+
+print(f"[python] HTML_FILE={html_file}", file=sys.stderr)
+print(f"[python] DOWNLOAD_TEXT={download_text!r}", file=sys.stderr)
+
+with open(html_file, "r", encoding="utf-8", errors="replace") as f:
+    html = f.read()
+
+print(f"[python] Read {len(html)} bytes from HTML", file=sys.stderr)
+
+
+class ItchParser(HTMLParser):
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+
+        self.depth = 0
+        self.upload = None
+        self.upload_depth = None
+        self.result = None
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        classes = set((attrs.get("class") or "").split())
+
+        # ------------------------------------------------------------
+        # Enter .upload
+        # ------------------------------------------------------------
+        if (
+            tag == "div"
+            and "upload" in classes
+            and self.upload is None
+        ):
+            self.upload = {
+                "depth": self.depth,
+                "upload_id": None,
+            }
+
+            self.upload_depth = self.depth
+
+            print(
+                f"[python] ENTER .upload depth={self.depth}",
+                file=sys.stderr
+            )
+
+        # ------------------------------------------------------------
+        # Everything below this point is evaluated while inside
+        # the current .upload.
+        # ------------------------------------------------------------
+        if self.upload is not None:
+
+            # --------------------------------------------------------
+            # Find upload ID
+            # --------------------------------------------------------
+            if tag == "a" and "download_btn" in classes:
+                print(
+                    f"[python] Found .download_btn: {attrs}",
+                    file=sys.stderr
+                )
+
+                for key in (
+                    "data-upload_id",
+                    "data-upload-id",
+                    "upload_id",
+                    "upload-id",
+                ):
+                    if key in attrs:
+                        value = attrs[key]
+
+                        print(
+                            f"[python] Found {key}={value!r}",
+                            file=sys.stderr
+                        )
+
+                        if value:
+                            self.upload["upload_id"] = value
+                            break
+
+                print(
+                    f"[python] Current upload_id="
+                    f"{self.upload['upload_id']!r}",
+                    file=sys.stderr
+                )
+
+            # --------------------------------------------------------
+            # Find upload title
+            # --------------------------------------------------------
+            if tag == "strong":
+                title = attrs.get("title", "")
+
+                print(
+                    f"[python] Found <strong> title={title!r}",
+                    file=sys.stderr
+                )
+
+                if title:
+                    title_matches = (
+                        download_text.casefold()
+                        in title.casefold()
+                    )
+
+                    print(
+                        f"[python] Checking title: "
+                        f"'{download_text}' in '{title}' "
+                        f"=> {title_matches}",
+                        file=sys.stderr
+                    )
+
+                    if title_matches:
+                        upload_id = self.upload["upload_id"]
+
+                        print(
+                            f"[python] MATCHED TITLE",
+                            file=sys.stderr
+                        )
+
+                        print(
+                            f"[python] upload_id for matched "
+                            f".upload = {upload_id!r}",
+                            file=sys.stderr
+                        )
+
+                        if upload_id:
+                            self.result = upload_id
+
+                            print(
+                                f"[python] RESULT={self.result}",
+                                file=sys.stderr
+                            )
+
+        # Always update depth AFTER processing the start tag.
+        self.depth += 1
+
+    def handle_endtag(self, tag):
+        self.depth -= 1
+
+        # Leave the .upload when we reach its original depth.
+        if (
+            tag == "div"
+            and self.upload is not None
+            and self.depth == self.upload["depth"]
+        ):
+            print(
+                f"[python] LEAVE .upload "
+                f"upload_id={self.upload['upload_id']!r}",
+                file=sys.stderr
+            )
+
+            self.upload = None
+            self.upload_depth = None
+
+
+print("[python] Starting HTML parser...", file=sys.stderr)
+
+parser = ItchParser()
+parser.feed(html)
+
+print(
+    f"[python] Parser finished, result={parser.result!r}",
+    file=sys.stderr
+)
+
+if parser.result:
+    print(parser.result)
+PY
+}
+
+itchio_parser_py4() {
+    cat <<'PY'
+import sys
+from html.parser import HTMLParser
+
+html_file = sys.argv[1]
+download_text = sys.argv[2]
+
+download_text = download_text.replace("**", "").strip()
+
+print(f"[python] HTML_FILE={html_file}", file=sys.stderr)
+print(f"[python] DOWNLOAD_TEXT={download_text!r}", file=sys.stderr)
+
+with open(html_file, "r", encoding="utf-8", errors="replace") as f:
+    html = f.read()
+
+print(f"[python] Read {len(html)} bytes from HTML", file=sys.stderr)
+
+
+class ItchParser(HTMLParser):
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+
+        self.depth = 0
+        self.upload = None
+        self.result = None
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        classes = set((attrs.get("class") or "").split())
+
+        # Start of:
+        #
+        # <div class="upload">
+        #
+        if tag == "div" and "upload" in classes:
+            self.upload = {
+                "depth": self.depth,
+                "upload_id": None,
+            }
+
+            print(
+                f"[python] Found .upload at depth {self.depth}",
+                file=sys.stderr
+            )
+
+            return
+
+        # Find the download button inside this upload:
+        #
+        # <a class="button download_btn"
+        #    data-upload_id="13624211">
+        #
+        if (
+            self.upload is not None
+            and tag == "a"
+            and "download_btn" in classes
+        ):
+            print(
+                f"[python] Found .download_btn: {attrs}",
+                file=sys.stderr
+            )
+
+            for key in (
+                "data-upload_id",
+                "data-upload-id",
+                "upload_id",
+                "upload-id",
+            ):
+                value = attrs.get(key)
+
+                if value:
+                    self.upload["upload_id"] = value
+
+                    print(
+                        f"[python] Found upload ID using "
+                        f"{key}: {value}",
+                        file=sys.stderr
+                    )
+
+                    break
+
+        # Find:
+        #
+        # <strong title="">
+        #
+        if (
+            self.upload is not None
+            and tag == "strong"
+        ):
+            title = attrs.get("title", "")
+
+            print(
+                f"[python] Found <strong>, title={title!r}",
+                file=sys.stderr
+            )
+
+            if download_text.casefold() in title.casefold():
+                print(
+                    f"[python] MATCH: {download_text!r} "
+                    f"is in {title!r}",
+                    file=sys.stderr
+                )
+
+                upload_id = self.upload["upload_id"]
+
+                if upload_id:
+                    self.result = upload_id
+
+                    print(
+                        f"[python] FOUND UPLOAD_ID={upload_id}",
+                        file=sys.stderr
+                    )
+
+                else:
+                    print(
+                        "[python] ERROR: matching title has no "
+                        "upload ID",
+                        file=sys.stderr
+                    )
+
+        self.depth += 1
+
+    def handle_endtag(self, tag):
+        self.depth -= 1
+
+        # We have left the .upload container.
+        if (
+            self.upload is not None
+            and self.depth <= self.upload["depth"]
+        ):
+            print(
+                f"[python] Leaving .upload "
+                f"(upload_id={self.upload['upload_id']})",
+                file=sys.stderr
+            )
+
+            # Don't discard the result once we've found it.
+            if self.result is None:
+                self.upload = None
+
+
+print("[python] Starting HTML parser...", file=sys.stderr)
+
+parser = ItchParser()
+parser.feed(html)
+
+if parser.result:
+    print(
+        f"[python] Returning upload ID: {parser.result}",
+        file=sys.stderr
+    )
+
+    # IMPORTANT:
+    # stdout contains ONLY the value Bash should capture.
+    print(parser.result)
+else:
+    print(
+        "[python] No matching upload ID found",
+        file=sys.stderr
+    )
+PY
+}
+
+# -----------------------------
+
+get_itchio_url() {
+    local URL="$1"
+    local DOWNLOAD_TEXT="$2"
+
+    local APP_NAME
+    APP_NAME="${URL%/}"
+    APP_NAME="${APP_NAME##*/}"
+    APP_NAME="${APP_NAME%%\?*}"
+    APP_NAME="${APP_NAME%%\#*}"
+
+    local HTML_FILE="${TMP_DIR}/${APP_NAME}.html"
+
+    echo "[get_itchio_url] URL=$URL" >&2
+    echo "[get_itchio_url] DOWNLOAD_TEXT=$DOWNLOAD_TEXT" >&2
+    echo "[get_itchio_url] HTML_FILE=$HTML_FILE" >&2
+
+    curl -fsSL \
+        -A "Mozilla/5.0" \
+        "$URL" \
+        -o "$HTML_FILE" || {
+        echo "[get_itchio_url] ERROR: HTML download failed" >&2
+        return 1
+    }
+
+    local UPLOAD_ID
+
+    UPLOAD_ID="$(
+        itchio_parser_py |
+            python3 - "$HTML_FILE" "$DOWNLOAD_TEXT"
+    )" || {
+        echo "[get_itchio_url] ERROR: parser failed" >&2
+        return 1
+    }
+
+    echo "[get_itchio_url] UPLOAD_ID=$UPLOAD_ID" >&2
+
+    if [[ -z "$UPLOAD_ID" ]]; then
+        echo "[get_itchio_url] ERROR: no upload ID" >&2
+        return 1
+    fi
+
+    local FILE_URL="${URL%/}/file/${UPLOAD_ID}"
+    local RESPONSE
+
+    echo "[get_itchio_url] FILE_URL=$FILE_URL" >&2
+
+    RESPONSE="$(
+        curl -fsSL \
+            -A "Mozilla/5.0" \
+            -X POST \
+            "$FILE_URL"
+    )" || {
+        echo "[get_itchio_url] ERROR: POST failed" >&2
+        return 1
+    }
+
+    echo "[get_itchio_url] POST completed" >&2
+
+    local GET_URL
+
+    GET_URL="$(
+        printf '%s' "$RESPONSE" |
+            jq -er '.url'
+    )" || {
+        echo "[get_itchio_url] ERROR: failed to extract URL" >&2
+        return 1
+    }
+
+    printf '[get_itchio_url] GET_URL=<%q>\n' "$GET_URL" >&2
+
+    if [[ -z "$GET_URL" ]]; then
+        echo "[get_itchio_url] ERROR: empty GET_URL" >&2
+        return 1
+    fi
+
+    # THE ONLY stdout emitted by this function.
+    printf '%s\n' "$GET_URL"
+}
+
+# -----------------------------
+
+download_from_itchio() {
+    local URL="$1"
+    local DOWNLOAD_TEXT="$2"
+    local APP_TYPE="${3:-engines}"
+    local APP_NAME="${URL##*/}"
+    local APP_TITLE="${4:-$1}"
+
+    echo >&2
+    echo "========== download_from_itchio ==========" >&2
+    echo "[download_from_itchio] URL=$URL" >&2
+    echo "[download_from_itchio] DOWNLOAD_TEXT=$DOWNLOAD_TEXT" >&2
+
+    local GET_URL
+
+    echo "[download_from_itchio] Calling get_itchio_url..." >&2
+
+    GET_URL="$(get_itchio_url "$URL" "$DOWNLOAD_TEXT")"
+
+    local STATUS=$?
+
+    echo "[download_from_itchio] get_itchio_url exit status=$STATUS" >&2
+    echo "[download_from_itchio] GET_URL=$GET_URL" >&2
+
+    if [[ $STATUS -ne 0 ]]; then
+        echo "[download_from_itchio] ERROR: get_itchio_url failed" >&2
+        return "$STATUS"
+    fi
+
+    if [[ -z "$GET_URL" ]]; then
+        echo "[download_from_itchio] ERROR: GET_URL is empty" >&2
+        return 1
+    fi
+
+    echo "[download_from_itchio] Calling safe_wget..." >&2
+    echo "[download_from_itchio] safe_wget URL=$GET_URL" >&2
+
+    local TMP_APP_BASE="${BASE}/${APP_TYPE}/${APP_NAME}"
+    local TMP_APP_PATH="$TMP_APP_BASE/${APP_NAME}.AppImage"
+
+    safe_exists "$TMP_APP_PATH" || {
+        rm -rf "$TMP_APP_BASE"
+        mkdir -p "$TMP_APP_BASE"    
+    }
+    
+    safe_wget "$GET_URL" "$TMP_APP_PATH" || {
+        echo "⚠️ $APP_TITLE download failed"
+        return 1
+    }
+    
+    extract_appimage_icon $TMP_APP_PATH
+    register_bin $APP_NAME $TMP_APP_PATH $APP_TITLE
+    
+    STATUS=$?
+
+    echo "[download_from_itchio] safe_wget exit status=$STATUS" >&2
+
+    return "$STATUS"
+}
+
+whimtale_download() {
+    download_from_itchio \
+        "https://ctjs.itch.io/whimtale" \
+        "Linux x64" \
+        "" \
+        "Whimtale"
+}
+
+
 # -------------------------------------------------------------------------------------------------------------------------------------------------
 
 # -----------------------------
@@ -2774,6 +3269,10 @@ EOF
     sudo chmod +x /usr/local/bin/defold
     
     create_desktop_entry defold "Defold" "/opt/gamedev/engines/Defold" "" "" "" "com.defold.editor.Start"
+    '
+
+    run_step "whimtale" "Whimtale" "is_installed whimtale" '
+        whimtale_download
     '
     
     # -----------------------------
