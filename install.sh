@@ -1792,6 +1792,8 @@ download_from_itchio() {
 
     local APP_TITLE="${5:-${APP_NAME}}"
 
+    local ALT_ICON_PATH="$6"
+
 
     echo >&2
     echo "========== download_from_itchio ==========" >&2
@@ -1835,7 +1837,16 @@ download_from_itchio() {
         return 1
     }
     
-    extract_appimage_icon $TMP_APP_PATH
+    extract_appimage_icon "$TMP_APP_PATH" || {
+        if [[ -n "$ALT_ICON_PATH" ]]; then
+            safe_wget \
+                "$ALT_ICON_PATH" \
+                "$TMP_APP_BASE/icon.png" || {
+                echo "⚠️ Failed to download $APP_TITLE icon"
+            }
+        fi
+    }
+
     register_bin $APP_NAME $TMP_APP_PATH "$APP_TITLE"
     
     STATUS=$?
@@ -1861,6 +1872,7 @@ ogmo_download() {
         "tools" \
         "ogmo-editor" \
         "Ogmo Editor"
+        "https://avatars.githubusercontent.com/u/55803837?s=200&v=4"
 }
 
 
