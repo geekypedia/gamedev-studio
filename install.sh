@@ -179,6 +179,7 @@ safe_wget() {
 
         if [[ -s "$tmpfile" ]]; then
             echo "✓ Already downloaded: $tmpfile"
+            mv "$tmpfile" "$out"
             return 0
         fi
     fi
@@ -1856,7 +1857,7 @@ download_and_register_app() {
     # Download
     # --------------------------------------------------------
 
-    rm -rf "$DOWNLOAD_DIR"
+    # rm -rf "$DOWNLOAD_DIR"
     mkdir -p "$DOWNLOAD_DIR"
 
     echo "[download] Downloading..."
