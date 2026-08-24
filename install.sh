@@ -102,7 +102,7 @@ fi
 
 if [[ "$ESSENTIAL" -eq 1 ]]; then
     EXEC_SCRIPT_PATH="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/$(basename -- "${BASH_SOURCE[0]}")"
-    "$EXEC_SCRIPT_PATH" -u apt,deps,code-setup,code,godot,godot-templates,gdevelop,ctjs,renpy,microstudio,gb-studio,gimp,krita,pixelorama,libresprite,tiled,ldtk,audacity,lmms,kdenlive,obs,famistudio
+    "$EXEC_SCRIPT_PATH" -u apt,deps,code-setup,code,godot,godot-templates,gdevelop,ctjs,renpy,microstudio,whimtale,gimp,krita,pixelorama,libresprite,tiled,ldtk,audacity,lmms,kdenlive,obs,famistudio
     exit 1
 fi
 
@@ -1836,7 +1836,7 @@ download_from_itchio() {
     }
     
     extract_appimage_icon $TMP_APP_PATH
-    register_bin $APP_NAME $TMP_APP_PATH $APP_TITLE
+    register_bin $APP_NAME $TMP_APP_PATH "$APP_TITLE"
     
     STATUS=$?
 
@@ -4804,7 +4804,7 @@ EOF
     sudo chmod +x /usr/local/bin/ldtk-sync
     '
 
-    run_step "ogmo-editor" "Whimtale" "is_installed ogmo-editor" '
+    run_step "ogmo-editor" "Ogmo Editor" "is_installed ogmo-editor" '
         ogmo_download
     '
     
