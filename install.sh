@@ -2061,7 +2061,7 @@ whimtale_download() {
         "Linux x64" \
         "" \
         "whimtale" \
-        "Whimtale" \
+        "Whimtale"
 }
 
 ogmo_download() {
