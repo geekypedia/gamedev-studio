@@ -1829,7 +1829,7 @@ find_linux_executable() {
 
 # -----------------------------
 
-download_and_register_app() {
+download_and_register_app_legacy() {
     local GET_URL="$1"
     local APP_NAME="$2"
     local APP_TITLE="$3"
@@ -2010,6 +2010,382 @@ download_and_register_app() {
     echo "[download] APP_BIN=$APP_BIN"
 
     register_bin "$APP_NAME" "$APP_BIN" "$APP_TITLE" "$APP_CATEGORY" "$APP_BIN_PARAMS" "$APP_WMC"
+}
+
+# -----------------------------
+
+# ============================================================
+# Detect whether a file is an AppImage
+# ============================================================
+
+is_appimage() {
+    local FILE="$1"
+
+    # AppImage type 2 magic: "AI\x02" at offset 8
+    [[ "$(dd if="$FILE" bs=1 skip=8 count=3 2>/dev/null)" == $'AI\x02' ]]
+}
+
+
+# ============================================================
+# Find an AppImage recursively inside a directory
+# ============================================================
+
+find_appimage() {
+    local SEARCH_DIR="$1"
+    local FILE_PATH
+
+    while IFS= read -r -d '' FILE_PATH; do
+        if is_appimage "$FILE_PATH"; then
+            printf '%s\n' "$FILE_PATH"
+            return 0
+        fi
+    done < <(
+        find "$SEARCH_DIR" -type f -print0
+    )
+
+    return 1
+}
+
+
+# ============================================================
+# Download a file
+# ============================================================
+
+download_app_file() {
+    local GET_URL="$1"
+    local DOWNLOAD_FILE="$2"
+    local APP_TITLE="$3"
+
+    echo "[download] Downloading..."
+    echo "[download] DOWNLOAD_FILE=$DOWNLOAD_FILE"
+
+    safe_wget "$GET_URL" "$DOWNLOAD_FILE" || {
+        echo "⚠️ $APP_TITLE download failed"
+        return 1
+    }
+
+    echo "[download] Download completed: $DOWNLOAD_FILE"
+}
+
+
+# ============================================================
+# Extract ZIP archive
+# ============================================================
+
+extract_app_archive() {
+    local DOWNLOAD_FILE="$1"
+    local EXTRACTED_DIR="$2"
+    local APP_TITLE="$3"
+
+    echo "[download] Extracting archive"
+    echo "[download] EXTRACTED_DIR=$EXTRACTED_DIR"
+
+    rm -rf "$EXTRACTED_DIR"
+    mkdir -p "$EXTRACTED_DIR"
+
+    unzip -q "$DOWNLOAD_FILE" -d "$EXTRACTED_DIR" || {
+        echo "⚠️ Failed to extract $APP_TITLE"
+        return 1
+    }
+
+    echo "[download] ZIP extraction completed"
+}
+
+
+# ============================================================
+# Prepare downloaded application
+#
+# Returns either:
+#
+#   /path/to/AppImage
+#
+# or:
+#
+#   /path/to/extracted/directory
+#
+# ============================================================
+
+prepare_downloaded_app() {
+    local DOWNLOAD_FILE="$1"
+    local EXTRACTED_DIR="$2"
+    local APP_NAME="$3"
+    local APP_TITLE="$4"
+
+    local FILE_TYPE
+    local FOUND_APPIMAGE
+    local APPIMAGE_FILE
+
+    FILE_TYPE="$(file -b "$DOWNLOAD_FILE")"
+
+    echo "[download] FILE_TYPE=$FILE_TYPE"
+
+    # --------------------------------------------------------
+    # Direct AppImage
+    # --------------------------------------------------------
+
+    if is_appimage "$DOWNLOAD_FILE"; then
+
+        echo "[download] Download is an AppImage"
+
+        APPIMAGE_FILE="$DOWNLOAD_DIR/${APP_NAME}.AppImage"
+
+        echo "[download] Renaming:"
+        echo "[download]   $DOWNLOAD_FILE"
+        echo "[download]   -> $APPIMAGE_FILE"
+
+        mv "$DOWNLOAD_FILE" "$APPIMAGE_FILE" || {
+            echo "⚠️ Failed to rename AppImage"
+            return 1
+        }
+
+        printf '%s\n' "$APPIMAGE_FILE"
+        return 0
+    fi
+
+    # --------------------------------------------------------
+    # ZIP archive
+    # --------------------------------------------------------
+
+    if [[ "$FILE_TYPE" == *"Zip archive"* ||
+          "$FILE_TYPE" == *"ZIP archive"* ]] ||
+       unzip -t "$DOWNLOAD_FILE" >/dev/null 2>&1; then
+
+        echo "[download] Download is a ZIP archive"
+
+        extract_app_archive \
+            "$DOWNLOAD_FILE" \
+            "$EXTRACTED_DIR" \
+            "$APP_TITLE" || return 1
+
+        FOUND_APPIMAGE="$(find_appimage "$EXTRACTED_DIR")"
+
+        if [[ -n "$FOUND_APPIMAGE" ]]; then
+
+            echo "[download] Found AppImage: $FOUND_APPIMAGE"
+
+            printf '%s\n' "$FOUND_APPIMAGE"
+
+        else
+
+            echo "[download] No AppImage found in ZIP"
+
+            printf '%s\n' "$EXTRACTED_DIR"
+
+        fi
+
+        return 0
+    fi
+
+    echo "⚠️ Unknown downloaded file type: $FILE_TYPE"
+    return 1
+}
+
+
+# ============================================================
+# Install/register AppImage
+# ============================================================
+
+install_appimage() {
+    local FOUND_APPIMAGE="$1"
+    local APP_BASE="$2"
+    local APP_PATH="$3"
+    local ALT_ICON_PATH="$4"
+    local APP_NAME="$5"
+    local APP_TITLE="$6"
+    local APP_CATEGORY="$7"
+    local APP_BIN_PARAMS="$8"
+    local APP_WMC="$9"
+
+    echo "[download] Processing as AppImage"
+
+    safe_exists "$APP_PATH" || {
+        rm -rf "$APP_BASE"
+        mkdir -p "$APP_BASE"
+    }
+
+    echo "[download] Moving AppImage:"
+    echo "[download]   $FOUND_APPIMAGE"
+    echo "[download]   -> $APP_PATH"
+
+    mv "$FOUND_APPIMAGE" "$APP_PATH" || {
+        echo "⚠️ Failed to move AppImage to $APP_PATH"
+        return 1
+    }
+
+    extract_appimage_icon "$APP_PATH" || {
+        if [[ -n "$ALT_ICON_PATH" ]]; then
+            safe_wget \
+                "$ALT_ICON_PATH" \
+                "$APP_BASE/icon.png" || {
+                echo "⚠️ Failed to download $APP_TITLE icon"
+            }
+        fi
+    }
+
+    register_bin \
+        "$APP_NAME" \
+        "$APP_PATH" \
+        "$APP_TITLE" \
+        "$APP_CATEGORY" \
+        "$APP_BIN_PARAMS" \
+        "$APP_WMC"
+}
+
+
+# ============================================================
+# Install/register extracted non-AppImage application
+# ============================================================
+
+install_extracted_app() {
+    local EXTRACTED_DIR="$1"
+    local APP_BASE="$2"
+    local ALT_ICON_PATH="$3"
+    local APP_NAME="$4"
+    local APP_TITLE="$5"
+    local APP_CATEGORY="$6"
+    local APP_BIN_PARAMS="$7"
+    local APP_WMC="$8"
+
+    local SUBDIRS
+    local APP_BIN
+
+    echo "[download] Processing as non-AppImage application"
+
+    rm -rf "$APP_BASE"
+
+    mkdir -p "$(dirname "$APP_BASE")"
+
+    echo "[download] Moving extracted application:"
+    echo "[download]   $EXTRACTED_DIR"
+    echo "[download]   -> $APP_BASE"
+
+    SUBDIRS=("$EXTRACTED_DIR"/*/)
+
+    if [[ ${#SUBDIRS[@]} -eq 1 ]]; then
+
+        mv "${SUBDIRS[0]}" "$APP_BASE" || {
+            echo "⚠️ Failed to move application to $APP_BASE"
+            return 1
+        }
+
+    else
+
+        mv "$EXTRACTED_DIR" "$APP_BASE" || {
+            echo "⚠️ Failed to move application to $APP_BASE"
+            return 1
+        }
+
+    fi
+
+    if [[ -n "$ALT_ICON_PATH" ]]; then
+        safe_wget \
+            "$ALT_ICON_PATH" \
+            "$APP_BASE/icon.png" || {
+            echo "⚠️ Failed to download $APP_TITLE icon"
+        }
+    fi
+
+    APP_BIN="$(find_linux_executable "$APP_BASE" "$APP_NAME")" || {
+        echo "⚠️ Could not find executable inside $APP_BASE"
+        return 1
+    }
+
+    echo "[download] APP_BIN=$APP_BIN"
+
+    register_bin \
+        "$APP_NAME" \
+        "$APP_BIN" \
+        "$APP_TITLE" \
+        "$APP_CATEGORY" \
+        "$APP_BIN_PARAMS" \
+        "$APP_WMC"
+}
+
+
+# ============================================================
+# Main reusable download/install function
+# ============================================================
+
+download_and_register_app() {
+    local GET_URL="$1"
+    local APP_NAME="$2"
+    local APP_TITLE="$3"
+    local APP_BASE="$4"
+    local APP_PATH="$5"
+    local ALT_ICON_PATH="$6"
+    local APP_CATEGORY="${7:-Development;GameDev;}"
+    local APP_BIN_PARAMS="$8"
+    local APP_WMC="$9"
+
+    local DOWNLOAD_DIR="$TMP_DIR/$APP_NAME"
+    local DOWNLOAD_FILE="$DOWNLOAD_DIR/download"
+    local EXTRACTED_DIR="$DOWNLOAD_DIR/extracted"
+    local APP_CONTENT
+
+    echo "[download] APP_NAME=$APP_NAME"
+    echo "[download] APP_TITLE=$APP_TITLE"
+    echo "[download] APP_BASE=$APP_BASE"
+    echo "[download] APP_PATH=$APP_PATH"
+    echo "[download] DOWNLOAD_DIR=$DOWNLOAD_DIR"
+
+    mkdir -p "$DOWNLOAD_DIR"
+
+    # --------------------------------------------------------
+    # Download
+    # --------------------------------------------------------
+
+    download_app_file \
+        "$GET_URL" \
+        "$DOWNLOAD_FILE" \
+        "$APP_TITLE" || return 1
+
+    # --------------------------------------------------------
+    # Detect and prepare
+    # --------------------------------------------------------
+
+    APP_CONTENT="$(
+        prepare_downloaded_app \
+            "$DOWNLOAD_FILE" \
+            "$EXTRACTED_DIR" \
+            "$APP_NAME" \
+            "$APP_TITLE"
+    )" || return 1
+
+    echo "[download] APP_CONTENT=$APP_CONTENT"
+
+    # --------------------------------------------------------
+    # AppImage
+    # --------------------------------------------------------
+
+    if is_appimage "$APP_CONTENT"; then
+
+        install_appimage \
+            "$APP_CONTENT" \
+            "$APP_BASE" \
+            "$APP_PATH" \
+            "$ALT_ICON_PATH" \
+            "$APP_NAME" \
+            "$APP_TITLE" \
+            "$APP_CATEGORY" \
+            "$APP_BIN_PARAMS" \
+            "$APP_WMC"
+
+        return $?
+    fi
+
+    # --------------------------------------------------------
+    # Non-AppImage
+    # --------------------------------------------------------
+
+    install_extracted_app \
+        "$APP_CONTENT" \
+        "$APP_BASE" \
+        "$ALT_ICON_PATH" \
+        "$APP_NAME" \
+        "$APP_TITLE" \
+        "$APP_CATEGORY" \
+        "$APP_BIN_PARAMS" \
+        "$APP_WMC"
 }
 
 # -----------------------------
