@@ -2056,18 +2056,18 @@ extract_app_archive() {
     local EXTRACTED_DIR="$2"
     local APP_TITLE="$3"
 
-    echo "[download] Extracting archive"
-    echo "[download] EXTRACTED_DIR=$EXTRACTED_DIR"
+    echo "[download] Extracting archive" >&2
+    echo "[download] EXTRACTED_DIR=$EXTRACTED_DIR" >&2
 
     rm -rf "$EXTRACTED_DIR"
     mkdir -p "$EXTRACTED_DIR"
 
     unzip -q "$DOWNLOAD_FILE" -d "$EXTRACTED_DIR" || {
-        echo "⚠️ Failed to extract $APP_TITLE"
+        echo "⚠️ Failed to extract $APP_TITLE" >&2
         return 1
     }
 
-    echo "[download] ZIP extraction completed"
+    echo "[download] ZIP extraction completed" >&2
 }
 
 
