@@ -1784,7 +1784,7 @@ download_and_register_app() {
     local APP_BASE="$4"
     local APP_PATH="$5"
     local ALT_ICON_PATH="$6"
-    local APP_CATEGORY="${7:-"Development;GameDev;"}"
+    local APP_CATEGORY="${7:-Development;GameDev;}"
     local APP_BIN_PARAMS="$8"
     local APP_WMC="$9"
 
