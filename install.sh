@@ -5668,6 +5668,6 @@ init
 list_header
 prep
 execute
-if [[ "$LIST_STEPS" -ne 1 ]]; then
+if [[ "$LIST_STEPS" -ne 1 && -z "$REMOVE_LIST" ]]; then
     finalize
 fi
