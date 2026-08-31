@@ -2821,6 +2821,8 @@ EOF
         exit 0
     fi
 
+    sudo add-apt-repository ppa:newman2x/xfce4-docklike
+    sudo apt update
     sudo apt install -y xfce4-docklike-plugin
     '
 }
