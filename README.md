@@ -20,7 +20,7 @@
 
 - [🚀 Overview](#-overview)
 - [⚡ One-Line Install](#-one-line-install)
-  - [🟢 Essential Install](#-essential-install-recomended-for-beginners)
+  - [🟢 Essential Install](#-essential-install-recommended-for-beginners)
   - [🟢 Standard Install (Recommended)](#-standard-install-recommended)
   - [🟢 Only Download Script (To run it later)](#-only-download-script-to-run-it-later)
   - [🟢 Clone from git](#-clone-from-git)
