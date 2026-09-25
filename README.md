@@ -422,6 +422,7 @@ OR
 - Curl / Wget / jq / unzip
 - VS Code
 - code-server
+- Codium
 - Chromium/Chrome
 
 [↑ Back to top](#top)
