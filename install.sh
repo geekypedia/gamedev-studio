@@ -3115,6 +3115,18 @@ execute(){
     }
     '
     
+    run_step "codium" "VSCodium" "is_installed codium" '
+        curl -fsSL https://repo.vscodium.dev/vscodium.gpg \
+          | gpg --dearmor \
+          | sudo tee /usr/share/keyrings/vscodium.gpg >/dev/null && \
+        sudo curl -fsSL -o /etc/apt/sources.list.d/vscodium.sources \
+          https://repo.vscodium.dev/vscodium.sources
+
+        sudo apt update
+        sudo apt install codium
+
+    '
+    
     run_step "http-server" "HTTP Server" "is_installed http-server" '
     npm install -g http-server || echo "⚠️ http-server install failed"
     '
