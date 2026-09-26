@@ -3150,6 +3150,16 @@ execute(){
         sudo apt install -y devin-desktop
     '
 
+    run_step "positron" "Positron IDE" "is_installed positron" '
+        local tmp_deb="$(mktemp --suffix=.deb)"
+        trap '\''rm -f "$tmp_deb"'\'' EXIT
+    
+        wget -qO "$tmp_deb" \
+            "https://cdn.posit.co/positron/releases/deb/linux-x64/Positron-2026.09.1-2-x64.deb"
+    
+        sudo apt install -y "$tmp_deb"
+    '
+
     run_step "http-server" "HTTP Server" "is_installed http-server" '
     npm install -g http-server || echo "⚠️ http-server install failed"
     '
