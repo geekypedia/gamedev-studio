@@ -111,7 +111,7 @@ fi
 
 if [[ "$ESSENTIAL" -eq 1 ]]; then
     EXEC_SCRIPT_PATH="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/$(basename -- "${BASH_SOURCE[0]}")"
-    "$EXEC_SCRIPT_PATH" -u apt,deps,code-setup,code,godot,godot-templates,gdevelop,ctjs,renpy,microstudio,whimtale,gimp,krita,pixelorama,libresprite,tiled,ldtk,audacity,lmms,kdenlive,obs,famistudio
+    "$EXEC_SCRIPT_PATH" -u apt,deps,code-setup,code,codium,godot,godot-templates,gdevelop,renpy,ctjs,microstudio,whimtale,gb-studio,defold,gimp,krita,pixelorama,libresprite,tiled,ldtk,audacity,lmms,kdenlive,obs,famistudio
     exit 1
 fi
 
