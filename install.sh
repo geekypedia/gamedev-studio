@@ -2696,8 +2696,9 @@ prep(){
     sudo apt install -y plank
 
     # 8. dotnet
-    sudo apt install -y dotnet-runtime-8.0
+    # sudo apt install -y dotnet-runtime-8.0
     sudo apt install -y dotnet-sdk-8.0
+    sudo apt install -y dotnet-sdk-10.0
 
     # 9. clang
     sudo apt install -y make
