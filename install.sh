@@ -5570,14 +5570,18 @@ EOF
     mkdir -p /opt/gamedev/tools
     
     OBSIDIAN_URL=$(
-      curl -s https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest |
+      curl -s https://api.github.com/repos/obsidianmd/obsidian-releases/releases?per_page=30 |
       jq -r "
-        .assets[]
+        .[]
+        | select(.draft == false and .prerelease == false)
+        | .assets[]
         | select(.name | endswith(\".AppImage\"))
         | select(.name | ascii_downcase | contains(\"arm64\") | not)
         | .browser_download_url
       " | head -n1
     )
+    
+
     
     if [ -z "$OBSIDIAN_URL" ]; then
       echo "⚠️ Could not find Obsidian AppImage"
