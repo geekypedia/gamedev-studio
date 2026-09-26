@@ -3160,6 +3160,10 @@ execute(){
         sudo apt install -y "$tmp_deb"
     '
 
+    run_step "busybox" "BusyBox" "command -v busybox" '
+        sudo apt install -y busybox
+    '
+
     run_step "http-server" "HTTP Server" "is_installed http-server" '
     npm install -g http-server || echo "⚠️ http-server install failed"
     '
@@ -4567,6 +4571,10 @@ EOF
     add_path_entry_all "/opt/gamedev/python-env/bin"
 
     export PATH="/opt/gamedev/python-env/bin:$PATH"
+
+    run_step "uv" "uv Python package manager" "command -v uv" '
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+    '    
     
     # -----------------------------
     # CREATIVE TOOLS
