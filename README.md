@@ -97,7 +97,7 @@ curl -fsSL https://raw.githubusercontent.com/geekypedia/gamedev-studio/main/inst
 
 It is equivalent to 
 ```bash
-~/gamedev-studio.sh -u apt,deps,code-setup,code,godot,godot-templates,gdevelop,ctjs,renpy,microstudio,whimtale,gimp,krita,pixelorama,libresprite,tiled,ldtk,audacity,lmms,kdenlive,obs,famistudio
+~/gamedev-studio.sh -u apt,deps,code-setup,code,codium,godot,godot-templates,gdevelop,renpy,ctjs,microstudio,whimtale,gb-studio,defold,gimp,krita,pixelorama,libresprite,tiled,ldtk,audacity,lmms,kdenlive,obs,famistudio
 ```
 
 ### 🟢 Standard Install (Recommended)
