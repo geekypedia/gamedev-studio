@@ -423,6 +423,9 @@ OR
 - VS Code
 - code-server
 - Codium
+- Zed
+- Devin Desktop
+- Positron
 - Chromium/Chrome
 
 [↑ Back to top](#top)
