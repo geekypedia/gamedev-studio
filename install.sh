@@ -3127,7 +3127,29 @@ execute(){
         sudo apt install codium
 
     '
+
+    run_step "zed" "Zed IDE" "is_installed zed" '
+        curl -f https://zed.dev/install.sh | sh
+    '
     
+    run_step "devin-desktop" "Devin Desktop IDE (formerly Windsurf)" "is_installed devin-desktop" '    
+        local tmp_key="$(mktemp)"
+        trap '\''rm -f "$tmp_key"'\'' EXIT
+    
+        wget -qO- "https://windsurf-stable.codeiumdata.com/wVxQEIWkwPUEAGf3/windsurf.gpg" \
+            | gpg --dearmor > "$tmp_key"
+    
+        sudo install -D -o root -g root -m 644 \
+            "$tmp_key" \
+            /etc/apt/keyrings/windsurf-stable.gpg
+    
+        echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/windsurf-stable.gpg] https://windsurf-stable.codeiumdata.com/wVxQEIWkwPUEAGf3/apt stable main" \
+            | sudo tee /etc/apt/sources.list.d/windsurf.list > /dev/null
+    
+        sudo apt update
+        sudo apt install -y devin-desktop
+    '
+
     run_step "http-server" "HTTP Server" "is_installed http-server" '
     npm install -g http-server || echo "⚠️ http-server install failed"
     '
