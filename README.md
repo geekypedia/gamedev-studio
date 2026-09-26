@@ -427,6 +427,7 @@ OR
 - Zed
 - Devin Desktop
 - Positron
+- Pulsar
 - Chromium/Chrome
 
 [↑ Back to top](#top)
