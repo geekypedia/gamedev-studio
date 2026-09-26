@@ -3131,6 +3131,45 @@ execute(){
     run_step "zed" "Zed IDE" "is_installed zed" '
         curl -f https://zed.dev/install.sh | sh
     '
+
+    run_step "pulsar" "Pulsar Editor" "is_installed pulsar" '
+        API="https://api.github.com/repos/pulsar-edit/pulsar/releases/latest"
+    
+        echo "🌐 Fetching Pulsar latest release..."
+    
+        DEB_URL=$(curl -s "$API" | jq -r "
+          .assets[]
+          | select(.name != null)
+          | select(.name | endswith(\".deb\"))
+          | select(.name | contains(\"amd64\"))
+          | .browser_download_url
+        " | head -n 1)
+    
+        if [ -z "$DEB_URL" ]; then
+            echo "⚠️ Pulsar AMD64 Linux DEB not found"
+            curl -s "$API" | jq -r ".assets[].name"
+            return 1
+        fi
+    
+        echo "⬇️ Downloading: $DEB_URL"
+    
+        safe_wget "$DEB_URL" "$TMP_DIR/pulsar.deb" || {
+            echo "⚠️ Download failed"
+            return 1
+        }
+    
+        echo "📦 Installing Pulsar..."
+    
+        sudo dpkg -i "$TMP_DIR/pulsar.deb" || {
+            echo "⚠️ dpkg failed, fixing dependencies..."
+            sudo apt install -f -y || {
+                echo "⚠️ dependency fix failed"
+                return 1
+            }
+        }
+    
+        echo "✅ Pulsar installed successfully"
+    '   
     
     run_step "devin-desktop" "Devin Desktop IDE (formerly Windsurf)" "is_installed devin-desktop" '    
         local tmp_key="$(mktemp)"
