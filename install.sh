@@ -2713,6 +2713,11 @@ prep(){
 
     #10. Other libraries
     sudo apt install -y libopenal1
+
+    #11. pacstall
+    sudo bash -c "$(wget -q https://pacstall.dev/q/install -O -)"
+    pacstall -I pacstall
+    pacstall -I deskcut-deb
     
 '
 
@@ -4445,6 +4450,16 @@ EOF
         sudo snap install solar2d
 
         create_desktop_entry "solar2d" "Solar2D" "/snap/solar2d/current/meta/gui" "" "" "" "Solar2DSimulator"
+    '
+
+    run_step "go" "GoLang" "command -v go >/dev/null 2>&1" '
+    
+        if ! command -v snap >/dev/null 2>&1; then
+            echo "Snap is required for Solar2D."
+            exit 1
+        fi
+    
+        sudo snap install go --classic
     '
 
     run_step "gamemaker" "GameMaker" "find /opt -maxdepth 2 -type f -path '/opt/GameMaker*/GameMaker'  | grep -q . 2>&1" '
